@@ -198,6 +198,10 @@ export function mapFlightShopResponse(response: FlightShopResponse, provider = '
                 ).minutes,
               ),
             bookingClass: detail?.bookingClassCode,
+            operatingCarrier: flight.operatingAirlineCode ?? flight.marketingAirlineCode,
+            operatingFlightNumber: String(
+              flight.operatingFlightNumber ?? flight.marketingFlightNumber,
+            ),
             providerFlightId: flight.id,
           };
         });

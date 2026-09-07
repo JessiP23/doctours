@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bubble } from './Bubble';
-import { TripList, type Trip } from './TripList';
+import { PanelIcon, TripList, type Trip } from './TripList';
 import { TypingIndicator } from './TypingIndicator';
 import { OPENING_BUBBLES } from '@/lib/agent/opening';
 
@@ -179,37 +179,26 @@ export function Chat() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 py-3">
-          <button
-            type="button"
-            onClick={() => {
-              void refreshTrips();
-              setShowTrips(true);
-            }}
-            className="rounded-lg px-2 py-1.5 text-sm text-muted transition hover:bg-them hover:text-ink"
-            aria-label="Your trips"
-          >
-            Trips
-          </button>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-me text-sm font-semibold text-me-ink">
-            D
+    <div className="flex h-dvh flex-col overflow-hidden">
+      <header className="flex shrink-0 items-center gap-2 border-b border-line bg-bg px-3 py-3">
+        <button
+          type="button"
+          onClick={() => {
+            void refreshTrips();
+            setShowTrips(true);
+          }}
+          className="rounded-lg p-2 text-muted transition hover:bg-them hover:text-ink"
+          aria-label="Your trips"
+        >
+          <PanelIcon />
+        </button>
+        <div className="min-w-0">
+          <div className="truncate text-[15px] leading-tight font-semibold">
+            Doctours travel coordinator
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[15px] leading-tight font-semibold">
-              Doctours travel coordinator
-            </div>
-            <div className="text-xs text-muted">Flights and hotel for your Istanbul procedure</div>
+          <div className="truncate text-xs text-muted">
+            Doctours travel coordinator · flights and hotel for your Istanbul procedure
           </div>
-          <button
-            type="button"
-            onClick={() => void startNewTrip()}
-            disabled={busy}
-            className="rounded-lg px-2 py-1.5 text-sm text-muted transition hover:bg-them hover:text-ink disabled:opacity-40"
-          >
-            New
-          </button>
         </div>
       </header>
 
@@ -223,15 +212,17 @@ export function Chat() {
         />
       )}
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2.5 px-4 py-5">
-        {messages.map((m) => (
-          <Bubble key={m.id} role={m.role} text={m.text} animate={m.animate} />
-        ))}
-        {typing && <TypingIndicator />}
-        <div ref={endRef} className="h-1" />
+      <main className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-2.5 px-4 py-5">
+          {messages.map((m) => (
+            <Bubble key={m.id} role={m.role} text={m.text} animate={m.animate} />
+          ))}
+          {typing && <TypingIndicator />}
+          <div ref={endRef} className="h-1" />
+        </div>
       </main>
 
-      <footer className="sticky bottom-0 border-t border-line bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+      <footer className="shrink-0 border-t border-line bg-bg pb-[env(safe-area-inset-bottom)]">
         <form
           className="mx-auto flex w-full max-w-2xl items-end gap-2 px-4 py-3"
           onSubmit={(e) => {

@@ -99,17 +99,23 @@ function paymentPolicyFor(guaranteeType: string | undefined): string {
   }
 }
 
+/**
+ * Flight Check echoes back the exact flights, in the same shape Flight Shop
+ * returned them: times as HH:mm (not HH:mm:ss) and the real operating carrier,
+ * which differs from the marketing carrier on a codeshare. Sending either
+ * differently is a 400.
+ */
 function flightCheckPayload(offer: FlightOffer): FlightCheckFlight[][] {
   return offer.slices.map((slice) =>
     slice.segments.map((seg) => ({
       departureAirportCode: seg.from.iata,
       departureDate: seg.departLocal.slice(0, 10),
-      departureTime: `${seg.departLocal.slice(11, 16)}:00`,
+      departureTime: seg.departLocal.slice(11, 16),
       arrivalAirportCode: seg.to.iata,
       arrivalDate: seg.arriveLocal.slice(0, 10),
-      arrivalTime: `${seg.arriveLocal.slice(11, 16)}:00`,
-      operatingAirlineCode: seg.carrier,
-      operatingFlightNumber: Number(seg.flightNumber),
+      arrivalTime: seg.arriveLocal.slice(11, 16),
+      operatingAirlineCode: seg.operatingCarrier ?? seg.carrier,
+      operatingFlightNumber: Number(seg.operatingFlightNumber ?? seg.flightNumber),
       marketingAirlineCode: seg.carrier,
       marketingFlightNumber: Number(seg.flightNumber),
     })),

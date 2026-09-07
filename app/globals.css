@@ -40,6 +40,8 @@
 html,
 body {
   height: 100%;
+  /* The app is a fixed shell that scrolls internally, so the document must not. */
+  overflow: hidden;
 }
 
 body {

@@ -125,3 +125,22 @@ describe('the real payload passed through the trip rules', () => {
     expect(cheapest.slices[0].segments.at(-1)!.to.iata).toBe('IST');
   });
 });
+
+describe('operating carrier is preserved for Flight Check', () => {
+  const { offers } = mapFlightShopResponse(fixture.response);
+
+  it('keeps the operating carrier and flight number on every segment', () => {
+    for (const seg of offers.flatMap((o) => o.slices.flatMap((s) => s.segments))) {
+      expect(seg.operatingCarrier).toMatch(/^[A-Z0-9]{2}$/);
+      expect(seg.operatingFlightNumber).toMatch(/^\d+$/);
+    }
+  });
+
+  it('finds at least one codeshare, where marketing and operating differ', () => {
+    // Flight Check rejects the request if the operating carrier is wrong, so this
+    // distinction has to survive mapping.
+    const segments = offers.flatMap((o) => o.slices.flatMap((s) => s.segments));
+    const codeshares = segments.filter((s) => s.operatingCarrier !== s.carrier);
+    expect(codeshares.length).toBeGreaterThan(0);
+  });
+});

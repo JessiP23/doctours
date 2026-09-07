@@ -31,10 +31,26 @@ export class ProviderError extends Error {
     this.details = opts.details;
   }
 
-  /** Safe representation to hand back to the model / persist. Never includes secrets. */
+  /**
+   * Safe representation to persist and hand back. Includes a trimmed preview of
+   * the upstream body: without it a 400 says nothing about what was wrong.
+   */
   toJSON() {
-    return { code: this.code, message: this.message, status: this.status };
+    return {
+      code: this.code,
+      message: this.message,
+      status: this.status,
+      ...(this.details !== undefined ? { details: previewOf(this.details) } : {}),
+    };
   }
+}
+
+const DETAILS_PREVIEW_CHARS = 1500;
+
+function previewOf(details: unknown): string {
+  const text = typeof details === 'string' ? details : JSON.stringify(details);
+  if (!text) return '';
+  return text.length > DETAILS_PREVIEW_CHARS ? `${text.slice(0, DETAILS_PREVIEW_CHARS)}…` : text;
 }
 
 export function isProviderError(e: unknown): e is ProviderError {

@@ -50,6 +50,19 @@ export async function listConversationsForVisitor(
   return data;
 }
 
+/**
+ * Claims a conversation that has no owner yet, so trips started before trips
+ * were listable (or before the visitor cookie existed) still appear in the list.
+ */
+export async function adoptConversation(id: string, visitorId: string): Promise<void> {
+  const { error } = await db()
+    .from('conversations')
+    .update({ visitor_id: visitorId })
+    .eq('id', id)
+    .is('visitor_id', null);
+  if (error) fail('adoptConversation', error);
+}
+
 /** Guards a switch: a visitor may only open a conversation it owns. */
 export async function getConversationForVisitor(
   id: string,

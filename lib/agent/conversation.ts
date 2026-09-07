@@ -46,12 +46,18 @@ async function open(conversationId: string): Promise<void> {
 }
 
 export async function getOrCreateConversation(): Promise<ConversationHandle> {
+  // Always ensure the visitor cookie exists: a returning browser skipped this
+  // path before, so its trips could never be listed.
+  const visitor = await visitorId();
   const jar = await cookies();
   const current = jar.get(CONVERSATION_COOKIE)?.value;
 
   if (current) {
     const row = await repo.getConversation(current);
-    if (row) return { id: row.id, rules: row.trip_rules as unknown as TripRules, isNew: false };
+    if (row) {
+      if (!row.visitor_id) await repo.adoptConversation(row.id, visitor);
+      return { id: row.id, rules: row.trip_rules as unknown as TripRules, isNew: false };
+    }
   }
   return startNewConversation();
 }

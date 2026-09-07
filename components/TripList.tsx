@@ -32,6 +32,20 @@ export interface TripListProps {
   onClose: () => void;
 }
 
+/** The single affordance that opens and closes the panel. */
+export function PanelIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path
+        d="M3 5.5h14M3 10h14M3 14.5h14"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function TripList({ trips, busy, onSelect, onNew, onClose }: TripListProps) {
   return (
     <>
@@ -45,16 +59,16 @@ export function TripList({ trips, busy, onSelect, onNew, onClose }: TripListProp
         className="fixed inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-line bg-surface shadow-xl"
         aria-label="Your trips"
       >
-        <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <h2 className="text-[15px] font-semibold">Your trips</h2>
+        <div className="flex items-center gap-2 border-b border-line px-3 py-3">
           <button
             type="button"
             onClick={onClose}
-            className="text-sm text-muted hover:text-ink"
-            aria-label="Close"
+            aria-label="Close trips"
+            className="rounded-lg p-2 text-muted transition hover:bg-them hover:text-ink"
           >
-            Close
+            <PanelIcon />
           </button>
+          <h2 className="text-[15px] font-semibold">Your trips</h2>
         </div>
 
         <div className="p-3">

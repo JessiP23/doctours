@@ -37,6 +37,9 @@ export interface FlightSegment {
   durationMin: number;
   /** Booking class letter (RBD) as filed, needed when creating the booking. */
   bookingClass?: string;
+  /** Operating carrier, which differs from the marketing carrier on codeshares. */
+  operatingCarrier?: string;
+  operatingFlightNumber?: string;
   /** Provider's own id for this flight, used to build the Flight Check payload. */
   providerFlightId?: string;
 }

@@ -34,6 +34,8 @@ export interface ModelClient {
 }
 
 const MAX_ITERATIONS = 8;
+/** Identical tool failures tolerated in one turn before the model must stop. */
+const MAX_SAME_FAILURE = 2;
 const MAX_TOKENS = 1024;
 
 function defaultClient(): ModelClient {
@@ -137,6 +139,8 @@ export async function runTurn(
   const tools = anthropicTools();
   let referenceRetryUsed = false;
   let promiseNudgeUsed = false;
+  /** How often each tool has failed the same way this turn, to stop retry storms. */
+  const failureCounts = new Map<string, number>();
 
   for (let i = 1; i <= MAX_ITERATIONS; i++) {
     const [bookings, flightOffers, hotelOffers] = await Promise.all([
@@ -184,10 +188,19 @@ export async function runTurn(
     const others = toolUses.filter((t) => t.name !== REPLY_TOOL_NAME);
 
     const results: Anthropic.ToolResultBlockParam[] = [];
+    const content: Anthropic.ContentBlockParam[] = [];
     let actedThisTurn = false;
+    const exhausted: string[] = [];
+
     for (const t of others) {
       const r = await runTool(t.name, t.input, conversationId);
       if (t.name.startsWith('create_') && r.ok) actedThisTurn = true;
+      if (!r.ok) {
+        const key = `${t.name}:${(r.error as { code?: string }).code ?? 'error'}`;
+        const count = (failureCounts.get(key) ?? 0) + 1;
+        failureCounts.set(key, count);
+        if (count >= MAX_SAME_FAILURE) exhausted.push(`${t.name} (${key.split(':')[1]})`);
+      }
       results.push({
         type: 'tool_result',
         tool_use_id: t.id,
@@ -270,8 +283,22 @@ export async function runTurn(
       return { bubbles, expectsInput: true, iterations: i };
     }
 
-    await repo.appendMessage(conversationId, 'user', results as unknown as Json);
-    history.push({ role: 'user', content: results });
+    content.push(...results);
+    if (exhausted.length > 0) {
+      // Calling a broken tool a third time wastes the patient's time and reads as
+      // flailing. Stop, and say something true instead.
+      l.warn(
+        { exhausted, iteration: i },
+        'tool failed repeatedly, telling the model to stop retrying',
+      );
+      content.push({
+        type: 'text',
+        text: `${exhausted.join(' and ')} has now failed the same way ${MAX_SAME_FAILURE} times. Do not call it again this turn. Tell the patient plainly that the booking system is refusing this request, that nothing has been charged or booked, and offer to try a different option or come back to it — then end your turn with reply.`,
+      });
+    }
+
+    await repo.appendMessage(conversationId, 'user', content as unknown as Json);
+    history.push({ role: 'user', content });
   }
 
   l.error('agent loop exhausted without a reply');
