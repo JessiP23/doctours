@@ -1,0 +1,226 @@
+import 'server-only';
+import { db } from './client';
+import type {
+  BookingKind,
+  BookingRow,
+  ConversationRow,
+  Json,
+  MessageRole,
+  MessageRow,
+  OfferKind,
+  OfferRow,
+  ToolCallRow,
+} from './types';
+
+/**
+ * Typed data access. One function per query; no business logic here.
+ * Errors from PostgREST are thrown as plain Errors with the table + operation in the message.
+ */
+function fail(op: string, error: { message: string; code?: string }): never {
+  throw new Error(`db.${op}: ${error.message}${error.code ? ` (${error.code})` : ''}`);
+}
+
+// ---- conversations ---------------------------------------------------------
+
+export async function createConversation(tripRules: Json): Promise<ConversationRow> {
+  const { data, error } = await db()
+    .from('conversations')
+    .insert({ trip_rules: tripRules })
+    .select()
+    .single();
+  if (error) fail('createConversation', error);
+  return data;
+}
+
+export async function getConversation(id: string): Promise<ConversationRow | null> {
+  const { data, error } = await db().from('conversations').select().eq('id', id).maybeSingle();
+  if (error) fail('getConversation', error);
+  return data;
+}
+
+export async function touchConversation(id: string): Promise<void> {
+  const { error } = await db().from('conversations').update({ status: 'open' }).eq('id', id);
+  if (error) fail('touchConversation', error);
+}
+
+// ---- messages --------------------------------------------------------------
+
+export async function appendMessage(
+  conversationId: string,
+  role: MessageRole,
+  content: Json,
+): Promise<MessageRow> {
+  const { data, error } = await db()
+    .from('messages')
+    .insert({ conversation_id: conversationId, role, content })
+    .select()
+    .single();
+  if (error) fail('appendMessage', error);
+  return data;
+}
+
+export async function listMessages(conversationId: string): Promise<MessageRow[]> {
+  const { data, error } = await db()
+    .from('messages')
+    .select()
+    .eq('conversation_id', conversationId)
+    .order('id', { ascending: true });
+  if (error) fail('listMessages', error);
+  return data;
+}
+
+// ---- offers ----------------------------------------------------------------
+
+export interface NewOffer {
+  kind: OfferKind;
+  provider: string;
+  providerOfferId: string;
+  summary: Json;
+  raw: Json;
+  expiresAt: string | null;
+}
+
+export async function insertOffers(
+  conversationId: string,
+  offers: NewOffer[],
+): Promise<OfferRow[]> {
+  if (offers.length === 0) return [];
+  const rows = offers.map((o) => ({
+    conversation_id: conversationId,
+    kind: o.kind,
+    provider: o.provider,
+    provider_offer_id: o.providerOfferId,
+    summary: o.summary,
+    raw: o.raw,
+    expires_at: o.expiresAt,
+  }));
+  const { data, error } = await db().from('offers').insert(rows).select();
+  if (error) fail('insertOffers', error);
+  return data;
+}
+
+export async function getOffer(conversationId: string, offerId: string): Promise<OfferRow | null> {
+  const { data, error } = await db()
+    .from('offers')
+    .select()
+    .eq('id', offerId)
+    .eq('conversation_id', conversationId)
+    .maybeSingle();
+  if (error) fail('getOffer', error);
+  return data;
+}
+
+export async function listRecentOffers(
+  conversationId: string,
+  kind: OfferKind,
+  limit = 10,
+): Promise<OfferRow[]> {
+  const { data, error } = await db()
+    .from('offers')
+    .select()
+    .eq('conversation_id', conversationId)
+    .eq('kind', kind)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) fail('listRecentOffers', error);
+  return data;
+}
+
+// ---- bookings --------------------------------------------------------------
+
+export interface NewBooking {
+  kind: BookingKind;
+  provider: string;
+  providerOrderId: string;
+  bookingReference: string;
+  offerId: string | null;
+  details: Json;
+  raw: Json;
+}
+
+/** Inserts a confirmed booking. Throws with code 23505 if a live booking of this kind already exists. */
+export async function insertBooking(conversationId: string, b: NewBooking): Promise<BookingRow> {
+  const { data, error } = await db()
+    .from('bookings')
+    .insert({
+      conversation_id: conversationId,
+      kind: b.kind,
+      provider: b.provider,
+      provider_order_id: b.providerOrderId,
+      booking_reference: b.bookingReference,
+      offer_id: b.offerId,
+      details: b.details,
+      raw: b.raw,
+    })
+    .select()
+    .single();
+  if (error) fail('insertBooking', error);
+  return data;
+}
+
+export async function listBookings(conversationId: string): Promise<BookingRow[]> {
+  const { data, error } = await db()
+    .from('bookings')
+    .select()
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: true });
+  if (error) fail('listBookings', error);
+  return data;
+}
+
+export async function getLiveBooking(
+  conversationId: string,
+  kind: BookingKind,
+): Promise<BookingRow | null> {
+  const { data, error } = await db()
+    .from('bookings')
+    .select()
+    .eq('conversation_id', conversationId)
+    .eq('kind', kind)
+    .eq('status', 'confirmed')
+    .maybeSingle();
+  if (error) fail('getLiveBooking', error);
+  return data;
+}
+
+// ---- tool calls ------------------------------------------------------------
+
+export interface NewToolCall {
+  toolName: string;
+  input: Json;
+  output: Json | null;
+  error: Json | null;
+  providerRequests: Json | null;
+  durationMs: number;
+}
+
+export async function recordToolCall(
+  conversationId: string | null,
+  t: NewToolCall,
+): Promise<ToolCallRow> {
+  const { data, error } = await db()
+    .from('tool_calls')
+    .insert({
+      conversation_id: conversationId,
+      tool_name: t.toolName,
+      input: t.input,
+      output: t.output,
+      error: t.error,
+      provider_requests: t.providerRequests,
+      duration_ms: t.durationMs,
+    })
+    .select()
+    .single();
+  if (error) fail('recordToolCall', error);
+  return data;
+}
+
+/** Cheap connectivity probe for the health route. */
+export async function ping(): Promise<boolean> {
+  const { error } = await db()
+    .from('conversations')
+    .select('id', { head: true, count: 'exact' })
+    .limit(1);
+  if (error) fail('ping', error);
+  return true;
+}
