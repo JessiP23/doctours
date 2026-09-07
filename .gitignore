@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local test-sync bundle (not part of the project)
+.tmp-sync.tgz

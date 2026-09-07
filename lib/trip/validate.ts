@@ -48,7 +48,9 @@ export function validateOutbound(slice: FlightSlice, rules: TripRules): Validati
       reason: `Outbound arrives ${last.to.iata}, expected ${rules.destination}`,
     };
 
-  const arrival = local(last.arriveLocal, last.to.tz);
+  // The airport was asserted above, so the destination zone from the rules is the
+  // authoritative one — never a zone guessed from provider data.
+  const arrival = local(last.arriveLocal, rules.destinationTz);
   const deadline = local(rules.mustArriveByLocal, rules.destinationTz);
   if (arrival > deadline) {
     return {
@@ -78,7 +80,7 @@ export function validateReturn(slice: FlightSlice, rules: TripRules): Validation
       reason: `Return arrives ${last.to.iata}, expected ${rules.origin}`,
     };
 
-  const departure = local(first.departLocal, first.from.tz);
+  const departure = local(first.departLocal, rules.destinationTz);
   const earliest = local(rules.earliestReturnDepartureLocal, rules.destinationTz);
   if (departure < earliest) {
     return {

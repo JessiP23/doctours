@@ -1,0 +1,4757 @@
+{
+  "request": {
+    "journeys": [
+      {
+        "departureLocation": {
+          "airportCode": "JFK"
+        },
+        "arrivalLocation": {
+          "airportCode": "IST"
+        },
+        "departureDate": "2026-10-11"
+      },
+      {
+        "departureLocation": {
+          "airportCode": "IST"
+        },
+        "arrivalLocation": {
+          "airportCode": "JFK"
+        },
+        "departureDate": "2026-10-17"
+      }
+    ],
+    "travelers": [
+      {
+        "passengerTypeCode": "ADT"
+      }
+    ],
+    "fare": {
+      "cabin": {
+        "name": "Economy"
+      }
+    },
+    "sources": {
+      "providers": [
+        "Sabre"
+      ],
+      "distributionModels": [
+        "ATPCO"
+      ]
+    }
+  },
+  "response": {
+    "timestamp": "2026-09-07T16:55:01.344Z",
+    "flights": [
+      {
+        "id": "18b369d7-382a-40e9-b428-6c82456605b9",
+        "departureAirportCode": "CAI",
+        "departureDate": "2026-10-12",
+        "departureTime": "10:40",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "13:00",
+        "operatingAirlineCode": "MS",
+        "operatingFlightNumber": 737,
+        "marketingAirlineCode": "MS",
+        "marketingFlightNumber": 737,
+        "aircraftTypeCode": "32N",
+        "durationInMinutes": 140,
+        "departureTerminal": "3"
+      },
+      {
+        "id": "cf50d201-a246-41a9-b257-935a62c56873",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "07:20",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "10:55",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 3,
+        "marketingAirlineCode": "TK",
+        "marketingFlightNumber": 3,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 635,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "6ea63e07-1e9c-4654-a506-588a0ad371cf",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "15:40",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "05:25",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 401,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 401,
+        "aircraftTypeCode": "346",
+        "durationInMinutes": 465,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "6507c13a-1f96-4503-892b-2ce7ac60f798",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "04:25",
+        "arrivalAirportCode": "CDG",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "07:05",
+        "operatingAirlineCode": "AF",
+        "operatingFlightNumber": 1391,
+        "marketingAirlineCode": "KL",
+        "marketingFlightNumber": 2353,
+        "disclosureAirlineCode": "AF",
+        "aircraftTypeCode": "223",
+        "durationInMinutes": 220,
+        "arrivalTerminal": "2E"
+      },
+      {
+        "id": "29f1e104-6c07-4257-80b3-8287b9a45022",
+        "departureAirportCode": "DOH",
+        "departureDate": "2026-10-18",
+        "departureTime": "01:55",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-18",
+        "arrivalTime": "08:50",
+        "operatingAirlineCode": "QR",
+        "operatingFlightNumber": 703,
+        "marketingAirlineCode": "QR",
+        "marketingFlightNumber": 703,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 835,
+        "arrivalTerminal": "8"
+      },
+      {
+        "id": "af285888-34bc-454c-a408-fcc725efb78c",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "12:45",
+        "arrivalAirportCode": "LIS",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "15:35",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 1759,
+        "marketingAirlineCode": "TP",
+        "marketingFlightNumber": 6453,
+        "disclosureAirlineCode": "TK",
+        "aircraftTypeCode": "333",
+        "durationInMinutes": 290,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "20507829-6009-481f-a270-b7b17bea4ff6",
+        "departureAirportCode": "WAW",
+        "departureDate": "2026-10-12",
+        "departureTime": "20:05",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "23:50",
+        "operatingAirlineCode": "LO",
+        "operatingFlightNumber": 137,
+        "marketingAirlineCode": "LO",
+        "marketingFlightNumber": 137,
+        "aircraftTypeCode": "E95",
+        "durationInMinutes": 165
+      },
+      {
+        "id": "901bb189-3569-4444-ac33-92f6e60f42a8",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-17",
+        "departureTime": "11:45",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "14:25",
+        "operatingAirlineCode": "DE",
+        "operatingFlightNumber": 2016,
+        "marketingAirlineCode": "DE",
+        "marketingFlightNumber": 2016,
+        "aircraftTypeCode": "339",
+        "durationInMinutes": 520,
+        "departureTerminal": "1",
+        "arrivalTerminal": "7"
+      },
+      {
+        "id": "56b0a849-675a-4653-9af4-69d09a6bcfb6",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-12",
+        "departureTime": "08:55",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "13:00",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1298,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 1298,
+        "aircraftTypeCode": "321",
+        "durationInMinutes": 185,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "18a4b7ca-4715-4d7a-8e88-074ec531b342",
+        "departureAirportCode": "LIS",
+        "departureDate": "2026-10-12",
+        "departureTime": "16:45",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "23:30",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 1760,
+        "marketingAirlineCode": "TP",
+        "marketingFlightNumber": 6452,
+        "disclosureAirlineCode": "TK",
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 285,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "7e8225ca-0dfc-4dbc-8961-248250f6b12b",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "02:00",
+        "arrivalAirportCode": "CAI",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "04:15",
+        "operatingAirlineCode": "MS",
+        "operatingFlightNumber": 543,
+        "marketingAirlineCode": "MS",
+        "marketingFlightNumber": 543,
+        "aircraftTypeCode": "33X",
+        "durationInMinutes": 135
+      },
+      {
+        "id": "281033ef-e1ee-487a-a1f5-278c0933bf83",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-12",
+        "departureTime": "17:30",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "21:35",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1304,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 1304,
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 185,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "a7f1c092-735a-49f7-9f41-8fee76407be0",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "21:15",
+        "arrivalAirportCode": "AMS",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "10:30",
+        "operatingAirlineCode": "KL",
+        "operatingFlightNumber": 644,
+        "marketingAirlineCode": "DL",
+        "marketingFlightNumber": 9403,
+        "disclosureAirlineCode": "KL",
+        "aircraftTypeCode": "781",
+        "durationInMinutes": 435,
+        "departureTerminal": "4"
+      },
+      {
+        "id": "73e040fc-2752-47e3-8a77-ddce50fc11e6",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-12",
+        "departureTime": "12:55",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "17:00",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1300,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 1300,
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 185,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "5c9c9edb-541e-4b8c-ac61-1c4a46303d26",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "19:10",
+        "arrivalAirportCode": "LHR",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "07:20",
+        "operatingAirlineCode": "BA",
+        "operatingFlightNumber": 180,
+        "marketingAirlineCode": "AA",
+        "marketingFlightNumber": 6881,
+        "disclosureAirlineCode": "BA",
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 430,
+        "departureTerminal": "8",
+        "arrivalTerminal": "5"
+      },
+      {
+        "id": "1fc5c069-ab66-4c1a-8b3d-60bab8e14e59",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "21:15",
+        "arrivalAirportCode": "AMS",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "10:30",
+        "operatingAirlineCode": "KL",
+        "operatingFlightNumber": 644,
+        "marketingAirlineCode": "KL",
+        "marketingFlightNumber": 644,
+        "aircraftTypeCode": "781",
+        "durationInMinutes": 435,
+        "departureTerminal": "4"
+      },
+      {
+        "id": "10fc1fb3-7c0c-4187-894e-db90f8b7a605",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "20:55",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "10:40",
+        "operatingAirlineCode": "SQ",
+        "operatingFlightNumber": 25,
+        "marketingAirlineCode": "SQ",
+        "marketingFlightNumber": 25,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 465,
+        "departureTerminal": "4",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "f460b2f1-cec4-4a55-a99d-e0e8cca69844",
+        "departureAirportCode": "LHR",
+        "departureDate": "2026-10-17",
+        "departureTime": "11:35",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "14:25",
+        "operatingAirlineCode": "BA",
+        "operatingFlightNumber": 173,
+        "marketingAirlineCode": "AA",
+        "marketingFlightNumber": 6934,
+        "disclosureAirlineCode": "BA",
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 470,
+        "departureTerminal": "5",
+        "arrivalTerminal": "8"
+      },
+      {
+        "id": "b74dc3ea-a5e7-49c3-8095-b84f10d7441b",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "12:50",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "05:30",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 4,
+        "marketingAirlineCode": "TK",
+        "marketingFlightNumber": 4,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 580,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "02152323-eb52-48ba-a1ca-b213082c1d3a",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "07:30",
+        "arrivalAirportCode": "HEL",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "11:10",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 1761,
+        "marketingAirlineCode": "AY",
+        "marketingFlightNumber": 3302,
+        "disclosureAirlineCode": "TK",
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 220
+      },
+      {
+        "id": "2a916bbd-d91d-4225-a4f4-84e5fb7ca57e",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "20:05",
+        "arrivalAirportCode": "DOH",
+        "arrivalDate": "2026-10-18",
+        "arrivalTime": "00:10",
+        "operatingAirlineCode": "QR",
+        "operatingFlightNumber": 246,
+        "marketingAirlineCode": "QR",
+        "marketingFlightNumber": 246,
+        "aircraftTypeCode": "789",
+        "durationInMinutes": 245
+      },
+      {
+        "id": "bad7df21-4a23-4cd6-95d5-693bc5c66834",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-12",
+        "departureTime": "12:55",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "17:00",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1300,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 9126,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 185,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "ed904192-08b6-48ff-b174-41390b42d1cd",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "22:20",
+        "arrivalAirportCode": "WAW",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "13:00",
+        "operatingAirlineCode": "LO",
+        "operatingFlightNumber": 27,
+        "marketingAirlineCode": "LO",
+        "marketingFlightNumber": 27,
+        "disclosureAirlineCode": "YU",
+        "aircraftTypeCode": "772",
+        "durationInMinutes": 520,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "3ec06836-2dad-46a6-927d-7b1651073817",
+        "departureAirportCode": "DOH",
+        "departureDate": "2026-10-12",
+        "departureTime": "07:35",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "11:55",
+        "operatingAirlineCode": "QR",
+        "operatingFlightNumber": 239,
+        "marketingAirlineCode": "QR",
+        "marketingFlightNumber": 239,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 260
+      },
+      {
+        "id": "5dbea3ac-e73b-4482-8466-0cdff1c8149a",
+        "departureAirportCode": "CDG",
+        "departureDate": "2026-10-17",
+        "departureTime": "10:45",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "12:55",
+        "operatingAirlineCode": "AF",
+        "operatingFlightNumber": 4,
+        "marketingAirlineCode": "AF",
+        "marketingFlightNumber": 4,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 490,
+        "departureTerminal": "2E",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "54942941-f78c-4fab-aaf8-cf4ea6e4e7e7",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "14:10",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "17:55",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 1,
+        "marketingAirlineCode": "TK",
+        "marketingFlightNumber": 1,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 645,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "6a4b260e-9163-41f0-a28b-907ec2b732d5",
+        "departureAirportCode": "AMS",
+        "departureDate": "2026-10-17",
+        "departureTime": "12:35",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "14:35",
+        "operatingAirlineCode": "KL",
+        "operatingFlightNumber": 641,
+        "marketingAirlineCode": "KL",
+        "marketingFlightNumber": 641,
+        "aircraftTypeCode": "781",
+        "durationInMinutes": 480,
+        "arrivalTerminal": "4"
+      },
+      {
+        "id": "f196cc93-e9ae-44f1-aeb3-00424239a466",
+        "departureAirportCode": "AMS",
+        "departureDate": "2026-10-12",
+        "departureTime": "12:00",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "16:20",
+        "operatingAirlineCode": "KL",
+        "operatingFlightNumber": 1959,
+        "marketingAirlineCode": "KL",
+        "marketingFlightNumber": 1959,
+        "aircraftTypeCode": "73J",
+        "durationInMinutes": 200
+      },
+      {
+        "id": "29aaa51f-ecef-4597-a719-2635cc66cc5d",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "16:25",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "06:10",
+        "operatingAirlineCode": "DE",
+        "operatingFlightNumber": 2017,
+        "marketingAirlineCode": "DE",
+        "marketingFlightNumber": 2017,
+        "aircraftTypeCode": "339",
+        "durationInMinutes": 465,
+        "departureTerminal": "7",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "137c1170-4e81-4ce7-922f-15b58e6f6bff",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "19:50",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "13:00",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 2,
+        "marketingAirlineCode": "TK",
+        "marketingFlightNumber": 2,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 610,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "b3b7df3c-7ac8-4eaa-ba4a-545e140d330f",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "18:40",
+        "arrivalAirportCode": "LHR",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "06:50",
+        "operatingAirlineCode": "BA",
+        "operatingFlightNumber": 174,
+        "marketingAirlineCode": "AA",
+        "marketingFlightNumber": 6923,
+        "disclosureAirlineCode": "BA",
+        "aircraftTypeCode": "777",
+        "durationInMinutes": 430,
+        "departureTerminal": "8",
+        "arrivalTerminal": "5"
+      },
+      {
+        "id": "50c0d788-4a5d-4cc3-ac88-10792d6a068f",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "12:55",
+        "arrivalAirportCode": "CAI",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "06:25",
+        "operatingAirlineCode": "MS",
+        "operatingFlightNumber": 986,
+        "marketingAirlineCode": "MS",
+        "marketingFlightNumber": 986,
+        "aircraftTypeCode": "359",
+        "durationInMinutes": 630,
+        "departureTerminal": "1",
+        "arrivalTerminal": "3"
+      },
+      {
+        "id": "6fd6b106-b220-4db8-b7b4-9e25c9e0600c",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "11:20",
+        "arrivalAirportCode": "DOH",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "06:40",
+        "operatingAirlineCode": "QR",
+        "operatingFlightNumber": 704,
+        "marketingAirlineCode": "QR",
+        "marketingFlightNumber": 704,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 740,
+        "departureTerminal": "8"
+      },
+      {
+        "id": "a4dd8736-17f8-417c-a98f-e5e4c580d03b",
+        "departureAirportCode": "AMS",
+        "departureDate": "2026-10-12",
+        "departureTime": "12:00",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "16:20",
+        "operatingAirlineCode": "KL",
+        "operatingFlightNumber": 1959,
+        "marketingAirlineCode": "DL",
+        "marketingFlightNumber": 9568,
+        "disclosureAirlineCode": "KL",
+        "aircraftTypeCode": "73J",
+        "durationInMinutes": 200
+      },
+      {
+        "id": "cdbcedb8-d629-4e31-be66-227004559d52",
+        "departureAirportCode": "CDG",
+        "departureDate": "2026-10-17",
+        "departureTime": "09:30",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "11:57",
+        "operatingAirlineCode": "DL",
+        "operatingFlightNumber": 267,
+        "marketingAirlineCode": "DL",
+        "marketingFlightNumber": 267,
+        "aircraftTypeCode": "333",
+        "durationInMinutes": 507,
+        "departureTerminal": "2E",
+        "arrivalTerminal": "4"
+      },
+      {
+        "id": "0c8d80ac-bc50-4be7-8db4-5fe4e39df83f",
+        "departureAirportCode": "CDG",
+        "departureDate": "2026-10-17",
+        "departureTime": "10:15",
+        "arrivalAirportCode": "AMS",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "11:30",
+        "operatingAirlineCode": "KL",
+        "operatingFlightNumber": 1406,
+        "marketingAirlineCode": "KL",
+        "marketingFlightNumber": 1406,
+        "aircraftTypeCode": "73H",
+        "durationInMinutes": 75,
+        "departureTerminal": "2F"
+      },
+      {
+        "id": "363b00a6-5deb-4dbc-a109-7bd978054772",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-17",
+        "departureTime": "10:55",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "13:35",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 400,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 8841,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "346",
+        "durationInMinutes": 520,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "ccc6db30-223a-415b-9ce0-af2aed4b5d8b",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "00:25",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-11",
+        "arrivalTime": "17:10",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 12,
+        "marketingAirlineCode": "TK",
+        "marketingFlightNumber": 12,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 585,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "a95e4ac5-228a-4fb2-afd1-f70bd9fd9d1a",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "13:55",
+        "arrivalAirportCode": "WAW",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "15:25",
+        "operatingAirlineCode": "LO",
+        "operatingFlightNumber": 134,
+        "marketingAirlineCode": "LO",
+        "marketingFlightNumber": 134,
+        "aircraftTypeCode": "E95",
+        "durationInMinutes": 150
+      },
+      {
+        "id": "8845009b-1947-4a3b-b7df-e76ff164515a",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "04:25",
+        "arrivalAirportCode": "CDG",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "07:05",
+        "operatingAirlineCode": "AF",
+        "operatingFlightNumber": 1391,
+        "marketingAirlineCode": "DL",
+        "marketingFlightNumber": 8353,
+        "disclosureAirlineCode": "AF",
+        "aircraftTypeCode": "223",
+        "durationInMinutes": 220,
+        "arrivalTerminal": "2E"
+      },
+      {
+        "id": "2e0db438-3324-424e-96ff-65f1a79c9286",
+        "departureAirportCode": "CAI",
+        "departureDate": "2026-10-17",
+        "departureTime": "05:50",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "10:25",
+        "operatingAirlineCode": "MS",
+        "operatingFlightNumber": 985,
+        "marketingAirlineCode": "MS",
+        "marketingFlightNumber": 985,
+        "aircraftTypeCode": "359",
+        "durationInMinutes": 695,
+        "departureTerminal": "3",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "21:50",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "11:45",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 405,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 8842,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "343",
+        "durationInMinutes": 475,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "6ab9effb-6efe-4343-8784-1747cf864a11",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "01:05",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "04:35",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 111,
+        "marketingAirlineCode": "TK",
+        "marketingFlightNumber": 111,
+        "aircraftTypeCode": "789",
+        "durationInMinutes": 630,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "3ded4afa-a627-474d-b684-8eb5569c4e55",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "22:50",
+        "arrivalAirportCode": "HEL",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "14:00",
+        "operatingAirlineCode": "AY",
+        "operatingFlightNumber": 16,
+        "marketingAirlineCode": "AY",
+        "marketingFlightNumber": 16,
+        "aircraftTypeCode": "333",
+        "durationInMinutes": 490,
+        "departureTerminal": "8"
+      },
+      {
+        "id": "e88ada35-73a9-4c17-9c23-2658b16d89cf",
+        "departureAirportCode": "HEL",
+        "departureDate": "2026-10-17",
+        "departureTime": "17:15",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "19:10",
+        "operatingAirlineCode": "AY",
+        "operatingFlightNumber": 15,
+        "marketingAirlineCode": "AY",
+        "marketingFlightNumber": 15,
+        "aircraftTypeCode": "359",
+        "durationInMinutes": 535,
+        "arrivalTerminal": "8"
+      },
+      {
+        "id": "d26b27b2-477c-4a1b-9a3a-8ab58b262f5a",
+        "departureAirportCode": "LHR",
+        "departureDate": "2026-10-12",
+        "departureTime": "08:35",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "14:30",
+        "operatingAirlineCode": "BA",
+        "operatingFlightNumber": 716,
+        "marketingAirlineCode": "AA",
+        "marketingFlightNumber": 7214,
+        "disclosureAirlineCode": "BA",
+        "aircraftTypeCode": "320",
+        "durationInMinutes": 235,
+        "departureTerminal": "5"
+      },
+      {
+        "id": "249cd60b-092a-403d-af5b-22da155b847c",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "15:40",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "05:25",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 401,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 8840,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "346",
+        "durationInMinutes": 465,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "fb09e559-015c-444f-bd07-81190a7f2e76",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-17",
+        "departureTime": "10:55",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "13:35",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 400,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 400,
+        "aircraftTypeCode": "346",
+        "durationInMinutes": 520,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "31a84f04-c27e-484d-aa17-2864b2d65afd",
+        "departureAirportCode": "LIS",
+        "departureDate": "2026-10-17",
+        "departureTime": "17:00",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "20:05",
+        "operatingAirlineCode": "TP",
+        "operatingFlightNumber": 209,
+        "marketingAirlineCode": "TP",
+        "marketingFlightNumber": 209,
+        "aircraftTypeCode": "339",
+        "durationInMinutes": 485,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "ad6658b4-f19c-4205-a3ae-4c72b6ffe363",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-12",
+        "departureTime": "08:55",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "13:00",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1298,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 9034,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "321",
+        "durationInMinutes": 185,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "0f7eff82-68be-4be5-80cc-9e1308a76ea1",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "04:25",
+        "arrivalAirportCode": "CDG",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "07:05",
+        "operatingAirlineCode": "AF",
+        "operatingFlightNumber": 1391,
+        "marketingAirlineCode": "AF",
+        "marketingFlightNumber": 1391,
+        "aircraftTypeCode": "223",
+        "durationInMinutes": 220,
+        "arrivalTerminal": "2E"
+      },
+      {
+        "id": "d72c5057-1f20-49cd-9131-2ab4801f41ac",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "17:50",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "20:00",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1301,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 1301,
+        "aircraftTypeCode": "32N",
+        "durationInMinutes": 190,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "9acdd3d5-8333-4630-a18d-e795fbc9a161",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "21:50",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "11:45",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 405,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 405,
+        "aircraftTypeCode": "343",
+        "durationInMinutes": 475,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "11b60a9a-f514-4693-9e5a-a85aea195c68",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-18",
+        "departureTime": "08:35",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-18",
+        "arrivalTime": "11:10",
+        "operatingAirlineCode": "SQ",
+        "operatingFlightNumber": 26,
+        "marketingAirlineCode": "SQ",
+        "marketingFlightNumber": 26,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 515,
+        "departureTerminal": "1",
+        "arrivalTerminal": "4"
+      },
+      {
+        "id": "81719fde-28c7-4671-91db-5ebad357642f",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "22:05",
+        "arrivalAirportCode": "LIS",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "10:15",
+        "operatingAirlineCode": "TP",
+        "operatingFlightNumber": 210,
+        "marketingAirlineCode": "TP",
+        "marketingFlightNumber": 210,
+        "aircraftTypeCode": "339",
+        "durationInMinutes": 430,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "20914e49-de5f-44b4-be35-8037487ada47",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "05:50",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "08:00",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1305,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 9127,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 190,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "85d05e82-2ab7-4d51-b0da-6ca1fc9fe88f",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "08:15",
+        "arrivalAirportCode": "LHR",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "10:30",
+        "operatingAirlineCode": "BA",
+        "operatingFlightNumber": 721,
+        "marketingAirlineCode": "AA",
+        "marketingFlightNumber": 6612,
+        "disclosureAirlineCode": "BA",
+        "aircraftTypeCode": "320",
+        "durationInMinutes": 255,
+        "arrivalTerminal": "5"
+      },
+      {
+        "id": "7315d119-3e51-47ba-ac52-90397f88752c",
+        "departureAirportCode": "WAW",
+        "departureDate": "2026-10-17",
+        "departureTime": "16:50",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "20:20",
+        "operatingAirlineCode": "LO",
+        "operatingFlightNumber": 26,
+        "marketingAirlineCode": "LO",
+        "marketingFlightNumber": 26,
+        "disclosureAirlineCode": "YU",
+        "aircraftTypeCode": "772",
+        "durationInMinutes": 570,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "31d7981c-c520-4361-be6f-314165362299",
+        "departureAirportCode": "CDG",
+        "departureDate": "2026-10-17",
+        "departureTime": "08:35",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "10:50",
+        "operatingAirlineCode": "AF",
+        "operatingFlightNumber": 2,
+        "marketingAirlineCode": "DL",
+        "marketingFlightNumber": 8747,
+        "disclosureAirlineCode": "AF",
+        "aircraftTypeCode": "772",
+        "durationInMinutes": 495,
+        "departureTerminal": "2E",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "53e9e701-1378-45ef-b870-ac66a1e68f95",
+        "departureAirportCode": "HEL",
+        "departureDate": "2026-10-12",
+        "departureTime": "19:40",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "23:20",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 1764,
+        "marketingAirlineCode": "AY",
+        "marketingFlightNumber": 3303,
+        "disclosureAirlineCode": "TK",
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 220
+      },
+      {
+        "id": "a08906c2-b04e-400f-b086-9acc1454171f",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "05:50",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "08:00",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1305,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 1305,
+        "aircraftTypeCode": "32Q",
+        "durationInMinutes": 190,
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "c50f4575-b2b9-4d15-86e1-bfe818340372",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "18:40",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "22:30",
+        "operatingAirlineCode": "TK",
+        "operatingFlightNumber": 11,
+        "marketingAirlineCode": "TK",
+        "marketingFlightNumber": 11,
+        "aircraftTypeCode": "77W",
+        "durationInMinutes": 650,
+        "arrivalTerminal": "1"
+      }
+    ],
+    "journeys": [
+      {
+        "id": "040a228f-36d4-4021-ac40-3c9ebd818df5",
+        "flightRefs": [
+          "29aaa51f-ecef-4597-a719-2635cc66cc5d",
+          "56b0a849-675a-4653-9af4-69d09a6bcfb6"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "169d3380-79bf-48e7-905c-4b4396e9247c",
+        "flightRefs": [
+          "8845009b-1947-4a3b-b7df-e76ff164515a",
+          "cdbcedb8-d629-4e31-be66-227004559d52"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "90803fb1-50f5-4d67-8303-785de97d7092",
+        "flightRefs": [
+          "6ab9effb-6efe-4343-8784-1747cf864a11"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "85e33575-72bf-41ce-b110-9f1500df5f85",
+        "flightRefs": [
+          "3ded4afa-a627-474d-b684-8eb5569c4e55",
+          "53e9e701-1378-45ef-b870-ac66a1e68f95"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "5e3b9997-c358-432c-96f6-7714145133c6",
+        "flightRefs": [
+          "a7f1c092-735a-49f7-9f41-8fee76407be0",
+          "f196cc93-e9ae-44f1-aeb3-00424239a466"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "ee72fe3c-13bc-4260-9d2c-264b50cb65c4",
+        "flightRefs": [
+          "ed904192-08b6-48ff-b174-41390b42d1cd",
+          "20507829-6009-481f-a270-b7b17bea4ff6"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "d36c4497-8bfa-469e-8649-24fd4ef14f29",
+        "flightRefs": [
+          "249cd60b-092a-403d-af5b-22da155b847c",
+          "ad6658b4-f19c-4205-a3ae-4c72b6ffe363"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "a2d671e2-e08b-4f9c-ad53-5fc7f8226439",
+        "flightRefs": [
+          "ccc6db30-223a-415b-9ce0-af2aed4b5d8b"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "3ecc2f93-0cee-4dae-baaf-4e07e7ad5973",
+        "flightRefs": [
+          "2a916bbd-d91d-4225-a4f4-84e5fb7ca57e",
+          "29f1e104-6c07-4257-80b3-8287b9a45022"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "dd3df29f-aa24-4c1f-a315-d4fc70963392",
+        "flightRefs": [
+          "10fc1fb3-7c0c-4187-894e-db90f8b7a605",
+          "73e040fc-2752-47e3-8a77-ddce50fc11e6"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "ac32faac-2773-4415-b55b-0172471a1036",
+        "flightRefs": [
+          "0f7eff82-68be-4be5-80cc-9e1308a76ea1",
+          "31d7981c-c520-4361-be6f-314165362299"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "3fba930e-c85f-4c39-abd8-1edeabbc110a",
+        "flightRefs": [
+          "c50f4575-b2b9-4d15-86e1-bfe818340372"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "0339947b-82e3-4bb4-b1e5-dd98b1ce2100",
+        "flightRefs": [
+          "a08906c2-b04e-400f-b086-9acc1454171f",
+          "fb09e559-015c-444f-bd07-81190a7f2e76"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "f4f4ccf0-389c-4e98-b0c0-595195730a13",
+        "flightRefs": [
+          "6507c13a-1f96-4503-892b-2ce7ac60f798",
+          "0c8d80ac-bc50-4be7-8db4-5fe4e39df83f",
+          "6a4b260e-9163-41f0-a28b-907ec2b732d5"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "124c70c7-0fb6-41fe-9a94-cbabc4956c03",
+        "flightRefs": [
+          "20914e49-de5f-44b4-be35-8037487ada47",
+          "363b00a6-5deb-4dbc-a109-7bd978054772"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "77150fbd-7163-4078-87f0-449240c33742",
+        "flightRefs": [
+          "d72c5057-1f20-49cd-9131-2ab4801f41ac",
+          "11b60a9a-f514-4693-9e5a-a85aea195c68"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "91a3b89b-9b09-484f-8aa3-01d5365fbd76",
+        "flightRefs": [
+          "1fc5c069-ab66-4c1a-8b3d-60bab8e14e59",
+          "f196cc93-e9ae-44f1-aeb3-00424239a466"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "881518f7-cf1d-42cc-bf38-3c523128b116",
+        "flightRefs": [
+          "a08906c2-b04e-400f-b086-9acc1454171f",
+          "363b00a6-5deb-4dbc-a109-7bd978054772"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "1c972cb3-d82f-48bb-b29c-a06aab7c49c3",
+        "flightRefs": [
+          "a95e4ac5-228a-4fb2-afd1-f70bd9fd9d1a",
+          "7315d119-3e51-47ba-ac52-90397f88752c"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "7a53187e-6a0f-4666-89d5-9eab8ca8cae1",
+        "flightRefs": [
+          "6ea63e07-1e9c-4654-a506-588a0ad371cf",
+          "73e040fc-2752-47e3-8a77-ddce50fc11e6"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "a586f442-fd03-4eb6-9b72-a674fe08b05e",
+        "flightRefs": [
+          "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+          "bad7df21-4a23-4cd6-95d5-693bc5c66834"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "d4458e3c-2cb2-4882-adff-a81b5f27e5e0",
+        "flightRefs": [
+          "b3b7df3c-7ac8-4eaa-ba4a-545e140d330f",
+          "d26b27b2-477c-4a1b-9a3a-8ab58b262f5a"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "6f0aac63-a597-435b-b6c7-b8ee63d188ba",
+        "flightRefs": [
+          "cf50d201-a246-41a9-b257-935a62c56873"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "8d81dc86-1d47-4c3c-b7de-65490d090372",
+        "flightRefs": [
+          "81719fde-28c7-4671-91db-5ebad357642f",
+          "18a4b7ca-4715-4d7a-8e88-074ec531b342"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "eeb215e6-f31a-41b2-8d08-ca63dd01ee78",
+        "flightRefs": [
+          "7e8225ca-0dfc-4dbc-8961-248250f6b12b",
+          "2e0db438-3324-424e-96ff-65f1a79c9286"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "1225ec5a-675e-402e-849b-2a0ebcdcd3c2",
+        "flightRefs": [
+          "6fd6b106-b220-4db8-b7b4-9e25c9e0600c",
+          "3ec06836-2dad-46a6-927d-7b1651073817"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "12a356f0-70e6-498b-b348-44847dc2525d",
+        "flightRefs": [
+          "9acdd3d5-8333-4630-a18d-e795fbc9a161",
+          "281033ef-e1ee-487a-a1f5-278c0933bf83"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "fedb7e7c-c0ac-4e33-9af4-b281a8af74e3",
+        "flightRefs": [
+          "85d05e82-2ab7-4d51-b0da-6ca1fc9fe88f",
+          "f460b2f1-cec4-4a55-a99d-e0e8cca69844"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "121b2822-9c2e-4efa-8a78-3537df934bf0",
+        "flightRefs": [
+          "0f7eff82-68be-4be5-80cc-9e1308a76ea1",
+          "5dbea3ac-e73b-4482-8466-0cdff1c8149a"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "ba0b7911-8e98-45c8-82fe-85755e64582d",
+        "flightRefs": [
+          "137c1170-4e81-4ce7-922f-15b58e6f6bff"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "6e0ff08d-283a-45c7-977b-9426849c8237",
+        "flightRefs": [
+          "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+          "73e040fc-2752-47e3-8a77-ddce50fc11e6"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "cc36f10a-b0b7-4b65-addf-00aeb2c04d17",
+        "flightRefs": [
+          "5c9c9edb-541e-4b8c-ac61-1c4a46303d26",
+          "d26b27b2-477c-4a1b-9a3a-8ab58b262f5a"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "f8b4d145-399b-40c9-9844-bbc5da67bbe7",
+        "flightRefs": [
+          "50c0d788-4a5d-4cc3-ac88-10792d6a068f",
+          "18b369d7-382a-40e9-b428-6c82456605b9"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "179dcbe1-b791-478a-9024-e130067882e0",
+        "flightRefs": [
+          "54942941-f78c-4fab-aaf8-cf4ea6e4e7e7"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "836009d9-e712-4393-ae22-b3d8d09b3918",
+        "flightRefs": [
+          "a08906c2-b04e-400f-b086-9acc1454171f",
+          "901bb189-3569-4444-ac33-92f6e60f42a8"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "78d69fcd-b979-44ef-a7b4-efedb13f1ab7",
+        "flightRefs": [
+          "af285888-34bc-454c-a408-fcc725efb78c",
+          "31a84f04-c27e-484d-aa17-2864b2d65afd"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "195d9fad-c3ac-48af-864d-3b49abc57b78",
+        "flightRefs": [
+          "02152323-eb52-48ba-a1ca-b213082c1d3a",
+          "e88ada35-73a9-4c17-9c23-2658b16d89cf"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "e6ab8f5d-6963-4b94-8627-17ead2e99579",
+        "flightRefs": [
+          "a7f1c092-735a-49f7-9f41-8fee76407be0",
+          "a4dd8736-17f8-417c-a98f-e5e4c580d03b"
+        ],
+        "requestedJourneyIndex": 0
+      },
+      {
+        "id": "7107f384-d3b9-4f65-be15-ac2ef6208a2c",
+        "flightRefs": [
+          "b74dc3ea-a5e7-49c3-8095-b84f10d7441b"
+        ],
+        "requestedJourneyIndex": 0
+      }
+    ],
+    "offers": [
+      {
+        "type": "FlightOffer",
+        "id": "0158309e-95cc-4eab-b286-789e2950f0fc",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1053.13",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-08T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "e6ab8f5d-6963-4b94-8627-17ead2e99579",
+          "169d3380-79bf-48e7-905c-4b4396e9247c"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "330.00",
+                  "taxAmount": "723.13",
+                  "amount": "1053.13",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "DL",
+                "fareComponents": [
+                  {
+                    "amount": "140.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "280.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLN00SBA",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a7f1c092-735a-49f7-9f41-8fee76407be0",
+                        "bookingClassCode": "E",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "a4dd8736-17f8-417c-a98f-e5e4c580d03b",
+                        "bookingClassCode": "E",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAINBASIC",
+                      "name": "DELTA MAIN BASIC",
+                      "programId": 254226
+                    }
+                  },
+                  {
+                    "amount": "190.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "380.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "XKN00SBA",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "8845009b-1947-4a3b-b7df-e76ff164515a",
+                        "bookingClassCode": "E",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "cdbcedb8-d629-4e31-be66-227004559d52",
+                        "bookingClassCode": "E",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAINBASIC",
+                      "name": "DELTA MAIN BASIC",
+                      "programId": 254226
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "8384da95-231a-4f53-aa79-c4c53fb15e97",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "cb357fc4-40f0-4ddd-8380-d39672179c96",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1086.53",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-08T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "91a3b89b-9b09-484f-8aa3-01d5365fbd76",
+          "121b2822-9c2e-4efa-8a78-3537df934bf0"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "277.00",
+                  "taxAmount": "809.53",
+                  "amount": "1086.53",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "KL",
+                "fareComponents": [
+                  {
+                    "amount": "135.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "270.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "NKA43NMP",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "1fc5c069-ab66-4c1a-8b3d-60bab8e14e59",
+                        "bookingClassCode": "N",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "f196cc93-e9ae-44f1-aeb3-00424239a466",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "STANDARD",
+                      "name": "STANDARD",
+                      "programId": 253075
+                    }
+                  },
+                  {
+                    "amount": "135.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "270.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "NKA43NMP",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "0f7eff82-68be-4be5-80cc-9e1308a76ea1",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "5dbea3ac-e73b-4482-8466-0cdff1c8149a",
+                        "bookingClassCode": "N",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "STANDARD",
+                      "name": "STANDARD",
+                      "programId": 256304
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "3eeec914-7aa6-4c02-aa83-34d819d23a50",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "a4d59f4d-39a1-466a-9c80-ad88855ad056",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1115.43",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-08T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "91a3b89b-9b09-484f-8aa3-01d5365fbd76",
+          "f4f4ccf0-389c-4e98-b0c0-595195730a13"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "285.00",
+                  "taxAmount": "830.43",
+                  "amount": "1115.43",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "KL",
+                "fareComponents": [
+                  {
+                    "amount": "135.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "270.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "NKA43NMP",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "1fc5c069-ab66-4c1a-8b3d-60bab8e14e59",
+                        "bookingClassCode": "N",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "f196cc93-e9ae-44f1-aeb3-00424239a466",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "STANDARD",
+                      "name": "STANDARD",
+                      "programId": 253075
+                    }
+                  },
+                  {
+                    "amount": "135.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "270.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "NKA43NMP",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "6507c13a-1f96-4503-892b-2ce7ac60f798",
+                        "bookingClassCode": "G",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "0c8d80ac-bc50-4be7-8db4-5fe4e39df83f",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "6a4b260e-9163-41f0-a28b-907ec2b732d5",
+                        "bookingClassCode": "N",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "STANDARD",
+                      "name": "STANDARD",
+                      "programId": 253075
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "5882ee44-722f-448b-b613-818211eb9968",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "aae07405-2d53-477d-b269-f9498837c929",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1121.43",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T22:05:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "8d81dc86-1d47-4c3c-b7de-65490d090372",
+          "78d69fcd-b979-44ef-a7b4-efedb13f1ab7"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "550.00",
+                  "taxAmount": "571.43",
+                  "amount": "1121.43",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TP",
+                "fareComponents": [
+                  {
+                    "amount": "265.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "530.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TF0BSI0C",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "81719fde-28c7-4671-91db-5ebad357642f",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "18a4b7ca-4715-4d7a-8e88-074ec531b342",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BASIC",
+                      "name": "BASIC",
+                      "programId": 251926
+                    }
+                  },
+                  {
+                    "amount": "265.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "530.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TF0BSI0C",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "af285888-34bc-454c-a408-fcc725efb78c",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "31a84f04-c27e-484d-aa17-2864b2d65afd",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BASIC",
+                      "name": "BASIC",
+                      "programId": 251926
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "f6c45183-2cb4-4245-b36f-87337ae3cc45",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "6dce1e76-6e83-4023-8e8e-528518ffa751",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1140.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T00:25:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "a2d671e2-e08b-4f9c-ad53-5fc7f8226439",
+          "90803fb1-50f5-4d67-8303-785de97d7092"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "649.00",
+                  "taxAmount": "491.83",
+                  "amount": "1140.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "ccc6db30-223a-415b-9ce0-af2aed4b5d8b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "6ab9effb-6efe-4343-8784-1747cf864a11",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "0354e7b3-45e3-4b08-b50b-7e49d667bb69",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "dd7f7511-75f4-42e4-b0e1-0722f52c0676",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1140.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T00:25:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "a2d671e2-e08b-4f9c-ad53-5fc7f8226439",
+          "6f0aac63-a597-435b-b6c7-b8ee63d188ba"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "649.00",
+                  "taxAmount": "491.83",
+                  "amount": "1140.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "ccc6db30-223a-415b-9ce0-af2aed4b5d8b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "cf50d201-a246-41a9-b257-935a62c56873",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "b897f086-13fc-4694-bde4-6dbc83fb60cf",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "9817074c-496c-4328-94f9-e1db48ef305a",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1140.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T00:25:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "a2d671e2-e08b-4f9c-ad53-5fc7f8226439",
+          "3fba930e-c85f-4c39-abd8-1edeabbc110a"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "649.00",
+                  "taxAmount": "491.83",
+                  "amount": "1140.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "ccc6db30-223a-415b-9ce0-af2aed4b5d8b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "c50f4575-b2b9-4d15-86e1-bfe818340372",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "50ba038a-34cb-4ea2-805b-0e9358ac5287",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "5b9f4c16-2061-404e-a25d-756c2c638fa6",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1155.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T12:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "7107f384-d3b9-4f65-be15-ac2ef6208a2c",
+          "90803fb1-50f5-4d67-8303-785de97d7092"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "664.00",
+                  "taxAmount": "491.83",
+                  "amount": "1155.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "b74dc3ea-a5e7-49c3-8095-b84f10d7441b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "6ab9effb-6efe-4343-8784-1747cf864a11",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "d1c35c38-783b-414c-959a-c7a14250076a",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "0a635a94-dff0-4521-814f-ada8b7987761",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1155.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T12:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "7107f384-d3b9-4f65-be15-ac2ef6208a2c",
+          "6f0aac63-a597-435b-b6c7-b8ee63d188ba"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "664.00",
+                  "taxAmount": "491.83",
+                  "amount": "1155.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "b74dc3ea-a5e7-49c3-8095-b84f10d7441b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "cf50d201-a246-41a9-b257-935a62c56873",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "7c896446-b29b-4af8-aee9-8728f9fc4a53",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "77b34e2a-75dd-42d4-b4fb-169655b8df3c",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1155.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T12:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "7107f384-d3b9-4f65-be15-ac2ef6208a2c",
+          "3fba930e-c85f-4c39-abd8-1edeabbc110a"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "664.00",
+                  "taxAmount": "491.83",
+                  "amount": "1155.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "b74dc3ea-a5e7-49c3-8095-b84f10d7441b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "c50f4575-b2b9-4d15-86e1-bfe818340372",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "c8bd2933-6d4e-4fe0-a6d4-3e467a996276",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "913aeb51-d322-4fdf-a602-5bed6e6a4dd7",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1170.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T00:25:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "a2d671e2-e08b-4f9c-ad53-5fc7f8226439",
+          "179dcbe1-b791-478a-9024-e130067882e0"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "679.00",
+                  "taxAmount": "491.83",
+                  "amount": "1170.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "ccc6db30-223a-415b-9ce0-af2aed4b5d8b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "54942941-f78c-4fab-aaf8-cf4ea6e4e7e7",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "2ec55723-3a6b-4b64-a9c4-fe27e1e59fea",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "6c7fd263-6cb2-4249-b129-243f443111e0",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1178.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "a586f442-fd03-4eb6-9b72-a674fe08b05e",
+          "0339947b-82e3-4bb4-b1e5-dd98b1ce2100"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "426.00",
+                  "taxAmount": "752.83",
+                  "amount": "1178.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "UA",
+                "fareComponents": [
+                  {
+                    "amount": "140.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "280.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "bad7df21-4a23-4cd6-95d5-693bc5c66834",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  },
+                  {
+                    "amount": "286.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "572.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SKA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a08906c2-b04e-400f-b086-9acc1454171f",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "fb09e559-015c-444f-bd07-81190a7f2e76",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOLIGHT",
+                      "name": "ECONOMY LIGHT",
+                      "programId": 252568
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "7de4fb33-17eb-453c-a0a9-3854c1e66e55",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "0caba0aa-4502-4660-8fcf-576d5d214c46",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1178.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "d36c4497-8bfa-469e-8649-24fd4ef14f29",
+          "0339947b-82e3-4bb4-b1e5-dd98b1ce2100"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "426.00",
+                  "taxAmount": "752.83",
+                  "amount": "1178.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "UA",
+                "fareComponents": [
+                  {
+                    "amount": "140.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "280.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "249cd60b-092a-403d-af5b-22da155b847c",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "ad6658b4-f19c-4205-a3ae-4c72b6ffe363",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  },
+                  {
+                    "amount": "286.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "572.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SKA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a08906c2-b04e-400f-b086-9acc1454171f",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "fb09e559-015c-444f-bd07-81190a7f2e76",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOLIGHT",
+                      "name": "ECONOMY LIGHT",
+                      "programId": 252568
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "369e543a-79ab-42e9-a250-31d70dad93c1",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "b4f5e8ea-f357-4a53-be8f-83aaacbe66b0",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1185.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T12:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "7107f384-d3b9-4f65-be15-ac2ef6208a2c",
+          "179dcbe1-b791-478a-9024-e130067882e0"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "694.00",
+                  "taxAmount": "491.83",
+                  "amount": "1185.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "b74dc3ea-a5e7-49c3-8095-b84f10d7441b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "54942941-f78c-4fab-aaf8-cf4ea6e4e7e7",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "dcb7b33f-96e6-402d-972b-e945bd4bbefe",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "7dd5ac8e-5ab1-4ee7-890a-9b371cca06a0",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1185.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T19:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "ba0b7911-8e98-45c8-82fe-85755e64582d",
+          "90803fb1-50f5-4d67-8303-785de97d7092"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "694.00",
+                  "taxAmount": "491.83",
+                  "amount": "1185.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "137c1170-4e81-4ce7-922f-15b58e6f6bff",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "6ab9effb-6efe-4343-8784-1747cf864a11",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "6379fa6e-519c-490a-a858-4d5d191f2f6b",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "7e5c15df-5372-4de7-be65-a8a24d59584e",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1185.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T19:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "ba0b7911-8e98-45c8-82fe-85755e64582d",
+          "6f0aac63-a597-435b-b6c7-b8ee63d188ba"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "694.00",
+                  "taxAmount": "491.83",
+                  "amount": "1185.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "137c1170-4e81-4ce7-922f-15b58e6f6bff",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "cf50d201-a246-41a9-b257-935a62c56873",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "bdc72f5b-8173-47ac-b770-f94d83c2281c",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "978c16d5-337b-473b-83e9-5e8c88f09de8",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1185.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T19:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "ba0b7911-8e98-45c8-82fe-85755e64582d",
+          "3fba930e-c85f-4c39-abd8-1edeabbc110a"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "694.00",
+                  "taxAmount": "491.83",
+                  "amount": "1185.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "137c1170-4e81-4ce7-922f-15b58e6f6bff",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "c50f4575-b2b9-4d15-86e1-bfe818340372",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "12452e6c-15d6-4f09-a126-92b1c7cf869d",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "ccaa75ee-4bc6-4d8c-bf46-cc021f7afb40",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1204.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "7a53187e-6a0f-4666-89d5-9eab8ca8cae1",
+          "0339947b-82e3-4bb4-b1e5-dd98b1ce2100"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "426.00",
+                  "taxAmount": "778.83",
+                  "amount": "1204.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "LH",
+                "fareComponents": [
+                  {
+                    "amount": "140.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "280.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "6ea63e07-1e9c-4654-a506-588a0ad371cf",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "73e040fc-2752-47e3-8a77-ddce50fc11e6",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOLIGHT",
+                      "name": "ECONOMY LIGHT",
+                      "programId": 252568
+                    }
+                  },
+                  {
+                    "amount": "286.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "572.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SKA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a08906c2-b04e-400f-b086-9acc1454171f",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "fb09e559-015c-444f-bd07-81190a7f2e76",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOLIGHT",
+                      "name": "ECONOMY LIGHT",
+                      "programId": 252568
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "acbfed6a-6424-4ab6-94c0-9d6bb5bd2eb6",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "5bd83775-4e1d-49c1-b1b4-8420c0f77b02",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1215.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T19:50:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "ba0b7911-8e98-45c8-82fe-85755e64582d",
+          "179dcbe1-b791-478a-9024-e130067882e0"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "724.00",
+                  "taxAmount": "491.83",
+                  "amount": "1215.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "TK",
+                "fareComponents": [
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "137c1170-4e81-4ce7-922f-15b58e6f6bff",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  },
+                  {
+                    "amount": "294.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "589.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLYLGR",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "54942941-f78c-4fab-aaf8-cf4ea6e4e7e7",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "LG",
+                      "name": "EXTRAFLY",
+                      "programId": 257286
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "c8908052-e653-4423-a94f-3c45e40b6594",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "7da04416-6a91-4bc2-9d66-b113de7cd56d",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1218.23",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-30T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "1225ec5a-675e-402e-849b-2a0ebcdcd3c2",
+          "3ecc2f93-0cee-4dae-baaf-4e07e7ad5973"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "728.00",
+                  "taxAmount": "490.23",
+                  "amount": "1218.23",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "QR",
+                "fareComponents": [
+                  {
+                    "amount": "151.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "303.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TLUSP0RE",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "6fd6b106-b220-4db8-b7b4-9e25c9e0600c",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "3ec06836-2dad-46a6-927d-7b1651073817",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECLASSIC",
+                      "name": "ECONOMY CLASSIC",
+                      "programId": 255315
+                    }
+                  },
+                  {
+                    "amount": "536.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "1072.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "KLR5R1SE",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "2a916bbd-d91d-4225-a4f4-84e5fb7ca57e",
+                        "bookingClassCode": "K",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "29f1e104-6c07-4257-80b3-8287b9a45022",
+                        "bookingClassCode": "K",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECONVENIEN",
+                      "name": "ECONOMY CONVENIENCE",
+                      "programId": 255315
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "365ab65c-6a98-40f2-8075-6e6bc5cac243",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "e657379a-2c96-414e-ab31-3193f9f0c51b",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1243.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "12a356f0-70e6-498b-b348-44847dc2525d",
+          "0339947b-82e3-4bb4-b1e5-dd98b1ce2100"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "465.00",
+                  "taxAmount": "778.83",
+                  "amount": "1243.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "LH",
+                "fareComponents": [
+                  {
+                    "amount": "179.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "358.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "9acdd3d5-8333-4630-a18d-e795fbc9a161",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "281033ef-e1ee-487a-a1f5-278c0933bf83",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOLIGHT",
+                      "name": "ECONOMY LIGHT",
+                      "programId": 252568
+                    }
+                  },
+                  {
+                    "amount": "286.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "572.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SKA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a08906c2-b04e-400f-b086-9acc1454171f",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "fb09e559-015c-444f-bd07-81190a7f2e76",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOLIGHT",
+                      "name": "ECONOMY LIGHT",
+                      "programId": 252568
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "a940f86a-90f4-4df7-a1c9-281568d32ba2",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "253bf635-089a-4bd5-abdf-535e5ba1a68c",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1259.33",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T20:55:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "dd3df29f-aa24-4c1f-a315-d4fc70963392",
+          "77150fbd-7163-4078-87f0-449240c33742"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "910.00",
+                  "taxAmount": "349.33",
+                  "amount": "1259.33",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "SQ",
+                "fareComponents": [
+                  {
+                    "amount": "405.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "810.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "V15USR3A",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "10fc1fb3-7c0c-4187-894e-db90f8b7a605",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "73e040fc-2752-47e3-8a77-ddce50fc11e6",
+                        "bookingClassCode": "W",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "YCLLITE",
+                      "name": "ECONOMY LITE",
+                      "programId": 242204
+                    }
+                  },
+                  {
+                    "amount": "405.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "810.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "V15USR3A",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "d72c5057-1f20-49cd-9131-2ab4801f41ac",
+                        "bookingClassCode": "W",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "11b60a9a-f514-4693-9e5a-a85aea195c68",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "YCLLITE",
+                      "name": "ECONOMY LITE",
+                      "programId": 242204
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "5f27a85d-5f72-478e-bebd-434d9d3b3755",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "5bf19593-3719-4706-813a-c48c6dfe2181",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1265.33",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "85e33575-72bf-41ce-b110-9f1500df5f85",
+          "195d9fad-c3ac-48af-864d-3b49abc57b78"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "550.00",
+                  "taxAmount": "715.33",
+                  "amount": "1265.33",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "AY",
+                "fareComponents": [
+                  {
+                    "amount": "250.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "500.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLN0D0M5",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "3ded4afa-a627-474d-b684-8eb5569c4e55",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "53e9e701-1378-45ef-b870-ac66a1e68f95",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECLASSIC",
+                      "name": "ECONOMY CLASSIC",
+                      "programId": 249290
+                    }
+                  },
+                  {
+                    "amount": "300.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "600.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "LKN0D0M5",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "02152323-eb52-48ba-a1ca-b213082c1d3a",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "e88ada35-73a9-4c17-9c23-2658b16d89cf",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECLASSIC",
+                      "name": "ECONOMY CLASSIC",
+                      "programId": 249290
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "6cf00f77-f64b-45b3-9ab2-49021598b481",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "7d348502-d1f5-4e85-a9e4-078f9cbebd90",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1296.03",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "cc36f10a-b0b7-4b65-addf-00aeb2c04d17",
+          "fedb7e7c-c0ac-4e33-9af4-b281a8af74e3"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "550.00",
+                  "taxAmount": "746.03",
+                  "amount": "1296.03",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "AA",
+                "fareComponents": [
+                  {
+                    "amount": "250.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "500.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLN0D0M5",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "5c9c9edb-541e-4b8c-ac61-1c4a46303d26",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "d26b27b2-477c-4a1b-9a3a-8ab58b262f5a",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAIN",
+                      "name": "MAIN CABIN",
+                      "programId": 257322
+                    }
+                  },
+                  {
+                    "amount": "300.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "600.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "LKN0D0M5",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "85d05e82-2ab7-4d51-b0da-6ca1fc9fe88f",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "f460b2f1-cec4-4a55-a99d-e0e8cca69844",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAIN",
+                      "name": "MAIN CABIN",
+                      "programId": 257322
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "7feba1e1-480f-433f-a2e1-b6ed1f846454",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "6844cb6e-9d18-4da7-a0bc-b11f9d45d1b7",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1296.03",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "d4458e3c-2cb2-4882-adff-a81b5f27e5e0",
+          "fedb7e7c-c0ac-4e33-9af4-b281a8af74e3"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "550.00",
+                  "taxAmount": "746.03",
+                  "amount": "1296.03",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "AA",
+                "fareComponents": [
+                  {
+                    "amount": "250.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "500.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLN0D0M5",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "b3b7df3c-7ac8-4eaa-ba4a-545e140d330f",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "d26b27b2-477c-4a1b-9a3a-8ab58b262f5a",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAIN",
+                      "name": "MAIN CABIN",
+                      "programId": 257322
+                    }
+                  },
+                  {
+                    "amount": "300.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "600.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "LKN0D0M5",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "85d05e82-2ab7-4d51-b0da-6ca1fc9fe88f",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "f460b2f1-cec4-4a55-a99d-e0e8cca69844",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAIN",
+                      "name": "MAIN CABIN",
+                      "programId": 257322
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "67ec994d-3463-400a-aebd-9da3f0c0c6bc",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "0d67c8b0-c3be-40fb-bcfa-5547b76aa111",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1300.53",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-08T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "e6ab8f5d-6963-4b94-8627-17ead2e99579",
+          "ac32faac-2773-4415-b55b-0172471a1036"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "549.00",
+                  "taxAmount": "751.53",
+                  "amount": "1300.53",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "DL",
+                "fareComponents": [
+                  {
+                    "amount": "140.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "280.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLN00SBA",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a7f1c092-735a-49f7-9f41-8fee76407be0",
+                        "bookingClassCode": "E",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "a4dd8736-17f8-417c-a98f-e5e4c580d03b",
+                        "bookingClassCode": "E",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAINBASIC",
+                      "name": "DELTA MAIN BASIC",
+                      "programId": 254226
+                    }
+                  },
+                  {
+                    "amount": "409.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "818.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "UKN00KBL",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "0f7eff82-68be-4be5-80cc-9e1308a76ea1",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "31d7981c-c520-4361-be6f-314165362299",
+                        "bookingClassCode": "E",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAINBASIC",
+                      "name": "DELTA MAIN BASIC",
+                      "programId": 254226
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "c165024a-c02d-4638-a695-13075d3cfd58",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "c40bf711-ae34-4f28-980a-3f37bd9a7bb1",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1321.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T11:54:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "ee72fe3c-13bc-4260-9d2c-264b50cb65c4",
+          "1c972cb3-d82f-48bb-b29c-a06aab7c49c3"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "625.00",
+                  "taxAmount": "696.83",
+                  "amount": "1321.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "LO",
+                "fareComponents": [
+                  {
+                    "amount": "212.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "425.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SLANUY30",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "ed904192-08b6-48ff-b174-41390b42d1cd",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "20507829-6009-481f-a270-b7b17bea4ff6",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOSTAND",
+                      "name": "ECONOMY STANDARD",
+                      "programId": 253880
+                    }
+                  },
+                  {
+                    "amount": "382.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "765.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "QKANUY30",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a95e4ac5-228a-4fb2-afd1-f70bd9fd9d1a",
+                        "bookingClassCode": "Q",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "7315d119-3e51-47ba-ac52-90397f88752c",
+                        "bookingClassCode": "Q",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOSTAND",
+                      "name": "ECONOMY STANDARD",
+                      "programId": 253880
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "fa037a24-350a-4705-ac19-2ef241b7ccca",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "72305190-5ecc-4b78-a20a-9e9aadf5c888",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1405.39",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-10-11T12:55:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "f8b4d145-399b-40c9-9844-bbc5da67bbe7",
+          "eeb215e6-f31a-41b2-8d08-ca63dd01ee78"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "581.00",
+                  "taxAmount": "824.39",
+                  "amount": "1405.39",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "MS",
+                "fareComponents": [
+                  {
+                    "amount": "75.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "150.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "WLNIUS",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "50c0d788-4a5d-4cc3-ac88-10792d6a068f",
+                        "bookingClassCode": "W",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "18b369d7-382a-40e9-b428-6c82456605b9",
+                        "bookingClassCode": "W",
+                        "cabinName": "Economy"
+                      }
+                    ]
+                  },
+                  {
+                    "amount": "241.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "241.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VLRIMSO",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "7e8225ca-0dfc-4dbc-8961-248250f6b12b",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ]
+                  },
+                  {
+                    "amount": "264.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "529.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "WLRIMS",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "2e0db438-3324-424e-96ff-65f1a79c9286",
+                        "bookingClassCode": "W",
+                        "cabinName": "Economy"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "1b1977a5-ac54-4cb6-ba37-65e8f862f069",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "8612d88b-485b-4d23-a456-f8cef2b9637f",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1498.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T11:54:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "040a228f-36d4-4021-ac40-3c9ebd818df5",
+          "836009d9-e712-4393-ae22-b3d8d09b3918"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "1155.00",
+                  "taxAmount": "343.83",
+                  "amount": "1498.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "DE",
+                "fareComponents": [
+                  {
+                    "amount": "372.50",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "745.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "QRA",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "29aaa51f-ecef-4597-a719-2635cc66cc5d",
+                        "bookingClassCode": "Q",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "56b0a849-675a-4653-9af4-69d09a6bcfb6",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      }
+                    ]
+                  },
+                  {
+                    "amount": "782.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "1564.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VRA",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a08906c2-b04e-400f-b086-9acc1454171f",
+                        "bookingClassCode": "L",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "901bb189-3569-4444-ac33-92f6e60f42a8",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "11be353e-88d4-4c62-903b-6b6914671b56",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "b2f372e1-7e52-4ec1-bf7d-cf35716fe4e6",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1634.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "a586f442-fd03-4eb6-9b72-a674fe08b05e",
+          "881518f7-cf1d-42cc-bf38-3c523128b116"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "882.00",
+                  "taxAmount": "752.83",
+                  "amount": "1634.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "UA",
+                "fareComponents": [
+                  {
+                    "amount": "140.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "280.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "bad7df21-4a23-4cd6-95d5-693bc5c66834",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  },
+                  {
+                    "amount": "742.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "742.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "UKV00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a08906c2-b04e-400f-b086-9acc1454171f",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "363b00a6-5deb-4dbc-a109-7bd978054772",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "4095ae75-53ee-462c-85b6-d3819cd04075",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "629dca98-57ba-4b63-999f-8c44278c97b9",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1634.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "a586f442-fd03-4eb6-9b72-a674fe08b05e",
+          "124c70c7-0fb6-41fe-9a94-cbabc4956c03"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "882.00",
+                  "taxAmount": "752.83",
+                  "amount": "1634.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "UA",
+                "fareComponents": [
+                  {
+                    "amount": "140.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "280.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "bad7df21-4a23-4cd6-95d5-693bc5c66834",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  },
+                  {
+                    "amount": "742.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "742.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "UKV00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "20914e49-de5f-44b4-be35-8037487ada47",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "363b00a6-5deb-4dbc-a109-7bd978054772",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "b4bb7609-8e5d-4de6-928c-ea0514f68720",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "9ed6db95-e910-430a-9111-9be4997b4cc8",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1673.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "6e0ff08d-283a-45c7-977b-9426849c8237",
+          "881518f7-cf1d-42cc-bf38-3c523128b116"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "921.00",
+                  "taxAmount": "752.83",
+                  "amount": "1673.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "UA",
+                "fareComponents": [
+                  {
+                    "amount": "179.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "358.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "73e040fc-2752-47e3-8a77-ddce50fc11e6",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  },
+                  {
+                    "amount": "742.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "742.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "UKV00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a08906c2-b04e-400f-b086-9acc1454171f",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "363b00a6-5deb-4dbc-a109-7bd978054772",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "0111eda5-c3cd-4fb6-9388-b5d578cc00f8",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "3cb47d59-ea25-4c63-9275-6754e40dedbd",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1673.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "6e0ff08d-283a-45c7-977b-9426849c8237",
+          "124c70c7-0fb6-41fe-9a94-cbabc4956c03"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "921.00",
+                  "taxAmount": "752.83",
+                  "amount": "1673.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "UA",
+                "fareComponents": [
+                  {
+                    "amount": "179.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "358.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "SLA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a1606cc9-275f-4fa1-bf0e-7236b47e58c8",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "73e040fc-2752-47e3-8a77-ddce50fc11e6",
+                        "bookingClassCode": "S",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  },
+                  {
+                    "amount": "742.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "742.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "UKV00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "20914e49-de5f-44b4-be35-8037487ada47",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "363b00a6-5deb-4dbc-a109-7bd978054772",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "9dae269f-400b-40be-9ffd-cfbb31a70299",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "2e13e684-4609-4d6f-8708-1f3bfe50cbf9",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "2061.13",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-08T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "5e3b9997-c358-432c-96f6-7714145133c6",
+          "169d3380-79bf-48e7-905c-4b4396e9247c"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "870.00",
+                  "taxAmount": "1191.13",
+                  "amount": "2061.13",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "DL",
+                "fareComponents": [
+                  {
+                    "amount": "570.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "1140.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "GLN00NP1",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a7f1c092-735a-49f7-9f41-8fee76407be0",
+                        "bookingClassCode": "G",
+                        "cabinName": "Premium Economy"
+                      },
+                      {
+                        "flightRef": "f196cc93-e9ae-44f1-aeb3-00424239a466",
+                        "bookingClassCode": "Y",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "DPSCLASC",
+                      "name": "DELTA PREMIUM SELECT CLASSIC",
+                      "programId": 254226
+                    }
+                  },
+                  {
+                    "amount": "300.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "600.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "XKN00SM4",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "8845009b-1947-4a3b-b7df-e76ff164515a",
+                        "bookingClassCode": "X",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "cdbcedb8-d629-4e31-be66-227004559d52",
+                        "bookingClassCode": "X",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAINCLASC",
+                      "name": "DELTA MAIN CLASSIC",
+                      "programId": 254226
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "b6fd609b-904a-4234-af11-5c218cb0c180",
+            "isMandatory": true
+          }
+        ]
+      },
+      {
+        "type": "FlightOffer",
+        "id": "024235dd-7bb2-4dd6-a9cc-b5f439932aa4",
+        "createdAt": "2026-09-07T16:55:01Z",
+        "validUntil": "2026-09-07T17:15:01Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "2308.53",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-08T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "5e3b9997-c358-432c-96f6-7714145133c6",
+          "ac32faac-2773-4415-b55b-0172471a1036"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "id": "Passenger1",
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "1089.00",
+                  "taxAmount": "1219.53",
+                  "amount": "2308.53",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "DL",
+                "fareComponents": [
+                  {
+                    "amount": "570.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "1140.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "GLN00NP1",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "a7f1c092-735a-49f7-9f41-8fee76407be0",
+                        "bookingClassCode": "G",
+                        "cabinName": "Premium Economy"
+                      },
+                      {
+                        "flightRef": "f196cc93-e9ae-44f1-aeb3-00424239a466",
+                        "bookingClassCode": "Y",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "DPSCLASC",
+                      "name": "DELTA PREMIUM SELECT CLASSIC",
+                      "programId": 254226
+                    }
+                  },
+                  {
+                    "amount": "519.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "1038.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "UKN00KMZ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "0f7eff82-68be-4be5-80cc-9e1308a76ea1",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "31d7981c-c520-4361-be6f-314165362299",
+                        "bookingClassCode": "U",
+                        "cabinName": "Economy"
+                      }
+                    ],
+                    "brand": {
+                      "code": "MAINCLASC",
+                      "name": "DELTA MAIN CLASSIC",
+                      "programId": 254226
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false,
+            "id": "f30611cb-e8d1-4983-bcde-94a737565bf8",
+            "isMandatory": true
+          }
+        ]
+      }
+    ]
+  }
+}

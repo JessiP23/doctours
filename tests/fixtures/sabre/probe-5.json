@@ -1,0 +1,535 @@
+{
+  "name": "v5 avail known CERT property codes",
+  "path": "/v5/get/hotelavail",
+  "request": {
+    "GetHotelAvailRQ": {
+      "POS": {
+        "Source": {
+          "PseudoCityCode": "REDACTED_PCC"
+        }
+      },
+      "SearchCriteria": {
+        "OffSet": 1,
+        "SortBy": "AverageNightlyRate",
+        "SortOrder": "ASC",
+        "PageSize": 7,
+        "RateDetailsInd": true,
+        "HotelRefs": {
+          "HotelRef": [
+            {
+              "HotelCode": "100000238",
+              "CodeContext": "GLOBAL"
+            },
+            {
+              "HotelCode": "100000126",
+              "CodeContext": "GLOBAL"
+            },
+            {
+              "HotelCode": "100000210",
+              "CodeContext": "GLOBAL"
+            },
+            {
+              "HotelCode": "100000230",
+              "CodeContext": "GLOBAL"
+            },
+            {
+              "HotelCode": "100000254",
+              "CodeContext": "GLOBAL"
+            },
+            {
+              "HotelCode": "100000270",
+              "CodeContext": "GLOBAL"
+            },
+            {
+              "HotelCode": "100000048",
+              "CodeContext": "GLOBAL"
+            }
+          ]
+        },
+        "RateInfoRef": {
+          "CurrencyCode": "USD",
+          "ConvertedRateInfoOnly": true,
+          "BestOnly": "2",
+          "PrepaidQualifier": "IncludePrepaid",
+          "StayDateTimeRange": {
+            "StartDate": "2026-10-12",
+            "EndDate": "2026-10-17"
+          },
+          "Rooms": {
+            "Room": [
+              {
+                "Index": 1,
+                "Adults": 1,
+                "Children": 0
+              }
+            ]
+          },
+          "RateSource": "100,113"
+        }
+      }
+    }
+  },
+  "response": {
+    "GetHotelAvailRS": {
+      "ApplicationResults": {
+        "status": "Complete",
+        "Success": [
+          {
+            "timeStamp": "2026-09-07T12:07:12.594-05:00"
+          }
+        ],
+        "Warning": [
+          {
+            "type": "Application",
+            "timeStamp": "2026-09-07T12:07:12.589-05:00",
+            "SystemSpecificResults": [
+              {
+                "Message": [
+                  {
+                    "code": "WARN.5275",
+                    "value": "aggregator disabled by PCC. Please contact PCC admin."
+                  },
+                  {
+                    "code": "WarningDetails",
+                    "value": "PCC not authorized to shop for -113"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "HotelAvailInfos": {
+        "OffSet": 1,
+        "MaxSearchResults": 6,
+        "HotelAvailInfo": [
+          {
+            "HotelInfo": {
+              "HotelCode": "100000048",
+              "CodeContext": "GLOBAL",
+              "HotelName": "Homewood Suites By Hilton Waco, Tx",
+              "ChainCode": "HG",
+              "ChainName": "Homewood Suites By Hilton",
+              "BrandCode": "12099",
+              "BrandName": "Homewood Suites By Hilton",
+              "SabreRating": "3.0",
+              "Ordinal": 1,
+              "SabreHotelCode": "100013",
+              "LocationInfo": {
+                "Latitude": "31.493963",
+                "Longitude": "-97.15976",
+                "Address": {
+                  "AddressLine1": "5620 Legend Lake Parkway",
+                  "CityName": {
+                    "CityCode": "ACT",
+                    "value": "Waco"
+                  },
+                  "StateProv": {
+                    "StateCode": "TX",
+                    "value": ""
+                  },
+                  "PostalCode": "76712",
+                  "CountryName": {
+                    "Code": "US",
+                    "value": "United States of America"
+                  }
+                },
+                "Contact": {
+                  "Phone": "1-254-644-4663",
+                  "Fax": "1-254-692-9151"
+                }
+              },
+              "Amenities": {
+                "Amenity": [
+                  {
+                    "Code": 101,
+                    "Description": "Wheelchair access",
+                    "value": ""
+                  },
+                  {
+                    "Code": 162,
+                    "Description": "Meal plan available",
+                    "value": "Y"
+                  },
+                  {
+                    "Code": 2014,
+                    "Description": "Family Room",
+                    "value": "Y"
+                  },
+                  {
+                    "Code": 2035,
+                    "Description": "Recreation Facilities",
+                    "value": ""
+                  },
+                  {
+                    "Code": 227,
+                    "Description": "Complimentary breakfast",
+                    "value": ""
+                  },
+                  {
+                    "Code": 228,
+                    "Description": "Business center",
+                    "value": ""
+                  },
+                  {
+                    "Code": 236,
+                    "Description": "Golf",
+                    "value": ""
+                  },
+                  {
+                    "Code": 260,
+                    "Description": "Interior corridors",
+                    "value": ""
+                  },
+                  {
+                    "Code": 262,
+                    "Description": "Kitchenette",
+                    "value": ""
+                  },
+                  {
+                    "Code": 269,
+                    "Description": "Meeting rooms",
+                    "value": ""
+                  },
+                  {
+                    "Code": 48,
+                    "Description": "Health club",
+                    "value": ""
+                  },
+                  {
+                    "Code": 55,
+                    "Description": "Hot Tub",
+                    "value": ""
+                  },
+                  {
+                    "Code": 66,
+                    "Description": "Outdoor pool",
+                    "value": ""
+                  },
+                  {
+                    "Code": 71,
+                    "Description": "Pool",
+                    "value": ""
+                  },
+                  {
+                    "Code": 68,
+                    "Description": "Parking",
+                    "value": "Y-ON SITE"
+                  },
+                  {
+                    "Code": 42,
+                    "Description": "Free Parking",
+                    "value": ""
+                  }
+                ]
+              },
+              "SecurityFeatures": {
+                "SecurityFeature": [
+                  {
+                    "Code": 9,
+                    "Description": "Complies with Local/State/Federal fire laws",
+                    "value": "Y"
+                  }
+                ]
+              },
+              "PropertyTypeInfo": {
+                "PropertyType": [
+                  {
+                    "Code": 1,
+                    "Description": "All suite"
+                  },
+                  {
+                    "Code": 13,
+                    "Description": "Extended stay"
+                  }
+                ]
+              },
+              "PropertyQualityInfo": {
+                "PropertyQuality": [
+                  {
+                    "Code": 2001,
+                    "Description": "First Class"
+                  }
+                ]
+              }
+            },
+            "HotelRateInfo": {
+              "RateInfos": {
+                "ConvertedRateInfo": [
+                  {
+                    "StartDate": "2026-10-12",
+                    "EndDate": "2026-10-17",
+                    "AmountBeforeTax": "952.55",
+                    "AmountAfterTax": "1117.34",
+                    "AverageNightlyRate": "223.47",
+                    "AverageNightlyRateBeforeTax": "190.51",
+                    "HighestNightlyRate": "194.98",
+                    "ApproxTotalPrice": "1117.34",
+                    "CurrencyCode": "USD",
+                    "AdditionalFeesInclusive": true,
+                    "TaxInclusive": true,
+                    "RateSource": "100",
+                    "RateKey": "kJ/KV0qJYpKkeKMfeLkc+/KOiSQcNNrcuoYMOebXepXF1Qez/Unlbpw3sA3ueMCzUBP9AQwSYdC+3sLzOAIF0TPtG8/sNE9LaUYYCl1o7+5r4YS4cS4z+a6ytYM85bLFq/Oc9ogUAGxfcywNgmGnZcXQVJ/Fxgww/4JU8C38+aA+DQSDLL+iNEADWHVlPckW4xEeFDgtWDWGncogv0XZyg1Ys/JNa7Cpi+XNIZSGlPoDLzVkGn7xAzLV8gWbah3SvbiuMMKCs5yCuc4VpLENKBgExvdJpQfxuG48aAbOD7C6Q4s04IWqdD1NJ4yX90FNhEPWwEHeRIUpFfDT7hsqQcJwvUdIUzr03vK9Pa/gok95aiSAr1DYuvimEMIs58RUzvVLSKSnNhh34sQL8Lo+pYJp1+dIgz8mmmX4GOIq8NbGX1KwpJBiri1hzX5CbkzU+FjBQtCAKZdhJL1AMTdBTE/ux3ri1OB3IA4R9ftwJ0n0OmATtGC0ZtACI6cNp9FShkH3Hi2/6on9DatH547OvB0xEhAAcKAToCrPwOBRGTKnD4eJBz/2tutGh28Bkv70pOajyC5Crv91Z8AHyvyMcDetEfNdkJ2IH/1ln/4uKlClrPFDAgLijgN11Ital7XX0mS+huJmJeJlSUQpDPH+LTw9NI/QK3WmvyTbJATIOpdvp1v/ogYotGSFuQfxQ8y24ii4ePhEfIFAR+FRWZ9sMo/JNWVythiWYFFm8I4dSbI4lXkkn2yA0aJ4o2yY+Uwd",
+                    "Commission": {
+                      "Type": "Percentage"
+                    }
+                  }
+                ]
+              },
+              "Rooms": {
+                "Room": [
+                  {
+                    "RoomIndex": 1,
+                    "RoomType": "Studio Suite",
+                    "RoomTypeCode": 16,
+                    "NonSmoking": false,
+                    "AccessibleRoom": false,
+                    "Adults": 1,
+                    "BedTypeOptions": {
+                      "BedTypes": [
+                        {
+                          "BedType": [
+                            {
+                              "Code": 3,
+                              "Description": "King",
+                              "Count": 1
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "RoomDescription": {
+                      "Name": "RESTRICTED CXL",
+                      "Text": [
+                        "RESTRICTED CXL STRICTER THAN STANDARD CXL POLICY. SEE TERMS AND CONDITIONS FOR CXL POLICY"
+                      ]
+                    },
+                    "Amenities": {
+                      "Amenity": [
+                        {
+                          "Code": 74,
+                          "Description": "Non-smoking",
+                          "value": ""
+                        },
+                        {
+                          "Code": 99,
+                          "Description": "Sitting area",
+                          "value": ""
+                        },
+                        {
+                          "Code": 102,
+                          "Description": "Sofa bed",
+                          "value": ""
+                        },
+                        {
+                          "Code": 47,
+                          "Description": "Full kitchen",
+                          "value": ""
+                        }
+                      ]
+                    },
+                    "Occupancy": {
+                      "Max": 5
+                    },
+                    "RatePlans": {
+                      "RatePlan": [
+                        {
+                          "RatePlanName": "RESTRICTED CXL",
+                          "RatePlanCode": "B9O",
+                          "RatePlanType": "13",
+                          "RatePlanTypeDescription": "Regular/rack",
+                          "PrepaidIndicator": false,
+                          "LimitedAvailability": "false",
+                          "RateSource": "100",
+                          "RateKey": "kJ/KV0qJYpKkeKMfeLkc+/KOiSQcNNrcuoYMOebXepXF1Qez/Unlbpw3sA3ueMCzUBP9AQwSYdC+3sLzOAIF0TPtG8/sNE9LaUYYCl1o7+5r4YS4cS4z+a6ytYM85bLFq/Oc9ogUAGxfcywNgmGnZcXQVJ/Fxgww/4JU8C38+aA+DQSDLL+iNEADWHVlPckW4xEeFDgtWDWGncogv0XZyg1Ys/JNa7Cpi+XNIZSGlPoDLzVkGn7xAzLV8gWbah3SvbiuMMKCs5yCuc4VpLENKBgExvdJpQfxuG48aAbOD7C6Q4s04IWqdD1NJ4yX90FNhEPWwEHeRIUpFfDT7hsqQcJwvUdIUzr03vK9Pa/gok95aiSAr1DYuvimEMIs58RUzvVLSKSnNhh34sQL8Lo+pYJp1+dIgz8mmmX4GOIq8NbGX1KwpJBiri1hzX5CbkzU+FjBQtCAKZdhJL1AMTdBTE/ux3ri1OB3IA4R9ftwJ0n0OmATtGC0ZtACI6cNp9FShkH3Hi2/6on9DatH547OvB0xEhAAcKAToCrPwOBRGTKnD4eJBz/2tutGh28Bkv70pOajyC5Crv91Z8AHyvyMcDetEfNdkJ2IH/1ln/4uKlClrPFDAgLijgN11Ital7XX0mS+huJmJeJlSUQpDPH+LTw9NI/QK3WmvyTbJATIOpdvp1v/ogYotGSFuQfxQ8y24ii4ePhEfIFAR+FRWZ9sMo/JNWVythiWYFFm8I4dSbI4lXkkn2yA0aJ4o2yY+Uwd",
+                          "ProductCode": "A00B9O",
+                          "LoyaltyMemberRate": false,
+                          "LoyaltyPoints": true,
+                          "LoyaltyProgramName": "Hilton Honors",
+                          "RatePlanDescription": {
+                            "Text": [
+                              "1 KING BED STUDIO SUITE NONSMOKING COMBINED BDRM LIVING AREA SOFABD FULL KITCHEN FREE WIFI-DAILY HOT BREAKFAST-24/7 SUITE SHOP"
+                            ]
+                          },
+                          "RatePlanInclusions": {
+                            "RatePlanInclusion": [
+                              {
+                                "Description": "Free high speed internet connection",
+                                "Code": 222
+                              }
+                            ]
+                          },
+                          "MealsIncluded": {
+                            "Breakfast": true,
+                            "Lunch": false,
+                            "Dinner": false,
+                            "MealPlanIndicator": true,
+                            "MealPlanCode": 19,
+                            "MealPlanDescription": "Breakfast"
+                          },
+                          "ConvertedRateInfo": {
+                            "StartDate": "2026-10-12",
+                            "EndDate": "2026-10-17",
+                            "AmountBeforeTax": "952.55",
+                            "AmountAfterTax": "1117.34",
+                            "AverageNightlyRate": "223.47",
+                            "AverageNightlyRateBeforeTax": "190.51",
+                            "HighestNightlyRate": "194.98",
+                            "ApproxTotalPrice": "1117.34",
+                            "CurrencyCode": "USD",
+                            "AdditionalFeesInclusive": true,
+                            "TaxInclusive": true,
+                            "Rates": {
+                              "Rate": [
+                                {
+                                  "StartDate": "2026-10-12",
+                                  "EndDate": "2026-10-13",
+                                  "AmountBeforeTax": "193.01",
+                                  "CurrencyCode": "USD"
+                                },
+                                {
+                                  "StartDate": "2026-10-13",
+                                  "EndDate": "2026-10-14",
+                                  "AmountBeforeTax": "192.47",
+                                  "CurrencyCode": "USD"
+                                },
+                                {
+                                  "StartDate": "2026-10-14",
+                                  "EndDate": "2026-10-15",
+                                  "AmountBeforeTax": "188.43",
+                                  "CurrencyCode": "USD"
+                                },
+                                {
+                                  "StartDate": "2026-10-15",
+                                  "EndDate": "2026-10-16",
+                                  "AmountBeforeTax": "183.66",
+                                  "CurrencyCode": "USD"
+                                },
+                                {
+                                  "StartDate": "2026-10-16",
+                                  "EndDate": "2026-10-17",
+                                  "AmountBeforeTax": "194.98",
+                                  "CurrencyCode": "USD"
+                                }
+                              ]
+                            },
+                            "Taxes": {
+                              "Amount": "145.74",
+                              "CurrencyCode": "USD"
+                            },
+                            "Fees": {
+                              "Amount": "19.05",
+                              "CurrencyCode": "USD",
+                              "FeeGroups": {
+                                "FeeGroup": [
+                                  {
+                                    "Code": 54,
+                                    "Description": "Miscellaneous fee",
+                                    "Amount": "19.05",
+                                    "CurrencyCode": "USD",
+                                    "FeeDescription": {
+                                      "Text": [
+                                        "Mandatory Charge"
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "RoomExtras": {
+                              "RoomExtra": [
+                                {
+                                  "Code": 26,
+                                  "Description": "Cribs",
+                                  "Amount": "0.00",
+                                  "CurrencyCode": "USD"
+                                },
+                                {
+                                  "Code": 91,
+                                  "Description": "Rollaway bed",
+                                  "Amount": "0.00",
+                                  "CurrencyCode": "USD"
+                                },
+                                {
+                                  "Code": 196,
+                                  "Description": "Extra adult charge",
+                                  "Amount": "10.00",
+                                  "CurrencyCode": "USD"
+                                }
+                              ]
+                            },
+                            "CancelPenalties": {
+                              "CancelPenalty": [
+                                {
+                                  "Refundable": true,
+                                  "Deadline": {
+                                    "AbsoluteDeadline": "2026-10-08T00:00:00-05:00"
+                                  },
+                                  "AmountPercent": {
+                                    "NmbrOfNights": 1,
+                                    "CurrencyCode": "USD"
+                                  }
+                                }
+                              ]
+                            },
+                            "Guarantee": {
+                              "GuaranteeType": "GUAR",
+                              "GuaranteesAccepted": {
+                                "GuaranteeAccepted": [
+                                  {
+                                    "GuaranteeTypeCode": 5,
+                                    "GuaranteeTypeDescription": "Credit card",
+                                    "PaymentCards": {
+                                      "PaymentCard": [
+                                        {
+                                          "CardCode": "AX",
+                                          "value": "AMERICAN EXPRESS"
+                                        },
+                                        {
+                                          "CardCode": "CA",
+                                          "value": "MASTERCARD"
+                                        },
+                                        {
+                                          "CardCode": "CB",
+                                          "value": "CARTE BLANCHE"
+                                        },
+                                        {
+                                          "CardCode": "DC",
+                                          "value": "DINERS CLUB CARD"
+                                        },
+                                        {
+                                          "CardCode": "DS",
+                                          "value": "DISCOVER CARD"
+                                        },
+                                        {
+                                          "CardCode": "IK",
+                                          "value": "MASTER CARD"
+                                        },
+                                        {
+                                          "CardCode": "MC",
+                                          "value": "MASTER CARD"
+                                        },
+                                        {
+                                          "CardCode": "VI",
+                                          "value": "VISA"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

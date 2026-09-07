@@ -1,0 +1,107 @@
+{
+  "request": {
+    "GetHotelAvailRQ": {
+      "POS": {
+        "Source": {
+          "PseudoCityCode": "REDACTED_PCC"
+        }
+      },
+      "SearchCriteria": {
+        "OffSet": 1,
+        "SortBy": "AverageNightlyRate",
+        "SortOrder": "ASC",
+        "PageSize": 20,
+        "RateDetailsInd": true,
+        "GeoSearch": {
+          "GeoRef": {
+            "Radius": 20,
+            "UOM": "MI",
+            "RefPoint": {
+              "Value": "IST",
+              "ValueContext": "CODE",
+              "RefPointType": "6"
+            }
+          }
+        },
+        "RateInfoRef": {
+          "CurrencyCode": "USD",
+          "ConvertedRateInfoOnly": true,
+          "BestOnly": "2",
+          "PrepaidQualifier": "IncludePrepaid",
+          "StayDateTimeRange": {
+            "StartDate": "2026-10-12",
+            "EndDate": "2026-10-17"
+          },
+          "Rooms": {
+            "Room": [
+              {
+                "Index": 1,
+                "Adults": 1,
+                "Children": 0
+              }
+            ]
+          },
+          "RateSource": "100"
+        }
+      }
+    }
+  },
+  "response": {
+    "GetHotelAvailRS": {
+      "ApplicationResults": {
+        "status": "Complete",
+        "Success": [
+          {
+            "timeStamp": "2026-09-07T11:55:04.275-05:00"
+          }
+        ],
+        "Warning": [
+          {
+            "type": "Application",
+            "timeStamp": "2026-09-07T11:55:04.271-05:00",
+            "SystemSpecificResults": [
+              {
+                "Message": [
+                  {
+                    "code": "WARN.0724",
+                    "value": "Vendor response error"
+                  },
+                  {
+                    "code": "WarningDetails",
+                    "value": "100-Database error - property not found usw"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Application",
+            "timeStamp": "2026-09-07T11:55:04.271-05:00",
+            "SystemSpecificResults": [
+              {
+                "Message": [
+                  {
+                    "code": "WARN.0322",
+                    "value": "No availability"
+                  },
+                  {
+                    "code": "WarningDetails",
+                    "value": "100-No availability returned for requested property"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "HotelAvailInfos": {
+        "OffSet": 1,
+        "MaxSearchResults": 21,
+        "ShopKey": "a965519d-383d-42b0-8d7a-72da9d837219",
+        "SearchLatitude": 41.270556,
+        "SearchLongitude": 28.7425,
+        "HotelAvailInfo": []
+      }
+    }
+  }
+}

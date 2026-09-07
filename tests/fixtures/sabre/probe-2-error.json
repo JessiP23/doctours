@@ -1,0 +1,16 @@
+{
+  "name": "beta hotelSearch @ IST 60mi",
+  "path": "/v1/hotels/hotelSearch",
+  "request": {
+    "radiusInMiles": 60,
+    "checkInDate": "2026-10-12",
+    "checkOutDate": "2026-10-17",
+    "numberOfAdults": 1,
+    "referencePoint": "IST"
+  },
+  "error": {
+    "code": "BAD_REQUEST",
+    "message": "Sabre POST /v1/hotels/hotelSearch failed (400)",
+    "status": 400
+  }
+}

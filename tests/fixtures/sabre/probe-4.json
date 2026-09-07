@@ -1,0 +1,87 @@
+{
+  "name": "v5 avail city IST 30mi source 100,113",
+  "path": "/v5/get/hotelavail",
+  "request": {
+    "GetHotelAvailRQ": {
+      "POS": {
+        "Source": {
+          "PseudoCityCode": "REDACTED_PCC"
+        }
+      },
+      "SearchCriteria": {
+        "OffSet": 1,
+        "SortBy": "AverageNightlyRate",
+        "SortOrder": "ASC",
+        "PageSize": 40,
+        "RateDetailsInd": true,
+        "GeoSearch": {
+          "GeoRef": {
+            "Radius": 30,
+            "UOM": "MI",
+            "RefPoint": {
+              "Value": "IST",
+              "ValueContext": "CODE",
+              "RefPointType": "16"
+            }
+          }
+        },
+        "RateInfoRef": {
+          "CurrencyCode": "USD",
+          "ConvertedRateInfoOnly": true,
+          "BestOnly": "2",
+          "PrepaidQualifier": "IncludePrepaid",
+          "StayDateTimeRange": {
+            "StartDate": "2026-10-12",
+            "EndDate": "2026-10-17"
+          },
+          "Rooms": {
+            "Room": [
+              {
+                "Index": 1,
+                "Adults": 1,
+                "Children": 0
+              }
+            ]
+          },
+          "RateSource": "100,113"
+        }
+      }
+    }
+  },
+  "response": {
+    "GetHotelAvailRS": {
+      "ApplicationResults": {
+        "status": "Complete",
+        "Success": [
+          {
+            "timeStamp": "2026-09-07T12:07:11.175-05:00"
+          }
+        ],
+        "Warning": [
+          {
+            "type": "Application",
+            "timeStamp": "2026-09-07T12:07:11.173-05:00",
+            "SystemSpecificResults": [
+              {
+                "Message": [
+                  {
+                    "code": "WARN.0775",
+                    "value": "Nothing found for requested criteria"
+                  },
+                  {
+                    "code": "WarningDetails",
+                    "value": "Invalid Refpoint, Check Request"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "HotelAvailInfos": {
+        "OffSet": 1,
+        "HotelAvailInfo": []
+      }
+    }
+  }
+}

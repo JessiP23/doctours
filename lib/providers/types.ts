@@ -18,7 +18,12 @@ export type Cabin = 'economy' | 'premium_economy' | 'business' | 'first';
 
 export interface Airport {
   iata: string;
-  tz: string; // IANA zone of the airport
+  /**
+   * IANA zone, when known. Informational only: deadline comparisons use the zones
+   * declared in TripRules for the origin/destination, so an unknown connection
+   * airport can never lead to a wrong booking.
+   */
+  tz: string | null;
 }
 
 export interface FlightSegment {
@@ -30,6 +35,10 @@ export interface FlightSegment {
   flightNumber: string;
   cabin: Cabin;
   durationMin: number;
+  /** Booking class letter (RBD) as filed, needed when creating the booking. */
+  bookingClass?: string;
+  /** Provider's own id for this flight, used to build the Flight Check payload. */
+  providerFlightId?: string;
 }
 
 /** One direction of travel (outbound or return), possibly with connections. */
