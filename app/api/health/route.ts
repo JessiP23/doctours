@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getEnv } from '@/lib/env';
+import { getEnv, paymentCard } from '@/lib/env';
 import { checkSchema } from '@/lib/db/repo';
 import { getAccessToken, tokenExpiresAt } from '@/lib/providers/sabre/auth';
 
@@ -17,7 +17,7 @@ export async function GET() {
     const env = getEnv();
     checks.env = {
       ok: true,
-      detail: `model=${env.ANTHROPIC_MODEL} sabre=${new URL(env.SABRE_BASE_URL).host}`,
+      detail: `model=${env.ANTHROPIC_MODEL} sabre=${new URL(env.SABRE_BASE_URL).host} agencyCard=${paymentCard(env) ? 'configured' : 'MISSING (hotel deposits will fail)'}`,
     };
   } catch (e) {
     checks.env = { ok: false, detail: e instanceof Error ? e.message : String(e) };

@@ -1,4 +1,4 @@
-import { getEnv } from '@/lib/env';
+import { getEnv, paymentCard } from '@/lib/env';
 import { log } from '@/lib/log';
 import type {
   FlightOffer,
@@ -20,6 +20,7 @@ import {
   buildCreateHotelBookingRequest,
   buildFlightCheckRequest,
   buildFlightShopRequest,
+  buildGetBookingRequest,
   buildHotelDetailsRequest,
   buildHotelPriceCheckRequest,
   sabreGender,
@@ -263,6 +264,7 @@ export class SabreProvider implements TravelProvider {
 
   async createHotelBooking(rate: HotelRate, guest: Guest): Promise<HotelBooking> {
     const env = getEnv();
+    const card = paymentCard(env);
 
     // Price Check both re-confirms the rate and mints the BookingKey that
     // Create Booking requires, so an expired rate fails here, before booking.
@@ -283,6 +285,15 @@ export class SabreProvider implements TravelProvider {
     const ratePlan = first(first(info?.HotelRateInfo?.Rooms?.Room)?.RatePlans?.RatePlan);
     const paymentPolicy = paymentPolicyFor(ratePlan?.RateInfo?.Guarantee?.GuaranteeType);
 
+    // Deposit and guarantee policies need a card on the booking; fail before Sabre
+    // does, with a message that says what to configure.
+    if (!card && paymentPolicy !== 'LATE') {
+      throw new ProviderError(
+        'BOOKING_FAILED',
+        `This rate requires a ${paymentPolicy.toLowerCase()} and no agency payment card is configured (PAYMENT_CARD_* environment variables)`,
+      );
+    }
+
     const response = await sabreFetch<CreateBookingResponse>({
       method: 'POST',
       path: '/v1/trip/orders/createBooking',
@@ -292,6 +303,7 @@ export class SabreProvider implements TravelProvider {
         travelers: [{ givenName: guest.givenName, surname: guest.familyName }],
         contact: { emails: [guest.email], phones: [guest.phone] },
         paymentPolicy,
+        card,
       }),
       timeoutMs: SHOP_TIMEOUT_MS,
     });
@@ -317,6 +329,23 @@ export class SabreProvider implements TravelProvider {
       raw: response,
     };
   }
+}
+
+export interface RetrievedBooking {
+  reference: string;
+  /** Sabre's normalized view: flights, hotels, travelers, payments, status. */
+  raw: unknown;
+}
+
+/** Retrieves an order by reference — used to prove a booking exists and to inspect it. */
+export async function retrieveBooking(reference: string): Promise<RetrievedBooking> {
+  const raw = await sabreFetch<Record<string, unknown>>({
+    method: 'POST',
+    path: '/v1/trip/orders/getBooking',
+    body: buildGetBookingRequest(reference),
+    timeoutMs: SHOP_TIMEOUT_MS,
+  });
+  return { reference, raw };
 }
 
 let instance: TravelProvider | undefined;

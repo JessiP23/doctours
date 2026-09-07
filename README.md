@@ -120,7 +120,14 @@ npm run sabre:smoke -- auth
 npm run sabre:smoke -- flights [departDate] [returnDate]
 npm run sabre:smoke -- hotel <hotelCode> [checkIn] [checkOut]
 npm run sabre:smoke -- hotels-probe          # which hotel search strategies return rates
+npm run sabre:smoke -- e2e --dry-run         # the whole booking path without creating anything
+npm run sabre:smoke -- e2e                   # books a flight and a hotel for real, verifies both
+                                             # with Get Booking, records them in docs/BOOKINGS.md
+npm run sabre:smoke -- lookup <reference>    # prove a reference is a real Sabre order
 ```
+
+`e2e` is the deterministic proof of the integration — the same provider calls and
+trip rules the agent uses, with no model in the loop.
 
 ### Checks
 

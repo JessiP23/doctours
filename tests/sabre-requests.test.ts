@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildCreateFlightBookingRequest,
+  buildCreateHotelBookingRequest,
   buildFlightCheckRequest,
   buildFlightShopRequest,
   buildHotelAvailRequest,
@@ -167,5 +168,54 @@ describe('Create Booking input normalization', () => {
     expect(body.flightDetails.flights[0].departureTime).toMatch(TIME);
     expect(body.flightDetails.flights[0].flightStatusCode).toBe('NN');
     expect(body.targetPcc).toBe('ABCD');
+  });
+});
+
+describe('buildCreateHotelBookingRequest', () => {
+  const base = {
+    pcc: 'ABCD',
+    bookingKey: 'key-1',
+    travelers: [{ givenName: 'Parkul', surname: 'Gumesh' }],
+    contact: { emails: ['p@example.com'], phones: ['+1 646 387 5453'] },
+    paymentPolicy: 'DEPOSIT',
+  };
+  const card = {
+    type: 'VI',
+    number: '4111111111111111',
+    expiry: '2028-12',
+    securityCode: '123',
+    holder: { givenName: 'Doctours', surname: 'Travel' },
+  };
+
+  it('attaches the agency card and points the room at it when a card is configured', () => {
+    const body = buildCreateHotelBookingRequest({ ...base, card });
+    expect(body.hotel.formOfPayment).toBe(1);
+    expect(body.payment?.formsOfPayment).toHaveLength(1);
+    expect(body.payment?.formsOfPayment[0]).toMatchObject({
+      type: 'PAYMENTCARD',
+      cardTypeCode: 'VI',
+      cardNumber: '4111111111111111',
+      expiryDate: '2028-12',
+      cardSecurityCode: '123',
+      cardHolder: { givenName: 'Doctours', surname: 'Travel', phone: '+16463875453' },
+    });
+    expect(body.hotel).toMatchObject({
+      useCsl: true,
+      bookingKey: 'key-1',
+      paymentPolicy: 'DEPOSIT',
+    });
+    expect(body.hotel.rooms).toEqual([{ travelerIndices: [1] }]);
+  });
+
+  it('sends no payment block when no card is configured', () => {
+    const body = buildCreateHotelBookingRequest({ ...base, card: null });
+    expect(body.payment).toBeUndefined();
+    expect(body.hotel.formOfPayment).toBeUndefined();
+  });
+
+  it('normalizes the phone in both contact info and card holder', () => {
+    const body = buildCreateHotelBookingRequest({ ...base, card });
+    expect(body.contactInfo.phones).toEqual(['+16463875453']);
+    expect(body.payment?.formsOfPayment[0].cardHolder.phone).toMatch(PHONE);
   });
 });

@@ -8,13 +8,21 @@
  *   npm run sabre:smoke -- pricecheck <rateKey>                  price check a RateKey → BookingKey
  *   npm run sabre:smoke -- hotels-beta [checkIn] [checkOut]      agentic-ready /v1/hotels/hotelSearch around IST
  *   npm run sabre:smoke -- hotels-probe [checkIn] [checkOut]     try every strategy, report which returns rates
+ *   npm run sabre:smoke -- e2e [--dry-run]                       the whole booking path, no model: shop → check →
+ *                                                                book flight, then rooms → price check → book hotel;
+ *                                                                records references in docs/BOOKINGS.md
+ *   npm run sabre:smoke -- lookup <reference>                    Get Booking: prove a reference is a real order
  *
  * Raw responses are written to tests/fixtures/sabre/<name>.json so mappers can be
  * written and unit-tested against real payloads.
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { getEnv } from '@/lib/env';
+import { appendFile } from 'node:fs/promises';
+import { getEnv, paymentCard } from '@/lib/env';
+import { SabreProvider, retrieveBooking } from '@/lib/providers/sabre';
+import { partitionOffers } from '@/lib/trip/validate';
+import { deriveStay } from '@/lib/trip/nights';
 import { getAccessToken, tokenExpiresAt } from '@/lib/providers/sabre/auth';
 import { sabreFetch } from '@/lib/providers/sabre/http';
 import {
@@ -384,7 +392,158 @@ async function pricecheck() {
   console.log(JSON.stringify({ ok: true, file, requests, shape: summarize(result) }, null, 2));
 }
 
+/**
+ * End-to-end booking path with the real provider and the real rules, without the
+ * model. This is the deterministic proof that the integration works; the chat
+ * adds conversation on top of exactly these calls.
+ *
+ * Bookings made here are real CERT orders and are recorded in docs/BOOKINGS.md.
+ * --dry-run stops before creating anything.
+ */
+async function e2e() {
+  const dryRun = args.includes('--dry-run');
+  const provider = new SabreProvider();
+  const env = getEnv();
+  const started = new Date();
+  const guest = {
+    givenName: 'Doctours',
+    familyName: 'Testpatient',
+    dateOfBirth: '1985-01-01',
+    gender: 'M' as const,
+    email: 'travel@doctours.test',
+    phone: '+16463875453',
+  };
+  const step = (name: string, extra: Record<string, unknown> = {}) =>
+    console.log(JSON.stringify({ step: name, at: new Date().toISOString(), ...extra }));
+
+  // 1. Shop every allowed date pairing, apply the trip rules, take the cheapest.
+  const searches = TRIP_RULES.outboundDepartureDates.flatMap((departDate) =>
+    TRIP_RULES.returnDepartureDates.map((returnDate) => ({ departDate, returnDate })),
+  );
+  const shopped = await Promise.allSettled(
+    searches.map((s) =>
+      provider.searchFlights({
+        origin: TRIP_RULES.origin,
+        destination: TRIP_RULES.destination,
+        departDate: s.departDate,
+        returnDate: s.returnDate,
+        adults: TRIP_RULES.adults,
+        cabin: TRIP_RULES.cabin,
+        currency: TRIP_RULES.currency,
+      }),
+    ),
+  );
+  const found = shopped.flatMap((r) => (r.status === 'fulfilled' ? r.value : []));
+  const { valid, rejected } = partitionOffers(found, TRIP_RULES);
+  step('flights shopped', { found: found.length, valid: valid.length, rejected: rejected.length });
+  if (valid.length === 0) throw new Error('No flight satisfies the trip rules');
+
+  const cheapest = [...valid].sort((a, b) => a.price.amount - b.price.amount)[0];
+  const stay = deriveStay(cheapest.slices[0], cheapest.slices[1]);
+  step('cheapest valid flight', {
+    priceUSD: cheapest.price.amount,
+    outbound: `${cheapest.slices[0].segments[0].departLocal} → ${cheapest.slices[0].segments.at(-1)!.arriveLocal}`,
+    inbound: `${cheapest.slices[1].segments[0].departLocal} → ${cheapest.slices[1].segments.at(-1)!.arriveLocal}`,
+    stops: cheapest.slices.map((s) => s.stops),
+    codeshare: cheapest.slices.some((s) =>
+      s.segments.some((g) => g.operatingCarrier !== g.carrier),
+    ),
+    stay,
+  });
+
+  // 2. Flight Check re-prices it (this is where a stale offer or a bad payload fails).
+  const priced = await provider.priceFlightOffer(cheapest);
+  step('flight check ok', {
+    priceUSD: priced.price.amount,
+    changed: priced.price.amount !== cheapest.price.amount,
+  });
+
+  // 3. Rooms for the derived nights, cheapest first.
+  const rates = await provider.searchHotelRates({
+    propertyId: TRIP_RULES.hotel.providerPropertyId,
+    checkIn: stay.checkIn,
+    checkOut: stay.checkOut,
+    adults: TRIP_RULES.adults,
+    currency: TRIP_RULES.currency,
+  });
+  const room = rates[0];
+  step('rooms found', {
+    hotel: room.propertyName,
+    rates: rates.length,
+    cheapest: {
+      room: room.roomName,
+      plan: room.ratePlanName,
+      totalUSD: room.total.amount,
+      refundable: room.refundable,
+    },
+    cardConfigured: Boolean(paymentCard(env)),
+  });
+
+  if (dryRun) {
+    step('dry run complete — nothing booked');
+    return;
+  }
+
+  // 4. Book the flight, then the hotel. References come only from Sabre's responses.
+  const flight = await provider.createFlightOrder(priced, [guest]);
+  step('FLIGHT BOOKED', { bookingReference: flight.bookingReference, orderId: flight.id });
+
+  const hotel = await provider.createHotelBooking(room, guest);
+  step('HOTEL BOOKED', {
+    bookingReference: hotel.bookingReference,
+    orderId: hotel.id,
+    totalUSD: hotel.total.amount,
+  });
+
+  // 5. Prove both exist by reading them back.
+  const [flightLookup, hotelLookup] = await Promise.all([
+    retrieveBooking(flight.bookingReference),
+    retrieveBooking(hotel.bookingReference),
+  ]);
+  const summarizeLookup = (r: { raw: unknown }) => {
+    const b = r.raw as {
+      bookingId?: string;
+      flights?: unknown[];
+      hotels?: unknown[];
+      travelers?: unknown[];
+    };
+    return {
+      bookingId: b.bookingId,
+      flights: b.flights?.length ?? 0,
+      hotels: b.hotels?.length ?? 0,
+      travelers: b.travelers?.length ?? 0,
+    };
+  };
+  step('verified with Get Booking', {
+    flight: summarizeLookup(flightLookup),
+    hotel: summarizeLookup(hotelLookup),
+  });
+  await saveFixture(`e2e-getbooking-${flight.bookingReference}`, {
+    flight: flightLookup.raw,
+    hotel: hotelLookup.raw,
+  });
+
+  // 6. Record the run.
+  const date = started.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+  const rows = [
+    `| ${date} | flight | ${flight.bookingReference} | ${flight.id} | scripts/sabre-smoke.ts e2e | $${priced.price.amount} ${cheapest.slices[0].segments[0].carrier}, ${stay.nights} nights derived |`,
+    `| ${date} | hotel | ${hotel.bookingReference} | ${hotel.id} | scripts/sabre-smoke.ts e2e | ${room.propertyName}, ${room.roomName}, $${hotel.total.amount} |`,
+  ];
+  await appendFile(path.resolve(process.cwd(), 'docs/BOOKINGS.md'), rows.join('\n') + '\n');
+  step('recorded in docs/BOOKINGS.md', { rows: rows.length });
+}
+
+async function lookup() {
+  const [reference] = args;
+  if (!reference) throw new Error('usage: lookup <reference>');
+  const { result, requests } = await withProviderTrace(() => retrieveBooking(reference));
+  const file = await saveFixture(`getbooking-${reference}`, { response: result.raw });
+  console.log(JSON.stringify({ ok: true, file, requests, shape: summarize(result.raw) }, null, 2));
+}
+
 const commands: Record<string, () => Promise<void>> = {
+  e2e,
+  lookup,
   auth,
   flights,
   'hotels-geo': hotelsGeo,

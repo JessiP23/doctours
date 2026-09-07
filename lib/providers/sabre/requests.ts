@@ -1,3 +1,4 @@
+import type { PaymentCard } from '@/lib/env';
 import type { Cabin, FlightSearch, HotelSearch } from '@/lib/providers/types';
 
 /**
@@ -193,10 +194,6 @@ export function buildHotelPriceCheckRequest(pcc: string, rateKey: string) {
   };
 }
 
-export function buildGetBookingRequest(confirmationId: string) {
-  return { confirmationId };
-}
-
 /** Agency identity stamped on every booking. Placeholder values are fine in CERT. */
 export const AGENCY = {
   address: {
@@ -301,8 +298,11 @@ export function buildCreateFlightBookingRequest(args: {
 }
 
 /**
- * Create Booking for a CSL hotel. `bookingKey` comes from Hotel Price Check;
- * `paymentPolicy` from the guarantee type it reports.
+ * Create Booking for a CSL hotel. `bookingKey` comes from Hotel Price Check and
+ * `paymentPolicy` from the guarantee type it reports. A DEPOSIT or GUARANTEE
+ * policy requires a form of payment on the request — Sabre answers
+ * UNABLE_TO_BOOK_HOTEL_FORM_OF_PAYMENT_MISSING otherwise — so the agency card is
+ * attached and referenced from the room by its 1-based index.
  */
 export function buildCreateHotelBookingRequest(args: {
   pcc: string;
@@ -310,8 +310,11 @@ export function buildCreateHotelBookingRequest(args: {
   travelers: CreateBookingTraveler[];
   contact: CreateBookingContact;
   paymentPolicy: string;
+  card: PaymentCard | null;
   specialInstruction?: string;
 }) {
+  const contact = { emails: args.contact.emails, phones: args.contact.phones.map(normalizePhone) };
+
   return {
     errorHandlingPolicy: ['HALT_ON_ERROR'],
     targetPcc: args.pcc,
@@ -322,15 +325,43 @@ export function buildCreateHotelBookingRequest(args: {
       surname: normalizeName(t.surname),
       passengerCode: t.passengerCode ?? 'ADT',
     })),
-    contactInfo: { emails: args.contact.emails, phones: args.contact.phones.map(normalizePhone) },
+    contactInfo: contact,
     hotel: {
       useCsl: true,
       bookingKey: args.bookingKey,
       rooms: [{ travelerIndices: args.travelers.map((_, i) => i + 1) }],
       ...(args.specialInstruction ? { specialInstruction: args.specialInstruction } : {}),
       paymentPolicy: args.paymentPolicy,
+      ...(args.card ? { formOfPayment: 1 } : {}),
     },
+    ...(args.card
+      ? {
+          payment: {
+            formsOfPayment: [
+              {
+                type: 'PAYMENTCARD',
+                cardTypeCode: args.card.type,
+                cardNumber: args.card.number,
+                expiryDate: args.card.expiry,
+                ...(args.card.securityCode ? { cardSecurityCode: args.card.securityCode } : {}),
+                cardHolder: {
+                  givenName: args.card.holder.givenName,
+                  surname: args.card.holder.surname,
+                  email: contact.emails[0],
+                  phone: contact.phones[0],
+                  address: AGENCY.address,
+                },
+              },
+            ],
+          },
+        }
+      : {}),
   };
+}
+
+/** Get Booking, the lookup that proves a reference is real. */
+export function buildGetBookingRequest(confirmationId: string) {
+  return { confirmationId };
 }
 
 /** Agentic-ready Hotel Search (beta): flat JSON, searches around an airport code. */
