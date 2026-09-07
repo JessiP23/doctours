@@ -1,0 +1,435 @@
+{
+  "response": {
+    "bookingId": "RSZVBJ",
+    "startDate": "2026-10-11",
+    "endDate": "2026-10-17",
+    "isCancelable": false,
+    "isTicketed": false,
+    "creationDetails": {
+      "creationUserSine": "AWV",
+      "creationDate": "2026-09-07",
+      "creationTime": "16:40",
+      "userWorkPcc": "REDACTED_PCC",
+      "userHomePcc": "REDACTED_PCC",
+      "primeHostId": "1S",
+      "lastUpdateDate": "2026-09-07",
+      "lastUpdateTime": "16:40",
+      "numberOfUpdates": 1
+    },
+    "contactInfo": {
+      "emails": [
+        "JESSI316866@GMAIL.COM"
+      ],
+      "phones": [
+        "64638745532"
+      ]
+    },
+    "travelers": [
+      {
+        "givenName": "MARCO",
+        "surname": "JUNIOR",
+        "type": "ADULT",
+        "passengerCode": "ADT",
+        "nameAssociationId": "1"
+      }
+    ],
+    "flights": [
+      {
+        "itemId": "13",
+        "confirmationId": "VS4TVP",
+        "sourceType": "ATPCO",
+        "flightNumber": 4,
+        "airlineCode": "TK",
+        "airlineName": "TURKISH AIRLINES",
+        "operatingFlightNumber": 4,
+        "operatingAirlineCode": "TK",
+        "operatingAirlineName": "TURKISH AIRLINES",
+        "fromAirportCode": "JFK",
+        "toAirportCode": "IST",
+        "departureDate": "2026-10-11",
+        "departureTime": "12:50:00",
+        "departureTerminalName": "TERMINAL 1",
+        "departureGate": "1",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "05:30:00",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "77W",
+        "aircraftTypeName": "BOEING 777-300ER",
+        "bookingClass": "L",
+        "meals": [
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 580,
+        "distanceInMiles": 5000,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-07",
+        "creationTime": "16:40"
+      },
+      {
+        "itemId": "15",
+        "confirmationId": "VS4TVP",
+        "sourceType": "ATPCO",
+        "flightNumber": 11,
+        "airlineCode": "TK",
+        "airlineName": "TURKISH AIRLINES",
+        "operatingFlightNumber": 11,
+        "operatingAirlineCode": "TK",
+        "operatingAirlineName": "TURKISH AIRLINES",
+        "fromAirportCode": "IST",
+        "toAirportCode": "JFK",
+        "departureDate": "2026-10-17",
+        "departureTime": "18:40:00",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "22:30:00",
+        "arrivalTerminalName": "TERMINAL 1",
+        "arrivalGate": "1",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "77W",
+        "aircraftTypeName": "BOEING 777-300ER",
+        "bookingClass": "O",
+        "meals": [
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 650,
+        "distanceInMiles": 5000,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-07",
+        "creationTime": "16:40"
+      }
+    ],
+    "journeys": [
+      {
+        "firstAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "12:50",
+        "lastAirportCode": "IST",
+        "numberOfFlights": 1
+      },
+      {
+        "firstAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "18:40",
+        "lastAirportCode": "JFK",
+        "numberOfFlights": 1
+      }
+    ],
+    "fareRules": [
+      {
+        "owningAirlineCode": "TK",
+        "passengerCode": "ADT",
+        "isRefundable": false,
+        "isChangeable": false
+      }
+    ],
+    "fareOffers": [
+      {
+        "travelerIndices": [
+          1
+        ],
+        "flights": [
+          {
+            "itemId": "13"
+          },
+          {
+            "itemId": "15"
+          }
+        ],
+        "cabinBaggageAllowance": {
+          "maximumPieces": 1,
+          "baggagePieces": [
+            {
+              "maximumSizeInInches": 45,
+              "maximumSizeInCentimeters": 115,
+              "maximumWeightInPounds": 18,
+              "maximumWeightInKilograms": 8,
+              "numberOfPieces": 1
+            }
+          ]
+        },
+        "checkedBaggageAllowance": {
+          "maximumPieces": 1,
+          "baggagePieces": [
+            {
+              "maximumSizeInInches": 62,
+              "maximumSizeInCentimeters": 158,
+              "maximumWeightInPounds": 50,
+              "maximumWeightInKilograms": 23,
+              "numberOfPieces": 1
+            }
+          ]
+        },
+        "checkedBaggageCharges": [
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "OVERSIZE WITHIN ALLOW TIER 1",
+            "isCheckInOnly": true
+          },
+          {
+            "maximumWeightInPounds": 51,
+            "maximumWeightInKilograms": 24,
+            "numberOfPieces": 1,
+            "isCheckInOnly": true
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "STROLLER OR PUSHCHAIR",
+            "fee": {
+              "amount": "60.00",
+              "currencyCode": "EUR"
+            }
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "SPORTING EQUIPMENT",
+            "fee": {
+              "amount": "180.00",
+              "currencyCode": "EUR"
+            }
+          },
+          {
+            "maximumSizeInInches": 62,
+            "maximumSizeInCentimeters": 158,
+            "maximumWeightInPounds": 70,
+            "maximumWeightInKilograms": 32,
+            "numberOfPieces": 1,
+            "isCheckInOnly": true
+          },
+          {
+            "maximumSizeInInches": 62,
+            "maximumSizeInCentimeters": 158,
+            "maximumWeightInPounds": 50,
+            "maximumWeightInKilograms": 23,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "246.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "maximumSizeInInches": 62,
+            "maximumSizeInCentimeters": 158,
+            "maximumWeightInPounds": 50,
+            "maximumWeightInKilograms": 23,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "270.00",
+              "currencyCode": "USD"
+            }
+          }
+        ]
+      }
+    ],
+    "fares": [
+      {
+        "creationDetails": {
+          "creationUserSine": "AWV",
+          "creationDate": "2026-09-07",
+          "creationTime": "16:40",
+          "userWorkPcc": "REDACTED_PCC",
+          "userHomePcc": "REDACTED_PCC"
+        },
+        "airlineCode": "TK",
+        "fareCalculationLine": "NYC TK IST Q15.00 334.50TK NYC Q60.00 539.50NUC949.00END ROE1.00 XFJFK4.5",
+        "isNegotiatedFare": false,
+        "fareConstruction": [
+          {
+            "flights": [
+              {
+                "itemId": "13"
+              }
+            ],
+            "flightIndices": [
+              1
+            ],
+            "fareBasisCode": "LLYLGR",
+            "baseRate": {
+              "amount": "334.50",
+              "currencyCode": "NUC"
+            },
+            "brandFareCode": "LG",
+            "brandFareName": "EXTRAFLY",
+            "brandProgramCode": "CFFTK",
+            "brandProgramName": "AKT 5 GDS",
+            "isCurrentItinerary": true,
+            "checkedBaggageAllowance": {
+              "maximumPieces": 1
+            }
+          },
+          {
+            "flights": [
+              {
+                "itemId": "15"
+              }
+            ],
+            "flightIndices": [
+              2
+            ],
+            "fareBasisCode": "OLYLGR",
+            "baseRate": {
+              "amount": "539.50",
+              "currencyCode": "NUC"
+            },
+            "brandFareCode": "LG",
+            "brandFareName": "EXTRAFLY",
+            "brandProgramCode": "CFFTK",
+            "brandProgramName": "AKT 5 GDS",
+            "isCurrentItinerary": true,
+            "checkedBaggageAllowance": {
+              "maximumPieces": 1
+            }
+          }
+        ],
+        "taxBreakdown": [
+          {
+            "taxCode": "YC",
+            "taxAmount": {
+              "amount": "7.39",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XY",
+            "taxAmount": {
+              "amount": "7.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XA",
+            "taxAmount": {
+              "amount": "3.84",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "AY",
+            "taxAmount": {
+              "amount": "5.60",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "YR",
+            "taxAmount": {
+              "amount": "360.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "US",
+            "taxAmount": {
+              "amount": "46.80",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "YQ",
+            "taxAmount": {
+              "amount": "30.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "TR",
+            "taxAmount": {
+              "amount": "23.20",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "M6",
+            "taxAmount": {
+              "amount": "3.50",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XF",
+            "taxAmount": {
+              "amount": "4.50",
+              "currencyCode": "USD"
+            }
+          }
+        ],
+        "totals": {
+          "subtotal": "949.00",
+          "taxes": "491.83",
+          "total": "1440.83",
+          "currencyCode": "USD"
+        },
+        "originalTotalValues": {
+          "total": "949.00",
+          "currencyCode": "USD"
+        },
+        "pricingTypeCode": "S",
+        "pricingTypeName": "System",
+        "pricingStatusCode": "A",
+        "pricingStatusName": "Active",
+        "requestedTravelerType": "ADT",
+        "pricedTravelerType": "ADT",
+        "recordTypeCode": "PQ",
+        "recordTypeName": "Price Quote",
+        "recordId": "1"
+      }
+    ],
+    "allSegments": [
+      {
+        "id": "13",
+        "type": "FLIGHT",
+        "text": "4",
+        "vendorCode": "TK",
+        "startDate": "2026-10-11",
+        "startTime": "12:50:00",
+        "startLocationCode": "JFK",
+        "endDate": "2026-10-12",
+        "endTime": "05:30:00",
+        "endLocationCode": "IST"
+      },
+      {
+        "id": "15",
+        "type": "FLIGHT",
+        "text": "11",
+        "vendorCode": "TK",
+        "startDate": "2026-10-17",
+        "startTime": "18:40:00",
+        "startLocationCode": "IST",
+        "endDate": "2026-10-17",
+        "endTime": "22:30:00",
+        "endLocationCode": "JFK"
+      }
+    ],
+    "payments": {
+      "flightTotals": [
+        {
+          "subtotal": "949.00",
+          "taxes": "491.83",
+          "total": "1440.83",
+          "currencyCode": "USD"
+        }
+      ]
+    },
+    "timestamp": "2026-09-07T22:09:28",
+    "bookingSignature": "fc441ed35d0806aa387824456f6368a2395bbae36c87d29e15dafe27e7f417a0dbb2bec079b7eeb451196ef48cd2260a702c5140d7c64da77bc2e5912d2782fc",
+    "request": {
+      "confirmationId": "RSZVBJ"
+    }
+  }
+}

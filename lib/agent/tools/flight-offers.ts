@@ -8,21 +8,10 @@ import type { TripRules } from '@/lib/trip/rules';
 import { partitionOffers, type ValidationCode } from '@/lib/trip/validate';
 
 /**
- * Shared flight-offer plumbing for the search and booking tools, so both
- * describe, persist and identify offers exactly the same way.
+ * Flight-offer plumbing that touches the provider or the database, so the search
+ * and booking tools describe and persist offers identically. Pure selection
+ * (ranking, de-duplication, exclusions) lives in `lib/trip/select.ts`.
  */
-
-export {
-  distinctItineraries,
-  excludeRefused,
-  isCodeshare,
-  itinerarySignature,
-  outboundDate,
-  rank,
-  returnDate,
-  type Ranking,
-  type RefusedFlight,
-} from '@/lib/trip/select';
 
 export function summarizeFlightOffer(offer: FlightOffer) {
   const [outbound, inbound] = offer.slices;

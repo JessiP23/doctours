@@ -7,21 +7,20 @@ import type { FlightOffer } from '@/lib/providers/types';
 import { isProviderError } from '@/lib/providers/sabre/errors';
 import { validateOffer } from '@/lib/trip/validate';
 import { deriveStay } from '@/lib/trip/nights';
-import { rulesFor } from './context';
-import { defineTool } from './define';
-import { loadBookableOffer } from './search_flights';
+import { unconfirmedFlightsOf } from '@/lib/providers/sabre';
 import {
   distinctItineraries,
+  excludeRefused,
   itinerarySignature,
   outboundDate,
-  persistFlightOffers,
   rank,
   returnDate,
-  searchAllowedFlights,
-  excludeRefused,
   type RefusedFlight,
-} from './flight-offers';
-import { unconfirmedFlightsOf } from '@/lib/providers/sabre';
+} from '@/lib/trip/select';
+import { rulesFor } from './context';
+import { defineTool } from './define';
+import { persistFlightOffers, searchAllowedFlights } from './flight-offers';
+import { loadBookableOffer } from './search_flights';
 
 /**
  * Books the flight.
