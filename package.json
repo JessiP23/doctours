@@ -17,6 +17,7 @@
     "sabre:smoke": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/sabre-smoke.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@supabase/supabase-js": "^2.115.0",
     "luxon": "^3.7.2",
     "next": "16.3.4",
