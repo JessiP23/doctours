@@ -46,5 +46,8 @@
   },
   "simple-git-hooks": {
     "pre-push": "npm run check"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
