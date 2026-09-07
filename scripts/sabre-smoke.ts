@@ -20,7 +20,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { appendFile } from 'node:fs/promises';
 import { getEnv, paymentCard } from '@/lib/env';
-import { SabreProvider, retrieveBooking } from '@/lib/providers/sabre';
+import { SabreProvider, retrieveBooking, unconfirmedFlightsOf } from '@/lib/providers/sabre';
+import { excludeRefused, type RefusedFlight } from '@/lib/agent/tools/flight-offers';
 import { partitionOffers } from '@/lib/trip/validate';
 import { deriveStay } from '@/lib/trip/nights';
 import { getAccessToken, tokenExpiresAt } from '@/lib/providers/sabre/auth';
@@ -439,30 +440,36 @@ async function e2e() {
   if (valid.length === 0) throw new Error('No flight satisfies the trip rules');
 
   // Cheapest first, one entry per distinct itinerary. Flight Shop is cache-based and
-  // Create Booking is live, so an airline can refuse the cached class ("UC"); the
-  // script then moves to the next itinerary, as a patient would.
-  const seen = new Set<string>();
-  const candidates = [...valid]
-    .sort((a, b) => a.price.amount - b.price.amount)
-    .filter((o) => {
-      const key = o.slices
-        .flatMap((sl) => sl.segments.map((g) => `${g.carrier}${g.flightNumber}@${g.departLocal}`))
-        .join('|');
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(0, 3);
+  // Create Booking is live, so an airline can refuse the cached class ("UC"). When it
+  // does, the flights it refused — and other codeshares marketed by that carrier —
+  // are dropped from the remaining candidates, as the agent does for a patient.
+  const distinct = (offers: typeof valid) => {
+    const seen = new Set<string>();
+    return offers
+      .sort((a, b) => a.price.amount - b.price.amount)
+      .filter((o) => {
+        const key = o.slices
+          .flatMap((sl) => sl.segments.map((g) => `${g.carrier}${g.flightNumber}@${g.departLocal}`))
+          .join('|');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  };
+  const MAX_ATTEMPTS = 5;
+  let remaining = distinct([...valid]);
+  const refused: RefusedFlight[] = [];
 
-  let chosen = candidates[0];
+  let chosen = remaining[0];
   let priced = chosen;
   let stay = deriveStay(chosen.slices[0], chosen.slices[1]);
   let flight: Awaited<ReturnType<typeof provider.createFlightOrder>> | undefined;
 
-  for (const [attempt, candidate] of candidates.entries()) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS && remaining.length > 0; attempt++) {
+    const candidate = remaining[0];
     chosen = candidate;
     stay = deriveStay(candidate.slices[0], candidate.slices[1]);
-    step(`candidate ${attempt + 1}`, {
+    step(`candidate ${attempt}`, {
       priceUSD: candidate.price.amount,
       outbound: `${candidate.slices[0].segments[0].departLocal} → ${candidate.slices[0].segments.at(-1)!.arriveLocal}`,
       inbound: `${candidate.slices[1].segments[0].departLocal} → ${candidate.slices[1].segments.at(-1)!.arriveLocal}`,
@@ -474,17 +481,15 @@ async function e2e() {
         sl.segments.some((g) => g.operatingCarrier !== g.carrier),
       ),
       stay,
+      remainingCandidates: remaining.length,
     });
 
-    // 2. Flight Check re-prices it live. Keep the raw response: if the classes it
-    //    validated differ from the cached ones, this fixture is how we prove it.
+    // 2. Flight Check re-prices it live. Keep the raw response as a fixture.
     const check = await provider.flightCheck(candidate);
-    await saveFixture(`e2e-flightcheck-${attempt + 1}`, {
-      request: 'see provider',
-      response: check.raw,
-    });
+    await saveFixture(`e2e-flightcheck-${attempt}`, { response: check.raw });
     if (!check.offer) {
-      step('flight check found nothing', { attempt: attempt + 1 });
+      step('flight check found nothing', { attempt });
+      remaining = remaining.slice(1);
       continue;
     }
     priced =
@@ -499,21 +504,27 @@ async function e2e() {
 
     if (dryRun) break;
 
-    // 4a. Book the flight. A UC (airline could not confirm) moves to the next candidate.
+    // 4a. Book the flight. A refusal removes those flights and that carrier's codeshares.
     try {
       flight = await provider.createFlightOrder(priced, [guest]);
       step('FLIGHT BOOKED', {
         bookingReference: flight.bookingReference,
         orderId: flight.id,
-        attempt: attempt + 1,
+        attempt,
       });
       break;
     } catch (e) {
       const err = e as { code?: string; message?: string };
       if (err.code === 'NO_AVAILABILITY') {
-        step('airline could not confirm, trying next itinerary', {
-          attempt: attempt + 1,
-          reason: err.message,
+        const newlyRefused = unconfirmedFlightsOf(e);
+        refused.push(...newlyRefused);
+        const before = remaining.length;
+        remaining = excludeRefused(remaining.slice(1), refused);
+        step('airline could not confirm, excluding what it refused', {
+          attempt,
+          refused: newlyRefused.map((r) => `${r.carrier}${r.flightNumber}`),
+          candidatesDropped: before - 1 - remaining.length,
+          candidatesLeft: remaining.length,
         });
         continue;
       }
@@ -547,7 +558,9 @@ async function e2e() {
     return;
   }
   if (!flight)
-    throw new Error(`No candidate itinerary could be booked (${candidates.length} tried)`);
+    throw new Error(
+      `No candidate itinerary could be booked (${MAX_ATTEMPTS} attempts; refused: ${refused.map((r) => r.carrier + r.flightNumber).join(', ')})`,
+    );
 
   // 4b. Book the hotel. References come only from Sabre's responses.
   const hotel = await provider.createHotelBooking(room, guest);

@@ -84,6 +84,27 @@ interface PriceCheckResponse {
   };
 }
 
+export interface UnconfirmedFlight {
+  carrier: string;
+  flightNumber: string;
+}
+
+/** "Flight number: UA8842 returned status code: UC." → { carrier: 'UA', flightNumber: '8842' } */
+export function parseUnconfirmedFlights(errors: { description?: string }[]): UnconfirmedFlight[] {
+  const out: UnconfirmedFlight[] = [];
+  for (const e of errors) {
+    const m = e.description?.match(/Flight number:\s*([A-Z0-9]{2})\s*(\d{1,4})/);
+    if (m) out.push({ carrier: m[1], flightNumber: m[2] });
+  }
+  return out;
+}
+
+/** Reads the refused flights back out of a NO_AVAILABILITY error, if the provider recorded them. */
+export function unconfirmedFlightsOf(error: unknown): UnconfirmedFlight[] {
+  const details = (error as { details?: { unconfirmedFlights?: UnconfirmedFlight[] } })?.details;
+  return details?.unconfirmedFlights ?? [];
+}
+
 function first<T>(value: T | T[] | undefined): T | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -260,7 +281,7 @@ export class SabreProvider implements TravelProvider {
         throw new ProviderError(
           'NO_AVAILABILITY',
           `The airline could not confirm seats: ${unconfirmed.map((e) => e.description).join('; ')}`,
-          { details: response },
+          { details: { unconfirmedFlights: parseUnconfirmedFlights(unconfirmed), response } },
         );
       }
       throw new ProviderError('BOOKING_FAILED', 'Sabre created no confirmation for this flight', {

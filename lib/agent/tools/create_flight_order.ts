@@ -18,7 +18,10 @@ import {
   rank,
   returnDate,
   searchAllowedFlights,
+  excludeRefused,
+  type RefusedFlight,
 } from './flight-offers';
+import { unconfirmedFlightsOf } from '@/lib/providers/sabre';
 
 /**
  * Books the flight.
@@ -41,14 +44,15 @@ import {
 async function reofferAfterExpiry(
   conversationId: string,
   expired: FlightOffer,
-  opts: { excludeSameItinerary?: boolean } = {},
+  opts: { excludeSameItinerary?: boolean; refused?: RefusedFlight[] } = {},
 ) {
   const rules = await rulesFor(conversationId);
   const wanted = itinerarySignature(expired);
-  const { offers } = await searchAllowedFlights(rules, {
+  const searched = await searchAllowedFlights(rules, {
     outboundDate: outboundDate(expired),
     returnDate: returnDate(expired),
   });
+  const offers = excludeRefused(searched.offers, opts.refused ?? []);
 
   const same = opts.excludeSameItinerary
     ? undefined
@@ -179,6 +183,7 @@ export const createFlightOrderTool = defineTool({
         // not bookable right now, so offer other itineraries, never the same one.
         const reoffer = await reofferAfterExpiry(ctx.conversationId, offer, {
           excludeSameItinerary: true,
+          refused: unconfirmedFlightsOf(e),
         });
         return {
           booked: false,

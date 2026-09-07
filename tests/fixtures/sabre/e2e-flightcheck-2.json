@@ -1,45 +1,45 @@
 {
   "request": "see provider",
   "response": {
-    "timestamp": "2026-09-07T20:57:45.101073328Z",
+    "timestamp": "2026-09-07T20:57:49.130759912Z",
     "flights": [
       {
-        "id": "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
+        "id": "08c5c761-cfd2-4d48-9b6b-56a9e5f78b93",
         "departureAirportCode": "JFK",
         "departureDate": "2026-10-10",
-        "departureTime": "21:50",
+        "departureTime": "15:40",
         "arrivalAirportCode": "FRA",
         "arrivalDate": "2026-10-11",
-        "arrivalTime": "11:45",
+        "arrivalTime": "05:25",
         "operatingAirlineCode": "LH",
-        "operatingFlightNumber": 405,
+        "operatingFlightNumber": 401,
         "marketingAirlineCode": "UA",
-        "marketingFlightNumber": 8842,
+        "marketingFlightNumber": 8840,
         "disclosureAirlineCode": "LH",
-        "aircraftTypeCode": "343",
-        "durationInMinutes": 475,
+        "aircraftTypeCode": "346",
+        "durationInMinutes": 465,
         "departureTerminal": "1",
         "arrivalTerminal": "1"
       },
       {
-        "id": "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440",
+        "id": "126b4a20-25f3-4b0c-a333-c7f180193592",
         "departureAirportCode": "FRA",
         "departureDate": "2026-10-11",
-        "departureTime": "13:00",
+        "departureTime": "08:55",
         "arrivalAirportCode": "IST",
         "arrivalDate": "2026-10-11",
-        "arrivalTime": "17:05",
+        "arrivalTime": "13:00",
         "operatingAirlineCode": "LH",
-        "operatingFlightNumber": 1300,
+        "operatingFlightNumber": 1298,
         "marketingAirlineCode": "UA",
-        "marketingFlightNumber": 9126,
+        "marketingFlightNumber": 9034,
         "disclosureAirlineCode": "LH",
-        "aircraftTypeCode": "32N",
+        "aircraftTypeCode": "321",
         "durationInMinutes": 185,
         "departureTerminal": "1"
       },
       {
-        "id": "6de065ee-d150-4497-955b-6ca398ae5e99",
+        "id": "2bcba80e-cf48-4c7b-8e8c-97846ca2c834",
         "departureAirportCode": "FRA",
         "departureDate": "2026-10-17",
         "departureTime": "17:15",
@@ -56,7 +56,7 @@
         "arrivalTerminal": "1"
       },
       {
-        "id": "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
+        "id": "c8fb0c77-60bb-496f-b802-9479e2ef7a54",
         "departureAirportCode": "IST",
         "departureDate": "2026-10-17",
         "departureTime": "13:55",
@@ -74,28 +74,28 @@
     ],
     "journeys": [
       {
-        "id": "e42fe965-13b7-48ee-8586-c696bbba8152",
+        "id": "f6d81442-9c1b-4c55-b71c-47840843e35e",
         "flightRefs": [
-          "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
-          "6de065ee-d150-4497-955b-6ca398ae5e99"
-        ],
-        "requestedJourneyIndex": 1
-      },
-      {
-        "id": "754da79c-2960-4e25-aa72-1ce32773279b",
-        "flightRefs": [
-          "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
-          "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440"
+          "08c5c761-cfd2-4d48-9b6b-56a9e5f78b93",
+          "126b4a20-25f3-4b0c-a333-c7f180193592"
         ],
         "requestedJourneyIndex": 0
+      },
+      {
+        "id": "ac01ddfe-2409-494e-a237-94a0e498fbfd",
+        "flightRefs": [
+          "c8fb0c77-60bb-496f-b802-9479e2ef7a54",
+          "2bcba80e-cf48-4c7b-8e8c-97846ca2c834"
+        ],
+        "requestedJourneyIndex": 1
       }
     ],
     "offers": [
       {
         "type": "FlightOffer",
-        "id": "cff3cb0d-bb0e-487c-a4d7-a96d9582f15d",
-        "createdAt": "2026-09-07T20:57:45.1Z",
-        "validUntil": "2026-09-07T21:17:45.1Z",
+        "id": "004c13a7-f786-40fb-9c0c-5b46200af751",
+        "createdAt": "2026-09-07T20:57:49.13Z",
+        "validUntil": "2026-09-07T21:17:49.13Z",
         "source": {
           "provider": "Sabre",
           "distributionModel": "ATPCO"
@@ -109,13 +109,13 @@
           "REDACTED_PCC"
         ],
         "journeyRefs": [
-          "754da79c-2960-4e25-aa72-1ce32773279b",
-          "e42fe965-13b7-48ee-8586-c696bbba8152"
+          "f6d81442-9c1b-4c55-b71c-47840843e35e",
+          "ac01ddfe-2409-494e-a237-94a0e498fbfd"
         ],
         "items": [
           {
             "type": "FlightOfferItem",
-            "id": "dummy-8582fa83-4c43-4394-8882-7ec9c9e64d10",
+            "id": "dummy-d16a9520-bc19-475b-bebb-e9aaf8f12234",
             "isMandatory": true,
             "fares": [
               {
@@ -142,12 +142,12 @@
                     "fareBasisCode": "TLW87TBQ",
                     "segmentDetails": [
                       {
-                        "flightRef": "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
+                        "flightRef": "08c5c761-cfd2-4d48-9b6b-56a9e5f78b93",
                         "bookingClassCode": "T",
                         "cabinName": "Economy"
                       },
                       {
-                        "flightRef": "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440",
+                        "flightRef": "126b4a20-25f3-4b0c-a333-c7f180193592",
                         "bookingClassCode": "T",
                         "cabinName": "Economy",
                         "availabilityBreak": true
@@ -168,12 +168,12 @@
                     "fareBasisCode": "TKA00TBQ",
                     "segmentDetails": [
                       {
-                        "flightRef": "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
+                        "flightRef": "c8fb0c77-60bb-496f-b802-9479e2ef7a54",
                         "bookingClassCode": "T",
                         "cabinName": "Economy"
                       },
                       {
-                        "flightRef": "6de065ee-d150-4497-955b-6ca398ae5e99",
+                        "flightRef": "2bcba80e-cf48-4c7b-8e8c-97846ca2c834",
                         "bookingClassCode": "T",
                         "cabinName": "Economy",
                         "availabilityBreak": true
@@ -192,14 +192,14 @@
           }
         ],
         "additionalOffersRefs": [
-          "12f7c1b2-7fd4-4cd8-a249-5bb92ea661c9"
+          "a807a6a5-043d-493f-9913-ee8b06b1f746"
         ]
       },
       {
         "type": "FlightOffer",
-        "id": "12f7c1b2-7fd4-4cd8-a249-5bb92ea661c9",
-        "createdAt": "2026-09-07T20:57:45.101Z",
-        "validUntil": "2026-09-07T21:17:45.1Z",
+        "id": "a807a6a5-043d-493f-9913-ee8b06b1f746",
+        "createdAt": "2026-09-07T20:57:49.13Z",
+        "validUntil": "2026-09-07T21:17:49.13Z",
         "source": {
           "provider": "Sabre",
           "distributionModel": "ATPCO"
@@ -213,13 +213,13 @@
           "REDACTED_PCC"
         ],
         "journeyRefs": [
-          "754da79c-2960-4e25-aa72-1ce32773279b",
-          "e42fe965-13b7-48ee-8586-c696bbba8152"
+          "f6d81442-9c1b-4c55-b71c-47840843e35e",
+          "ac01ddfe-2409-494e-a237-94a0e498fbfd"
         ],
         "items": [
           {
             "type": "FlightOfferItem",
-            "id": "dummy-72b9baf2-6628-48b8-b5b4-0c44dc17ea61",
+            "id": "dummy-370fadb5-4e79-47a9-ad70-54313d1cbb30",
             "isMandatory": true,
             "fares": [
               {
@@ -246,12 +246,12 @@
                     "fareBasisCode": "TLW87TBQ",
                     "segmentDetails": [
                       {
-                        "flightRef": "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
+                        "flightRef": "08c5c761-cfd2-4d48-9b6b-56a9e5f78b93",
                         "bookingClassCode": "T",
                         "cabinName": "Economy"
                       },
                       {
-                        "flightRef": "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440",
+                        "flightRef": "126b4a20-25f3-4b0c-a333-c7f180193592",
                         "bookingClassCode": "T",
                         "cabinName": "Economy",
                         "availabilityBreak": true
@@ -272,12 +272,12 @@
                     "fareBasisCode": "TKA00TBQ",
                     "segmentDetails": [
                       {
-                        "flightRef": "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
+                        "flightRef": "c8fb0c77-60bb-496f-b802-9479e2ef7a54",
                         "bookingClassCode": "T",
                         "cabinName": "Economy"
                       },
                       {
-                        "flightRef": "6de065ee-d150-4497-955b-6ca398ae5e99",
+                        "flightRef": "2bcba80e-cf48-4c7b-8e8c-97846ca2c834",
                         "bookingClassCode": "T",
                         "cabinName": "Economy",
                         "availabilityBreak": true
@@ -300,11 +300,11 @@
     "offerValidationResults": [
       {
         "bookingClassCodeValidation": "Matched",
-        "offerRef": "cff3cb0d-bb0e-487c-a4d7-a96d9582f15d"
+        "offerRef": "004c13a7-f786-40fb-9c0c-5b46200af751"
       },
       {
         "bookingClassCodeValidation": "Same cabin",
-        "offerRef": "12f7c1b2-7fd4-4cd8-a249-5bb92ea661c9"
+        "offerRef": "a807a6a5-043d-493f-9913-ee8b06b1f746"
       }
     ]
   }

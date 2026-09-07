@@ -144,3 +144,69 @@ describe('operating carrier is preserved for Flight Check', () => {
     expect(codeshares.length).toBeGreaterThan(0);
   });
 });
+
+describe('excludeRefused — learning from a UC refusal', () => {
+  it('drops the refused flights and every other codeshare marketed by that carrier, keeps the rest', async () => {
+    const { excludeRefused } = await import('@/lib/agent/tools/flight-offers');
+    const { offers } = mapFlightShopResponse(fixture.response);
+
+    // Take whichever carrier has codeshares in this payload (DL-marketed KL/AF flights
+    // here; UA-marketed LH flights in the e2e run) — the rule is carrier-agnostic.
+    const codeshareSegment = offers
+      .flatMap((o) => o.slices.flatMap((s) => s.segments))
+      .find((g) => g.operatingCarrier !== g.carrier)!;
+    expect(codeshareSegment).toBeDefined();
+    const carrier = codeshareSegment.carrier;
+    const isThatCarriersCodeshare = (o: (typeof offers)[number]) =>
+      o.slices.some((s) =>
+        s.segments.some((g) => g.carrier === carrier && g.operatingCarrier !== carrier),
+      );
+    const affected = offers.filter(isThatCarriersCodeshare);
+    expect(affected.length).toBeGreaterThan(0);
+
+    // The airline refused one of them — exactly what the e2e run saw.
+    const kept = excludeRefused(offers, [{ carrier, flightNumber: codeshareSegment.flightNumber }]);
+
+    // Every other codeshare marketed by that carrier is gone…
+    expect(kept.some(isThatCarriersCodeshare)).toBe(false);
+    // …and nothing else was thrown away.
+    expect(kept.length).toBe(offers.length - affected.length);
+    // Online flights (marketing = operating) by that same carrier are still allowed.
+    const onlineByCarrier = kept.filter((o) =>
+      o.slices.some((s) =>
+        s.segments.some((g) => g.carrier === carrier && g.operatingCarrier === carrier),
+      ),
+    );
+    expect(onlineByCarrier.length).toBe(
+      offers.filter(
+        (o) =>
+          !isThatCarriersCodeshare(o) &&
+          o.slices.some((s) =>
+            s.segments.some((g) => g.carrier === carrier && g.operatingCarrier === carrier),
+          ),
+      ).length,
+    );
+  });
+
+  it('is a no-op with nothing refused', async () => {
+    const { excludeRefused } = await import('@/lib/agent/tools/flight-offers');
+    const { offers } = mapFlightShopResponse(fixture.response);
+    expect(excludeRefused(offers, [])).toBe(offers);
+  });
+});
+
+describe('parseUnconfirmedFlights', () => {
+  it("reads carrier and number out of Sabre's UC message", async () => {
+    const { parseUnconfirmedFlights } = await import('@/lib/providers/sabre');
+    expect(
+      parseUnconfirmedFlights([
+        { description: 'Flight number: UA8842 returned status code: UC.' },
+        { description: 'Flight number: UA9126 returned status code: NN.' },
+        { description: 'something unrelated' },
+      ]),
+    ).toEqual([
+      { carrier: 'UA', flightNumber: '8842' },
+      { carrier: 'UA', flightNumber: '9126' },
+    ]);
+  });
+});

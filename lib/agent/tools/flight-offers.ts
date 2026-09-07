@@ -150,3 +150,32 @@ export function outboundDate(offer: FlightOffer): string {
 export function returnDate(offer: FlightOffer): string {
   return offer.slices[1].segments[0].departLocal.slice(0, 10);
 }
+
+export interface RefusedFlight {
+  carrier: string;
+  flightNumber: string;
+}
+
+/**
+ * Drops itineraries the airline has just shown it will not confirm.
+ *
+ * Two rules, learned from CERT: the exact flights that returned UC are out, and
+ * so is any other codeshare *marketed by the same carrier* — when UA-marketed,
+ * LH-operated segments will not confirm, the next UA-marketed LH-operated pair
+ * will not either, and offering it just costs the patient another refusal.
+ * Online (non-codeshare) flights by that carrier are still allowed.
+ */
+export function excludeRefused(offers: FlightOffer[], refused: RefusedFlight[]): FlightOffer[] {
+  if (refused.length === 0) return offers;
+  const flights = new Set(refused.map((r) => `${r.carrier}${r.flightNumber}`));
+  const carriers = new Set(refused.map((r) => r.carrier));
+  return offers.filter((offer) =>
+    offer.slices.every((slice) =>
+      slice.segments.every((s) => {
+        if (flights.has(`${s.carrier}${s.flightNumber}`)) return false;
+        const codeshare = s.operatingCarrier !== undefined && s.operatingCarrier !== s.carrier;
+        return !(codeshare && carriers.has(s.carrier));
+      }),
+    ),
+  );
+}
