@@ -25,8 +25,16 @@ describe('the tool set the model is given', () => {
     const properties = Object.keys(
       (getTool('search_flights')!.schema as unknown as { shape: Record<string, unknown> }).shape,
     );
-    // Ranking and narrowing to a date the rules already allow are the only choices.
-    expect(properties).toEqual(['rankBy', 'departOn', 'returnOn']);
+    // Ranking, soft preferences, and narrowing to a date the rules already allow.
+    expect(properties).toEqual([
+      'rankBy',
+      'maxStops',
+      'airlines',
+      'departBetween',
+      'returnBetween',
+      'departOn',
+      'returnOn',
+    ]);
     for (const forbidden of [
       'cabin',
       'checkedBags',

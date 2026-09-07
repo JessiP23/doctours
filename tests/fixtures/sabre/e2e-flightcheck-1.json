@@ -1,50 +1,31 @@
 {
-  "request": "see provider",
   "response": {
-    "timestamp": "2026-09-07T20:57:45.101073328Z",
+    "timestamp": "2026-09-07T21:22:34.781432618Z",
     "flights": [
       {
-        "id": "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
+        "id": "e2196f94-2b0e-410e-aaa2-2f8cc489e918",
         "departureAirportCode": "JFK",
         "departureDate": "2026-10-10",
-        "departureTime": "21:50",
+        "departureTime": "15:40",
         "arrivalAirportCode": "FRA",
         "arrivalDate": "2026-10-11",
-        "arrivalTime": "11:45",
+        "arrivalTime": "05:25",
         "operatingAirlineCode": "LH",
-        "operatingFlightNumber": 405,
-        "marketingAirlineCode": "UA",
-        "marketingFlightNumber": 8842,
-        "disclosureAirlineCode": "LH",
-        "aircraftTypeCode": "343",
-        "durationInMinutes": 475,
+        "operatingFlightNumber": 401,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 401,
+        "aircraftTypeCode": "346",
+        "durationInMinutes": 465,
         "departureTerminal": "1",
         "arrivalTerminal": "1"
       },
       {
-        "id": "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440",
+        "id": "d0326e11-8308-467f-a669-0a69d819aca9",
         "departureAirportCode": "FRA",
-        "departureDate": "2026-10-11",
-        "departureTime": "13:00",
-        "arrivalAirportCode": "IST",
-        "arrivalDate": "2026-10-11",
-        "arrivalTime": "17:05",
-        "operatingAirlineCode": "LH",
-        "operatingFlightNumber": 1300,
-        "marketingAirlineCode": "UA",
-        "marketingFlightNumber": 9126,
-        "disclosureAirlineCode": "LH",
-        "aircraftTypeCode": "32N",
-        "durationInMinutes": 185,
-        "departureTerminal": "1"
-      },
-      {
-        "id": "6de065ee-d150-4497-955b-6ca398ae5e99",
-        "departureAirportCode": "FRA",
-        "departureDate": "2026-10-17",
+        "departureDate": "2026-10-18",
         "departureTime": "17:15",
         "arrivalAirportCode": "JFK",
-        "arrivalDate": "2026-10-17",
+        "arrivalDate": "2026-10-18",
         "arrivalTime": "20:05",
         "operatingAirlineCode": "LH",
         "operatingFlightNumber": 404,
@@ -56,52 +37,68 @@
         "arrivalTerminal": "1"
       },
       {
-        "id": "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
+        "id": "f7917fba-961b-4f65-b076-7cf17b30c3f6",
         "departureAirportCode": "IST",
-        "departureDate": "2026-10-17",
+        "departureDate": "2026-10-18",
         "departureTime": "13:55",
         "arrivalAirportCode": "FRA",
-        "arrivalDate": "2026-10-17",
+        "arrivalDate": "2026-10-18",
         "arrivalTime": "16:05",
         "operatingAirlineCode": "LH",
         "operatingFlightNumber": 1299,
         "marketingAirlineCode": "LH",
         "marketingFlightNumber": 1299,
-        "aircraftTypeCode": "32N",
+        "aircraftTypeCode": "321",
         "durationInMinutes": 190,
         "arrivalTerminal": "1"
+      },
+      {
+        "id": "9be1291a-5dcf-469c-aa2b-b40ddc93161c",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-11",
+        "departureTime": "13:00",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-11",
+        "arrivalTime": "17:05",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1300,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 1300,
+        "aircraftTypeCode": "32N",
+        "durationInMinutes": 185,
+        "departureTerminal": "1"
       }
     ],
     "journeys": [
       {
-        "id": "e42fe965-13b7-48ee-8586-c696bbba8152",
+        "id": "b21cd149-1fcf-44b9-998c-a1a21d4da99c",
         "flightRefs": [
-          "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
-          "6de065ee-d150-4497-955b-6ca398ae5e99"
-        ],
-        "requestedJourneyIndex": 1
-      },
-      {
-        "id": "754da79c-2960-4e25-aa72-1ce32773279b",
-        "flightRefs": [
-          "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
-          "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440"
+          "e2196f94-2b0e-410e-aaa2-2f8cc489e918",
+          "9be1291a-5dcf-469c-aa2b-b40ddc93161c"
         ],
         "requestedJourneyIndex": 0
+      },
+      {
+        "id": "6fd6c53a-7e3d-4910-9337-fa28ca836830",
+        "flightRefs": [
+          "f7917fba-961b-4f65-b076-7cf17b30c3f6",
+          "d0326e11-8308-467f-a669-0a69d819aca9"
+        ],
+        "requestedJourneyIndex": 1
       }
     ],
     "offers": [
       {
         "type": "FlightOffer",
-        "id": "cff3cb0d-bb0e-487c-a4d7-a96d9582f15d",
-        "createdAt": "2026-09-07T20:57:45.1Z",
-        "validUntil": "2026-09-07T21:17:45.1Z",
+        "id": "1b5d1f13-2eaa-4e43-a0eb-931e4848060e",
+        "createdAt": "2026-09-07T21:22:34.781Z",
+        "validUntil": "2026-09-07T21:42:34.781Z",
         "source": {
           "provider": "Sabre",
           "distributionModel": "ATPCO"
         },
         "totalPrice": {
-          "amount": "1042.83",
+          "amount": "1533.83",
           "currencyCode": "USD"
         },
         "paymentTimeLimit": "2026-09-10T23:59:00Z",
@@ -109,13 +106,13 @@
           "REDACTED_PCC"
         ],
         "journeyRefs": [
-          "754da79c-2960-4e25-aa72-1ce32773279b",
-          "e42fe965-13b7-48ee-8586-c696bbba8152"
+          "b21cd149-1fcf-44b9-998c-a1a21d4da99c",
+          "6fd6c53a-7e3d-4910-9337-fa28ca836830"
         ],
         "items": [
           {
             "type": "FlightOfferItem",
-            "id": "dummy-8582fa83-4c43-4394-8882-7ec9c9e64d10",
+            "id": "dummy-4c184075-428d-4dde-bdb7-9f8e9edd83c4",
             "isMandatory": true,
             "fares": [
               {
@@ -126,55 +123,29 @@
                   }
                 ],
                 "fareTotal": {
-                  "equivalentFare": "290.00",
-                  "taxAmount": "752.83",
-                  "amount": "1042.83",
+                  "equivalentFare": "755.00",
+                  "taxAmount": "778.83",
+                  "amount": "1533.83",
                   "currencyCode": "USD"
                 },
-                "validatingAirlineCode": "UA",
+                "validatingAirlineCode": "LH",
                 "fareComponents": [
                   {
-                    "amount": "100.00",
+                    "amount": "374.00",
                     "currencyCode": "NUC",
-                    "publishedAmount": "200.00",
+                    "publishedAmount": "748.00",
                     "publishedCurrencyCode": "USD",
                     "exchangeRate": "1.00000",
-                    "fareBasisCode": "TLW87TBQ",
+                    "fareBasisCode": "VLA00TBQ",
                     "segmentDetails": [
                       {
-                        "flightRef": "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
-                        "bookingClassCode": "T",
+                        "flightRef": "e2196f94-2b0e-410e-aaa2-2f8cc489e918",
+                        "bookingClassCode": "V",
                         "cabinName": "Economy"
                       },
                       {
-                        "flightRef": "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440",
-                        "bookingClassCode": "T",
-                        "cabinName": "Economy",
-                        "availabilityBreak": true
-                      }
-                    ],
-                    "brand": {
-                      "code": "BE",
-                      "name": "BASIC ECONOMY",
-                      "programId": 252891
-                    }
-                  },
-                  {
-                    "amount": "190.00",
-                    "currencyCode": "NUC",
-                    "publishedAmount": "380.00",
-                    "publishedCurrencyCode": "USD",
-                    "exchangeRate": "1.00000",
-                    "fareBasisCode": "TKA00TBQ",
-                    "segmentDetails": [
-                      {
-                        "flightRef": "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
-                        "bookingClassCode": "T",
-                        "cabinName": "Economy"
-                      },
-                      {
-                        "flightRef": "6de065ee-d150-4497-955b-6ca398ae5e99",
-                        "bookingClassCode": "T",
+                        "flightRef": "9be1291a-5dcf-469c-aa2b-b40ddc93161c",
+                        "bookingClassCode": "V",
                         "cabinName": "Economy",
                         "availabilityBreak": true
                       }
@@ -184,101 +155,23 @@
                       "name": "ECONOMY LIGHT",
                       "programId": 252568
                     }
-                  }
-                ]
-              }
-            ],
-            "isPartial": false
-          }
-        ],
-        "additionalOffersRefs": [
-          "12f7c1b2-7fd4-4cd8-a249-5bb92ea661c9"
-        ]
-      },
-      {
-        "type": "FlightOffer",
-        "id": "12f7c1b2-7fd4-4cd8-a249-5bb92ea661c9",
-        "createdAt": "2026-09-07T20:57:45.101Z",
-        "validUntil": "2026-09-07T21:17:45.1Z",
-        "source": {
-          "provider": "Sabre",
-          "distributionModel": "ATPCO"
-        },
-        "totalPrice": {
-          "amount": "1042.83",
-          "currencyCode": "USD"
-        },
-        "paymentTimeLimit": "2026-09-10T23:59:00Z",
-        "applicableToPseudoCityCodes": [
-          "REDACTED_PCC"
-        ],
-        "journeyRefs": [
-          "754da79c-2960-4e25-aa72-1ce32773279b",
-          "e42fe965-13b7-48ee-8586-c696bbba8152"
-        ],
-        "items": [
-          {
-            "type": "FlightOfferItem",
-            "id": "dummy-72b9baf2-6628-48b8-b5b4-0c44dc17ea61",
-            "isMandatory": true,
-            "fares": [
-              {
-                "travelers": [
-                  {
-                    "passengerTypeCode": "ADT",
-                    "requestedTravelerIndex": 0
-                  }
-                ],
-                "fareTotal": {
-                  "equivalentFare": "290.00",
-                  "taxAmount": "752.83",
-                  "amount": "1042.83",
-                  "currencyCode": "USD"
-                },
-                "validatingAirlineCode": "UA",
-                "fareComponents": [
-                  {
-                    "amount": "100.00",
-                    "currencyCode": "NUC",
-                    "publishedAmount": "200.00",
-                    "publishedCurrencyCode": "USD",
-                    "exchangeRate": "1.00000",
-                    "fareBasisCode": "TLW87TBQ",
-                    "segmentDetails": [
-                      {
-                        "flightRef": "5bea8723-4101-48e6-8d58-e5f0e0c587d5",
-                        "bookingClassCode": "T",
-                        "cabinName": "Economy"
-                      },
-                      {
-                        "flightRef": "4e1b9ed8-0501-4f3e-8a66-7d3e8d7ff440",
-                        "bookingClassCode": "T",
-                        "cabinName": "Economy",
-                        "availabilityBreak": true
-                      }
-                    ],
-                    "brand": {
-                      "code": "BE",
-                      "name": "BASIC ECONOMY",
-                      "programId": 252891
-                    }
                   },
                   {
-                    "amount": "190.00",
+                    "amount": "381.00",
                     "currencyCode": "NUC",
-                    "publishedAmount": "380.00",
+                    "publishedAmount": "762.00",
                     "publishedCurrencyCode": "USD",
                     "exchangeRate": "1.00000",
-                    "fareBasisCode": "TKA00TBQ",
+                    "fareBasisCode": "VKA00TBQ",
                     "segmentDetails": [
                       {
-                        "flightRef": "b4acf5b3-5383-41c6-b9e6-866cb98fbb8d",
-                        "bookingClassCode": "T",
+                        "flightRef": "f7917fba-961b-4f65-b076-7cf17b30c3f6",
+                        "bookingClassCode": "V",
                         "cabinName": "Economy"
                       },
                       {
-                        "flightRef": "6de065ee-d150-4497-955b-6ca398ae5e99",
-                        "bookingClassCode": "T",
+                        "flightRef": "d0326e11-8308-467f-a669-0a69d819aca9",
+                        "bookingClassCode": "V",
                         "cabinName": "Economy",
                         "availabilityBreak": true
                       }
@@ -299,12 +192,8 @@
     ],
     "offerValidationResults": [
       {
-        "bookingClassCodeValidation": "Matched",
-        "offerRef": "cff3cb0d-bb0e-487c-a4d7-a96d9582f15d"
-      },
-      {
         "bookingClassCodeValidation": "Same cabin",
-        "offerRef": "12f7c1b2-7fd4-4cd8-a249-5bb92ea661c9"
+        "offerRef": "1b5d1f13-2eaa-4e43-a0eb-931e4848060e"
       }
     ]
   }

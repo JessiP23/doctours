@@ -210,3 +210,111 @@ describe('codeshare sourcing rule', () => {
     ).toEqual({ ok: true });
   });
 });
+
+describe('applyPreferences — patient wishes over the rule-valid set', () => {
+  const tk = (id: string, stops: number, depart: string, ret: string, price: number) =>
+    offer(
+      [
+        stops === 0
+          ? slice(
+              seg({
+                from: JFK,
+                to: IST,
+                departLocal: depart,
+                arriveLocal: '2026-10-12T17:00',
+                carrier: 'TK',
+              }),
+            )
+          : slice(
+              seg({
+                from: JFK,
+                to: FRA,
+                departLocal: depart,
+                arriveLocal: '2026-10-12T07:00',
+                carrier: 'LH',
+              }),
+              seg({
+                from: FRA,
+                to: IST,
+                departLocal: '2026-10-12T09:00',
+                arriveLocal: '2026-10-12T13:00',
+                carrier: 'LH',
+              }),
+            ),
+        slice(
+          seg({
+            from: IST,
+            to: JFK,
+            departLocal: ret,
+            arriveLocal: '2026-10-17T22:00',
+            carrier: 'TK',
+          }),
+        ),
+      ],
+      { id, price: { amount: price, currency: 'USD' } },
+    );
+  const pool = [
+    tk('nonstop-evening', 0, '2026-10-11T23:55', '2026-10-17T14:00', 1200),
+    tk('nonstop-morning', 0, '2026-10-11T08:10', '2026-10-17T14:00', 1300),
+    tk('onestop-cheap', 1, '2026-10-11T18:00', '2026-10-17T14:00', 900),
+  ];
+
+  it('defaults to cheapest', async () => {
+    const { applyPreferences } = await import('@/lib/trip/select');
+    expect(applyPreferences(pool, {}).map((o) => o.id)).toEqual([
+      'onestop-cheap',
+      'nonstop-evening',
+      'nonstop-morning',
+    ]);
+  });
+
+  it('non-stop only', async () => {
+    const { applyPreferences } = await import('@/lib/trip/select');
+    expect(applyPreferences(pool, { maxStops: 0 }).map((o) => o.id)).toEqual([
+      'nonstop-evening',
+      'nonstop-morning',
+    ]);
+  });
+
+  it('restricts to an airline, case-insensitively', async () => {
+    const { applyPreferences } = await import('@/lib/trip/select');
+    expect(applyPreferences(pool, { airlines: ['tk'] }).map((o) => o.id)).toEqual([
+      'nonstop-evening',
+      'nonstop-morning',
+    ]);
+    expect(applyPreferences(pool, { airlines: ['LH'] })).toEqual([]); // the return is TK, so nothing is all-LH
+  });
+
+  it('a morning departure window', async () => {
+    const { applyPreferences } = await import('@/lib/trip/select');
+    expect(
+      applyPreferences(pool, { departBetween: { from: '06:00', to: '12:00' } }).map((o) => o.id),
+    ).toEqual(['nonstop-morning']);
+  });
+
+  it('a window crossing midnight catches the 23:55 departure', async () => {
+    const { applyPreferences } = await import('@/lib/trip/select');
+    expect(
+      applyPreferences(pool, { departBetween: { from: '22:00', to: '02:00' } }).map((o) => o.id),
+    ).toEqual(['nonstop-evening']);
+  });
+
+  it('ranks by fewest stops with price as the tie-break', async () => {
+    const { applyPreferences } = await import('@/lib/trip/select');
+    expect(applyPreferences(pool, { rankBy: 'fewest_stops' }).map((o) => o.id)).toEqual([
+      'nonstop-evening',
+      'nonstop-morning',
+      'onestop-cheap',
+    ]);
+  });
+
+  it('describes what exists so the agent can answer "is there a non-stop?" truthfully', async () => {
+    const { describeChoices } = await import('@/lib/trip/select');
+    expect(describeChoices(pool)).toEqual({
+      total: 3,
+      nonStop: 2,
+      carriers: { TK: 2, LH: 1 },
+      cheapestUSD: 900,
+    });
+  });
+});

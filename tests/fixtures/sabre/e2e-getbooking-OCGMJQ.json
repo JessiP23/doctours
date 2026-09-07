@@ -1,0 +1,807 @@
+{
+  "flight": {
+    "bookingId": "OCGMJQ",
+    "startDate": "2026-10-10",
+    "endDate": "2026-10-18",
+    "isCancelable": false,
+    "isTicketed": false,
+    "creationDetails": {
+      "creationUserSine": "AWV",
+      "creationDate": "2026-09-07",
+      "creationTime": "16:22",
+      "userWorkPcc": "REDACTED_PCC",
+      "userHomePcc": "REDACTED_PCC",
+      "primeHostId": "1S",
+      "lastUpdateDate": "2026-09-07",
+      "lastUpdateTime": "16:22",
+      "numberOfUpdates": 1
+    },
+    "contactInfo": {
+      "emails": [
+        "TRAVEL@DOCTOURS.TEST"
+      ],
+      "phones": [
+        "16463875453"
+      ]
+    },
+    "travelers": [
+      {
+        "givenName": "DOCTOURS",
+        "surname": "TESTPATIENT",
+        "type": "ADULT",
+        "passengerCode": "ADT",
+        "nameAssociationId": "1"
+      }
+    ],
+    "flights": [
+      {
+        "itemId": "13",
+        "confirmationId": "BR6LE9",
+        "sourceType": "ATPCO",
+        "flightNumber": 401,
+        "airlineCode": "LH",
+        "airlineName": "LUFTHANSA",
+        "operatingFlightNumber": 401,
+        "operatingAirlineCode": "LH",
+        "operatingAirlineName": "LUFTHANSA",
+        "fromAirportCode": "JFK",
+        "toAirportCode": "FRA",
+        "departureDate": "2026-10-10",
+        "departureTime": "15:40:00",
+        "departureTerminalName": "TERMINAL 1",
+        "departureGate": "1",
+        "arrivalDate": "2026-10-11",
+        "arrivalTime": "05:25:00",
+        "arrivalTerminalName": "TERMINAL 1",
+        "arrivalGate": "1",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "346",
+        "aircraftTypeName": "AIRBUS INDUSTRIE A340-600",
+        "bookingClass": "V",
+        "meals": [
+          {
+            "code": "R",
+            "description": "Refreshment"
+          },
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 465,
+        "distanceInMiles": 3856,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-07",
+        "creationTime": "16:22"
+      },
+      {
+        "itemId": "15",
+        "confirmationId": "BR6LE9",
+        "sourceType": "ATPCO",
+        "flightNumber": 1300,
+        "airlineCode": "LH",
+        "airlineName": "LUFTHANSA",
+        "operatingFlightNumber": 1300,
+        "operatingAirlineCode": "LH",
+        "operatingAirlineName": "LUFTHANSA",
+        "fromAirportCode": "FRA",
+        "toAirportCode": "IST",
+        "departureDate": "2026-10-11",
+        "departureTime": "13:00:00",
+        "departureTerminalName": "TERMINAL 1",
+        "departureGate": "1",
+        "arrivalDate": "2026-10-11",
+        "arrivalTime": "17:05:00",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "32N",
+        "aircraftTypeName": "AIRBUS A320NEO",
+        "bookingClass": "V",
+        "meals": [
+          {
+            "code": "R",
+            "description": "Refreshment"
+          },
+          {
+            "code": "G",
+            "description": "Food and beverage for purchase"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 185,
+        "distanceInMiles": 1144,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-07",
+        "creationTime": "16:22"
+      },
+      {
+        "itemId": "17",
+        "confirmationId": "BR6LE9",
+        "sourceType": "ATPCO",
+        "flightNumber": 1299,
+        "airlineCode": "LH",
+        "airlineName": "LUFTHANSA",
+        "operatingFlightNumber": 1299,
+        "operatingAirlineCode": "LH",
+        "operatingAirlineName": "LUFTHANSA",
+        "fromAirportCode": "IST",
+        "toAirportCode": "FRA",
+        "departureDate": "2026-10-18",
+        "departureTime": "13:55:00",
+        "arrivalDate": "2026-10-18",
+        "arrivalTime": "16:05:00",
+        "arrivalTerminalName": "TERMINAL 1",
+        "arrivalGate": "1",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "321",
+        "aircraftTypeName": "AIRBUS",
+        "bookingClass": "V",
+        "meals": [
+          {
+            "code": "R",
+            "description": "Refreshment"
+          },
+          {
+            "code": "G",
+            "description": "Food and beverage for purchase"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 190,
+        "distanceInMiles": 1144,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-07",
+        "creationTime": "16:22"
+      },
+      {
+        "itemId": "19",
+        "confirmationId": "BR6LE9",
+        "sourceType": "ATPCO",
+        "flightNumber": 404,
+        "airlineCode": "LH",
+        "airlineName": "LUFTHANSA",
+        "operatingFlightNumber": 404,
+        "operatingAirlineCode": "LH",
+        "operatingAirlineName": "LUFTHANSA",
+        "fromAirportCode": "FRA",
+        "toAirportCode": "JFK",
+        "departureDate": "2026-10-18",
+        "departureTime": "17:15:00",
+        "departureTerminalName": "TERMINAL 1",
+        "departureGate": "1",
+        "arrivalDate": "2026-10-18",
+        "arrivalTime": "20:05:00",
+        "arrivalTerminalName": "TERMINAL 1",
+        "arrivalGate": "1",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "343",
+        "aircraftTypeName": "AIRBUS A340",
+        "bookingClass": "V",
+        "meals": [
+          {
+            "code": "R",
+            "description": "Refreshment"
+          },
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 530,
+        "distanceInMiles": 3856,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-07",
+        "creationTime": "16:22"
+      }
+    ],
+    "journeys": [
+      {
+        "firstAirportCode": "JFK",
+        "departureDate": "2026-10-10",
+        "departureTime": "15:40",
+        "lastAirportCode": "IST",
+        "numberOfFlights": 2
+      },
+      {
+        "firstAirportCode": "IST",
+        "departureDate": "2026-10-18",
+        "departureTime": "13:55",
+        "lastAirportCode": "JFK",
+        "numberOfFlights": 2
+      }
+    ],
+    "fareRules": [
+      {
+        "owningAirlineCode": "LH",
+        "passengerCode": "ADT",
+        "isRefundable": false,
+        "isChangeable": true,
+        "exchangePenalties": [
+          {
+            "applicability": "BEFORE_DEPARTURE",
+            "conditionsApply": true,
+            "penalty": {
+              "amount": "299.0",
+              "currencyCode": "USD"
+            },
+            "hasNoShowCost": true,
+            "noShowPenalty": {
+              "amount": "299.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "applicability": "AFTER_DEPARTURE",
+            "conditionsApply": true,
+            "penalty": {
+              "amount": "299.0",
+              "currencyCode": "USD"
+            },
+            "hasNoShowCost": true,
+            "noShowPenalty": {
+              "amount": "299.00",
+              "currencyCode": "USD"
+            }
+          }
+        ]
+      }
+    ],
+    "fareOffers": [
+      {
+        "travelerIndices": [
+          1
+        ],
+        "flights": [
+          {
+            "itemId": "13"
+          },
+          {
+            "itemId": "15"
+          },
+          {
+            "itemId": "17"
+          },
+          {
+            "itemId": "19"
+          }
+        ],
+        "cabinBaggageAllowance": {
+          "maximumPieces": 1,
+          "baggagePieces": [
+            {
+              "maximumSizeInInches": 46,
+              "maximumSizeInCentimeters": 118,
+              "maximumWeightInPounds": 18,
+              "maximumWeightInKilograms": 8,
+              "numberOfPieces": 1
+            },
+            {
+              "numberOfPieces": 1,
+              "specialItemDescription": "HANDBAG UPTO 40 X 30 X 15CM"
+            }
+          ]
+        },
+        "checkedBaggageAllowance": {
+          "maximumPieces": 0,
+          "baggagePieces": [
+            {
+              "maximumSizeInInches": 62,
+              "maximumSizeInCentimeters": 158,
+              "maximumWeightInPounds": 50,
+              "maximumWeightInKilograms": 23,
+              "numberOfPieces": 0
+            }
+          ]
+        },
+        "checkedBaggageCharges": [
+          {
+            "maximumWeightInPounds": 50,
+            "maximumWeightInKilograms": 23,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "190.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "1ST BAG UPTO50LB23KG 62LI158CM",
+            "fee": {
+              "amount": "90.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "2ND BAG UPTO50LB23KG 62LI158CM",
+            "isCheckInOnly": true
+          }
+        ]
+      }
+    ],
+    "fares": [
+      {
+        "creationDetails": {
+          "creationUserSine": "AWV",
+          "creationDate": "2026-09-07",
+          "creationTime": "16:22",
+          "purchaseDeadlineDate": "2026-09-10",
+          "purchaseDeadlineTime": "23:59",
+          "userWorkPcc": "REDACTED_PCC",
+          "userHomePcc": "REDACTED_PCC"
+        },
+        "airlineCode": "LH",
+        "fareCalculationLine": "NYC LH X/FRA LH IST374.00LH X/FRA LH NYC381.00NUC755.00END ROE1.00 XFJFK4.5",
+        "isNegotiatedFare": false,
+        "fareConstruction": [
+          {
+            "flights": [
+              {
+                "itemId": "13"
+              },
+              {
+                "itemId": "15"
+              }
+            ],
+            "flightIndices": [
+              1,
+              2
+            ],
+            "fareBasisCode": "VLA00TBQ",
+            "baseRate": {
+              "amount": "374.00",
+              "currencyCode": "NUC"
+            },
+            "brandFareCode": "ECOLIGHT",
+            "brandFareName": "ECONOMY LIGHT",
+            "brandProgramCode": "CFFLH",
+            "brandProgramName": "LH BRANDED FARES APP EB CAMXUS",
+            "isCurrentItinerary": true
+          },
+          {
+            "flights": [
+              {
+                "itemId": "17"
+              },
+              {
+                "itemId": "19"
+              }
+            ],
+            "flightIndices": [
+              3,
+              4
+            ],
+            "fareBasisCode": "VKA00TBQ",
+            "baseRate": {
+              "amount": "381.00",
+              "currencyCode": "NUC"
+            },
+            "brandFareCode": "ECOLIGHT",
+            "brandFareName": "ECONOMY LIGHT",
+            "brandProgramCode": "CFFLH",
+            "brandProgramName": "LH BRANDED FARES APP EB CAMXUS",
+            "isCurrentItinerary": true
+          }
+        ],
+        "taxBreakdown": [
+          {
+            "taxCode": "YC",
+            "taxAmount": {
+              "amount": "7.39",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XY",
+            "taxAmount": {
+              "amount": "7.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XA",
+            "taxAmount": {
+              "amount": "3.84",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "AY",
+            "taxAmount": {
+              "amount": "5.60",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "YR",
+            "taxAmount": {
+              "amount": "26.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "US",
+            "taxAmount": {
+              "amount": "46.80",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "YQ",
+            "taxAmount": {
+              "amount": "560.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "DE",
+            "taxAmount": {
+              "amount": "25.40",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "RA",
+            "taxAmount": {
+              "amount": "65.60",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "TR",
+            "taxAmount": {
+              "amount": "23.20",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "M6",
+            "taxAmount": {
+              "amount": "3.50",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XF",
+            "taxAmount": {
+              "amount": "4.50",
+              "currencyCode": "USD"
+            }
+          }
+        ],
+        "totals": {
+          "subtotal": "755.00",
+          "taxes": "778.83",
+          "total": "1533.83",
+          "currencyCode": "USD"
+        },
+        "originalTotalValues": {
+          "total": "755.00",
+          "currencyCode": "USD"
+        },
+        "pricingTypeCode": "S",
+        "pricingTypeName": "System",
+        "pricingStatusCode": "A",
+        "pricingStatusName": "Active",
+        "requestedTravelerType": "ADT",
+        "pricedTravelerType": "ADT",
+        "recordTypeCode": "PQ",
+        "recordTypeName": "Price Quote",
+        "recordId": "1"
+      }
+    ],
+    "allSegments": [
+      {
+        "id": "13",
+        "type": "FLIGHT",
+        "text": "401",
+        "vendorCode": "LH",
+        "startDate": "2026-10-10",
+        "startTime": "15:40:00",
+        "startLocationCode": "JFK",
+        "endDate": "2026-10-11",
+        "endTime": "05:25:00",
+        "endLocationCode": "FRA"
+      },
+      {
+        "id": "15",
+        "type": "FLIGHT",
+        "text": "1300",
+        "vendorCode": "LH",
+        "startDate": "2026-10-11",
+        "startTime": "13:00:00",
+        "startLocationCode": "FRA",
+        "endDate": "2026-10-11",
+        "endTime": "17:05:00",
+        "endLocationCode": "IST"
+      },
+      {
+        "id": "17",
+        "type": "FLIGHT",
+        "text": "1299",
+        "vendorCode": "LH",
+        "startDate": "2026-10-18",
+        "startTime": "13:55:00",
+        "startLocationCode": "IST",
+        "endDate": "2026-10-18",
+        "endTime": "16:05:00",
+        "endLocationCode": "FRA"
+      },
+      {
+        "id": "19",
+        "type": "FLIGHT",
+        "text": "404",
+        "vendorCode": "LH",
+        "startDate": "2026-10-18",
+        "startTime": "17:15:00",
+        "startLocationCode": "FRA",
+        "endDate": "2026-10-18",
+        "endTime": "20:05:00",
+        "endLocationCode": "JFK"
+      }
+    ],
+    "payments": {
+      "flightTotals": [
+        {
+          "subtotal": "755.00",
+          "taxes": "778.83",
+          "total": "1533.83",
+          "currencyCode": "USD"
+        }
+      ]
+    },
+    "timestamp": "2026-09-07T21:23:00",
+    "bookingSignature": "8aca8cb540ca68c1c516db34e2046a3fe538a9d7e62fd6b8ca8214a507d3d44c3562ad7ad49f59eac7e8414730039eeb87934f48df9d31dbc75ff3abbd79068a",
+    "request": {
+      "confirmationId": "OCGMJQ"
+    }
+  },
+  "hotel": {
+    "bookingId": "ROFKOX",
+    "startDate": "2026-10-11",
+    "endDate": "2026-10-18",
+    "isCancelable": true,
+    "isTicketed": false,
+    "creationDetails": {
+      "creationUserSine": "AWV",
+      "creationDate": "2026-09-07",
+      "creationTime": "16:22",
+      "agencyIataNumber": "99999999",
+      "userWorkPcc": "REDACTED_PCC",
+      "userHomePcc": "REDACTED_PCC",
+      "primeHostId": "1S",
+      "lastUpdateDate": "2026-09-07",
+      "lastUpdateTime": "16:22",
+      "numberOfUpdates": 1
+    },
+    "contactInfo": {
+      "emails": [
+        "TRAVEL@DOCTOURS.TEST"
+      ],
+      "phones": [
+        "16463875453"
+      ]
+    },
+    "travelers": [
+      {
+        "givenName": "DOCTOURS",
+        "surname": "TESTPATIENT",
+        "type": "ADULT",
+        "passengerCode": "ADT",
+        "nameAssociationId": "1",
+        "phones": [
+          {
+            "number": "+16463875453"
+          }
+        ]
+      }
+    ],
+    "remarks": [
+      {
+        "type": "FORM_OF_PAYMENT",
+        "text": "*VI4XXXXXXXXXXX1111¥12/28"
+      }
+    ],
+    "hotels": [
+      {
+        "itemId": "23",
+        "confirmationId": "89421970-",
+        "hotelName": "HOLIDAY INN CITY ISTANBUL",
+        "address": {
+          "street": "MILLET CAD 187",
+          "city": "ISTANBUL",
+          "postalCode": "34280",
+          "countryCode": "TR",
+          "cityCode": "IST"
+        },
+        "checkInDate": "2026-10-11",
+        "checkInTime": "00:00",
+        "checkOutDate": "2026-10-18",
+        "checkOutTime": "00:00",
+        "leadTravelerIndex": 1,
+        "room": {
+          "roomType": "Standard Room",
+          "quantity": 1,
+          "description": "2 Single Beds Standard 22 SqM Room 2 Single Beds Standard 22 SqM Room",
+          "productCode": "TWN005T",
+          "roomRate": {
+            "amount": "83.00",
+            "currencyCode": "EUR"
+          },
+          "travelerIndices": [
+            1
+          ],
+          "agencyCommission": {
+            "commissionPercentage": "10.00",
+            "text": "Commissionable Rate"
+          },
+          "supplierRateCode": "005T",
+          "rateBreakdown": [
+            {
+              "amount": "83.00",
+              "currencyCode": "EUR",
+              "startDate": "2026-10-11",
+              "endDate": "2026-10-18"
+            }
+          ],
+          "supplierRateDescription": [
+            "ADVANCE PURCHASE ENTIRE STAY NONREFUNDABLE"
+          ]
+        },
+        "isRefundable": false,
+        "hotelStatusCode": "HK",
+        "hotelStatusName": "Confirmed",
+        "chainCode": "HI",
+        "chainName": "Holiday Inn",
+        "propertyId": "100071112",
+        "sabrePropertyId": "37260",
+        "contactInfo": {
+          "phones": [
+            "90-212-5309900"
+          ],
+          "faxes": [
+            "90-212-5309924"
+          ]
+        },
+        "guaranteeTypeCode": 5,
+        "guaranteeTypeName": "Credit card",
+        "guaranteePaymentNote": "GDPSTVI4XXXXXXXXXXX1111EXP 12 28-TRAVEL",
+        "guaranteePaymentCardBrand": "AMERICAN EXPRESS",
+        "guaranteePaymentCardCode": "AX",
+        "paymentPolicy": "DEPOSIT",
+        "payment": {
+          "subtotal": "581.00",
+          "taxes": "69.72",
+          "total": "650.72",
+          "currencyCode": "EUR"
+        },
+        "numberOfGuests": 1,
+        "sourceTypeCode": 100,
+        "sourceTypeName": "Sabre GDS"
+      }
+    ],
+    "allSegments": [
+      {
+        "id": "23",
+        "type": "HOTEL",
+        "text": "89421970-",
+        "vendorCode": "HI",
+        "locationCode": "IST",
+        "address": {
+          "street": "MILLET CAD 187",
+          "city": "ISTANBUL",
+          "postalCode": "34280",
+          "countryCode": "TR"
+        },
+        "startDate": "2026-10-11",
+        "startTime": "00:00",
+        "endDate": "2026-10-18",
+        "endTime": "00:00"
+      }
+    ],
+    "payments": {
+      "hotelTotals": [
+        {
+          "subtotal": "581.00",
+          "taxes": "69.72",
+          "total": "650.72",
+          "currencyCode": "EUR"
+        }
+      ],
+      "formsOfPayment": [
+        {
+          "cardTypeCode": "VI",
+          "cardNumber": "4XXXXXXXXXXX1111",
+          "expiryDate": "2028-12",
+          "cardHolder": {
+            "givenName": "Doctours",
+            "surname": "Travel",
+            "email": "travel@doctours.test",
+            "phone": "+16463875453",
+            "address": {
+              "street": "1 Medical Tourism Way",
+              "city": "New York",
+              "stateProvince": "NY",
+              "postalCode": "10001",
+              "countryCode": "US"
+            }
+          },
+          "useType": "Unknown",
+          "tripType": "Unknown",
+          "useTypes": [
+            "Unknown"
+          ],
+          "tripTypes": [
+            "Unknown"
+          ],
+          "type": "PAYMENTCARD",
+          "itemId": "3"
+        }
+      ]
+    },
+    "otherServices": [
+      {
+        "serviceMessage": "HHL HI 100.00 EUR EARLY DEPARTURE FEE,EXCLUD",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T D BOOK EARLY ADVANCE PURCHASE",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T C CANCELING YOUR RESERVATION A",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T D 2 SINGLE BEDS STANDARD 22 SQ",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T D M ROOM 2 SINGLE BEDS STANDAR",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T TTX 69.72 TTL TAX",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T TX 69.72 12% PER NIGHT NOT INC",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T TP 650.72 EUR APPROX. TTL PRIC",
+        "chainCode": "HI"
+      },
+      {
+        "serviceMessage": "HHL 100071112 TWN005T TD INCLUDES TAX",
+        "chainCode": "HI"
+      }
+    ],
+    "timestamp": "2026-09-07T21:22:59",
+    "bookingSignature": "a8513dff94bde7c61cc1aba8247a72150f1060b9d668046f7ea6559e5b4e34cb8813cd7ba03d674edfe682f6d3e30b54795bb152c43bb5b84e9edb6b2850725d",
+    "request": {
+      "confirmationId": "ROFKOX"
+    }
+  }
+}

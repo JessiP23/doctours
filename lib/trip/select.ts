@@ -82,3 +82,75 @@ export function excludeRefused(offers: FlightOffer[], refused: RefusedFlight[]):
     ),
   );
 }
+
+/**
+ * Soft preferences the patient expresses in conversation. Distinct from the hard
+ * rules in TripRules: rules are enforced in code and cannot be changed by the
+ * model; preferences are what the model maps the patient's words onto, and code
+ * applies them deterministically. "Fewest stops", "only Turkish", "leave in the
+ * evening" all land here — never as free-text reasoning over a shortlist.
+ */
+export interface FlightPreferences {
+  rankBy?: Ranking;
+  /** Maximum stops per direction; 0 = non-stop only. */
+  maxStops?: number;
+  /** Restrict to these marketing carriers (IATA codes). */
+  airlines?: string[];
+  /** Outbound departure window, local time at the origin, "HH:mm" inclusive. */
+  departBetween?: { from: string; to: string };
+  /** Return departure window, local time at the destination, "HH:mm" inclusive. */
+  returnBetween?: { from: string; to: string };
+}
+
+function timeOf(localIso: string): string {
+  return localIso.slice(11, 16);
+}
+
+function inWindow(time: string, window: { from: string; to: string } | undefined): boolean {
+  if (!window) return true;
+  return window.from <= window.to
+    ? time >= window.from && time <= window.to
+    : time >= window.from || time <= window.to; // window crossing midnight
+}
+
+/** Applies preferences as filters, then ranks. Never widens beyond the offers given. */
+export function applyPreferences(offers: FlightOffer[], prefs: FlightPreferences): FlightOffer[] {
+  const airlines = prefs.airlines?.map((a) => a.toUpperCase());
+  const filtered = offers.filter((offer) => {
+    if (prefs.maxStops !== undefined && offer.slices.some((s) => s.stops > prefs.maxStops!))
+      return false;
+    if (
+      airlines?.length &&
+      !offer.slices.every((s) => s.segments.every((g) => airlines.includes(g.carrier)))
+    ) {
+      return false;
+    }
+    if (!inWindow(timeOf(offer.slices[0].segments[0].departLocal), prefs.departBetween))
+      return false;
+    if (
+      offer.slices[1] &&
+      !inWindow(timeOf(offer.slices[1].segments[0].departLocal), prefs.returnBetween)
+    ) {
+      return false;
+    }
+    return true;
+  });
+  return rank(filtered, prefs.rankBy ?? 'price');
+}
+
+/** What is on offer, so the agent can say "no non-stops, but…" truthfully. */
+export function describeChoices(offers: FlightOffer[]) {
+  const carriers = new Map<string, number>();
+  let nonStop = 0;
+  for (const o of offers) {
+    const c = o.slices[0].segments[0].carrier;
+    carriers.set(c, (carriers.get(c) ?? 0) + 1);
+    if (o.slices.every((s) => s.stops === 0)) nonStop++;
+  }
+  return {
+    total: offers.length,
+    nonStop,
+    carriers: Object.fromEntries([...carriers.entries()].sort((a, b) => b[1] - a[1])),
+    cheapestUSD: offers.length ? Math.min(...offers.map((o) => o.price.amount)) : null,
+  };
+}

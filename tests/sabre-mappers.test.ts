@@ -98,7 +98,8 @@ describe('the real payload passed through the trip rules', () => {
 
   it('rejects some real offers and explains why', () => {
     expect(rejected.length).toBeGreaterThan(0);
-    for (const r of rejected) expect(r.reason).toMatch(/cutoff|before the earliest|expected|flown by/);
+    for (const r of rejected)
+      expect(r.reason).toMatch(/cutoff|before the earliest|expected|flown by/);
   });
 
   it('every surviving offer honours both hard deadlines', () => {
