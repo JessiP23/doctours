@@ -1,3 +1,4 @@
+import Anthropic from '@anthropic-ai/sdk';
 import { getEnv } from '@/lib/env';
 import { checkSchema } from '@/lib/db/repo';
 import { getAccessToken, tokenExpiresAt } from '@/lib/providers/sabre/auth';
@@ -39,6 +40,18 @@ export async function GET() {
     checks.sabre = { ok: true, detail: `token valid until ${tokenExpiresAt()?.toISOString()}` };
   } catch (e) {
     checks.sabre = { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+
+  // Verifies the configured model id exists and the key can see it, without
+  // spending a completion — a wrong id would otherwise only fail mid-conversation.
+  try {
+    const env = getEnv();
+    const model = await new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }).models.retrieve(
+      env.ANTHROPIC_MODEL,
+    );
+    checks.anthropic = { ok: true, detail: `${model.id} reachable` };
+  } catch (e) {
+    checks.anthropic = { ok: false, detail: e instanceof Error ? e.message : String(e) };
   }
 
   const ok = Object.values(checks).every((c) => c.ok);
