@@ -215,12 +215,37 @@ export async function recordToolCall(
   return data;
 }
 
-/** Cheap connectivity probe for the health route. */
-export async function ping(): Promise<boolean> {
-  const { error } = await db()
-    .from('conversations')
-    .select('id', { head: true, count: 'exact' })
-    .limit(1);
-  if (error) fail('ping', error);
-  return true;
+// ---- health ----------------------------------------------------------------
+
+const TABLES = ['conversations', 'messages', 'offers', 'bookings', 'tool_calls'] as const;
+
+export interface SchemaCheck {
+  ok: boolean;
+  present: string[];
+  missing: { table: string; message: string }[];
+}
+
+/**
+ * Verifies the migration has actually been applied.
+ *
+ * Uses a real GET select per table rather than a HEAD/count probe: PostgREST
+ * answers a HEAD on a missing table without an error body, so supabase-js
+ * surfaces no error and the check passes even though the table is not there.
+ * Selecting a row is the only reliable signal.
+ */
+export async function checkSchema(): Promise<SchemaCheck> {
+  const results = await Promise.all(
+    TABLES.map(async (table) => {
+      const { error } = await db().from(table).select('id').limit(1);
+      return { table, message: error?.message };
+    }),
+  );
+  const missing = results
+    .filter((r) => r.message)
+    .map((r) => ({ table: r.table, message: r.message as string }));
+  return {
+    ok: missing.length === 0,
+    present: results.filter((r) => !r.message).map((r) => r.table),
+    missing,
+  };
 }

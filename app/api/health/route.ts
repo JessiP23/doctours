@@ -1,5 +1,5 @@
 import { getEnv } from '@/lib/env';
-import { ping } from '@/lib/db/repo';
+import { checkSchema } from '@/lib/db/repo';
 import { getAccessToken, tokenExpiresAt } from '@/lib/providers/sabre/auth';
 
 export const runtime = 'nodejs';
@@ -23,8 +23,13 @@ export async function GET() {
   }
 
   try {
-    await ping();
-    checks.database = { ok: true };
+    const schema = await checkSchema();
+    checks.database = schema.ok
+      ? { ok: true, detail: `${schema.present.length} tables present` }
+      : {
+          ok: false,
+          detail: `missing or unreadable: ${schema.missing.map((m) => m.table).join(', ')}. Apply supabase/migrations/0001_init.sql. First error: ${schema.missing[0]?.message}`,
+        };
   } catch (e) {
     checks.database = { ok: false, detail: e instanceof Error ? e.message : String(e) };
   }
