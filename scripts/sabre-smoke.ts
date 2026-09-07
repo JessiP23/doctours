@@ -6,6 +6,7 @@
  *   npm run sabre:smoke -- hotels-geo [checkIn] [checkOut]       hotels around IST, save fixture
  *   npm run sabre:smoke -- hotel <hotelCode> [checkIn] [checkOut] one property's rates, save fixture
  *   npm run sabre:smoke -- pricecheck <rateKey>                  price check a RateKey → BookingKey
+ *   npm run sabre:smoke -- hotels-beta [checkIn] [checkOut]      agentic-ready /v1/hotels/hotelSearch around IST
  *
  * Raw responses are written to tests/fixtures/sabre/<name>.json so mappers can be
  * written and unit-tested against real payloads.
@@ -20,6 +21,7 @@ import {
   buildHotelAvailRequest,
   buildHotelDetailsRequest,
   buildHotelPriceCheckRequest,
+  buildHotelSearchBetaRequest,
 } from '@/lib/providers/sabre/requests';
 import { withProviderTrace } from '@/lib/providers/trace';
 import { TRIP_RULES } from '@/lib/trip/rules';
@@ -150,6 +152,27 @@ async function hotel() {
   );
 }
 
+async function hotelsBeta() {
+  const [checkIn = '2026-10-12', checkOut = '2026-10-17'] = args;
+  const body = buildHotelSearchBetaRequest(
+    { checkIn, checkOut, adults: 1 },
+    { airportCode: TRIP_RULES.destination, radiusMiles: 20 },
+  );
+  const { result, requests } = await withProviderTrace(() =>
+    sabreFetch<Record<string, unknown>>({
+      method: 'POST',
+      path: '/v1/hotels/hotelSearch',
+      body,
+      timeoutMs: 60_000,
+    }),
+  );
+  const file = await saveFixture(
+    `hotel-search-beta-${TRIP_RULES.destination}-${checkIn}-${checkOut}`,
+    { request: body, response: result },
+  );
+  console.log(JSON.stringify({ ok: true, file, requests, shape: summarize(result) }, null, 2));
+}
+
 async function pricecheck() {
   const env = getEnv();
   const [rateKey] = args;
@@ -170,6 +193,7 @@ const commands: Record<string, () => Promise<void>> = {
   auth,
   flights,
   'hotels-geo': hotelsGeo,
+  'hotels-beta': hotelsBeta,
   hotel,
   pricecheck,
 };

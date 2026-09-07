@@ -3,3 +3,4 @@ node_modules
 out
 coverage
 package-lock.json
+tests/fixtures

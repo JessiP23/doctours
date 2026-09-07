@@ -10,6 +10,7 @@ import type { Cabin, FlightSearch, HotelSearch } from '@/lib/providers/types';
  *   POST /v5/hotel/pricecheck           re-price a RateKey → BookingKey (needed to book)
  *   POST /v1/trip/orders/createBooking  create the order (flight and/or hotel) → confirmationId
  *   POST /v1/trip/orders/getBooking     retrieve an order by confirmationId
+ *   POST /v1/hotels/hotelSearch         (agentic-ready beta) flat JSON hotel search by airport/lat-long
  */
 
 const SABRE_CABIN: Record<Cabin, string> = {
@@ -97,7 +98,7 @@ export function buildHotelAvailRequest(
       POS: { Source: { PseudoCityCode: pcc } },
       SearchCriteria: {
         OffSet: 1,
-        SortBy: 'TotalRate',
+        SortBy: 'AverageNightlyRate', // v5 accepts: NegotiatedRateAvailability, DistanceFrom, AverageNightlyRate, SabreRating, AverageNightlyRateBeforeTax
         SortOrder: 'ASC',
         PageSize: 'hotelCodes' in target ? target.hotelCodes.length : (target.pageSize ?? 20),
         RateDetailsInd: true,
@@ -169,4 +170,18 @@ export function buildHotelPriceCheckRequest(pcc: string, rateKey: string) {
 
 export function buildGetBookingRequest(confirmationId: string) {
   return { confirmationId };
+}
+
+/** Agentic-ready Hotel Search (beta): flat JSON, searches around an airport code. */
+export function buildHotelSearchBetaRequest(
+  stay: Pick<HotelSearch, 'checkIn' | 'checkOut' | 'adults'>,
+  ref: { airportCode: string; radiusMiles?: number },
+) {
+  return {
+    radiusInMiles: ref.radiusMiles ?? 20,
+    checkInDate: stay.checkIn,
+    checkOutDate: stay.checkOut,
+    numberOfAdults: stay.adults,
+    referencePoint: ref.airportCode,
+  };
 }
