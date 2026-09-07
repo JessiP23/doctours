@@ -22,13 +22,46 @@ function fail(op: string, error: { message: string; code?: string }): never {
 
 // ---- conversations ---------------------------------------------------------
 
-export async function createConversation(tripRules: Json): Promise<ConversationRow> {
+export async function createConversation(
+  tripRules: Json,
+  visitorId: string,
+): Promise<ConversationRow> {
   const { data, error } = await db()
     .from('conversations')
-    .insert({ trip_rules: tripRules })
+    .insert({ trip_rules: tripRules, visitor_id: visitorId })
     .select()
     .single();
   if (error) fail('createConversation', error);
+  return data;
+}
+
+/** Trips created by this browser, newest first. */
+export async function listConversationsForVisitor(
+  visitorId: string,
+  limit = 20,
+): Promise<ConversationRow[]> {
+  const { data, error } = await db()
+    .from('conversations')
+    .select()
+    .eq('visitor_id', visitorId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) fail('listConversationsForVisitor', error);
+  return data;
+}
+
+/** Guards a switch: a visitor may only open a conversation it owns. */
+export async function getConversationForVisitor(
+  id: string,
+  visitorId: string,
+): Promise<ConversationRow | null> {
+  const { data, error } = await db()
+    .from('conversations')
+    .select()
+    .eq('id', id)
+    .eq('visitor_id', visitorId)
+    .maybeSingle();
+  if (error) fail('getConversationForVisitor', error);
   return data;
 }
 
@@ -155,6 +188,20 @@ export async function insertBooking(conversationId: string, b: NewBooking): Prom
     .select()
     .single();
   if (error) fail('insertBooking', error);
+  return data;
+}
+
+/** Bookings across several conversations, for labelling a trip list in one query. */
+export async function listBookingsForConversations(
+  conversationIds: string[],
+): Promise<BookingRow[]> {
+  if (conversationIds.length === 0) return [];
+  const { data, error } = await db()
+    .from('bookings')
+    .select()
+    .in('conversation_id', conversationIds)
+    .eq('status', 'confirmed');
+  if (error) fail('listBookingsForConversations', error);
   return data;
 }
 

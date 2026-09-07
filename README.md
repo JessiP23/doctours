@@ -37,6 +37,12 @@ browser ──POST /api/chat {text}──▶ route ──▶ runTurn()          
         f. `reply` called → guards → humanize → return bubbles
 ```
 
+**Trips.** There are no accounts. A httpOnly _visitor_ cookie owns the trips a browser
+has started and a second cookie remembers which one is open, so the Trips panel can list
+them with their progress ("fully booked · ABC12D, XYZ98W") and switching only ever opens
+a trip that browser created. Replacing the visitor id with a real user id is the whole of
+what authentication would change.
+
 **State.** The agent holds nothing in memory between requests. Everything is in
 Postgres: the conversation, the exact Anthropic content blocks, every offer the model
 was shown, every booking, every tool call. The model is _told_ the current state each
@@ -95,6 +101,7 @@ Requires Node 22 and a Supabase project.
 npm install
 cp .env.example .env            # fill in the values
 npm run db:sql                  # paste the output into Supabase → SQL editor → Run
+                                # (prints every migration, in order)
 npm run dev                     # http://localhost:3000
 curl -s localhost:3000/api/health | jq
 ```

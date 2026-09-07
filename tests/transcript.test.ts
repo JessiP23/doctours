@@ -50,3 +50,14 @@ describe('projectTranscript', () => {
     ]);
   });
 });
+
+describe('trip list status', () => {
+  it('reads progress from the confirmed bookings of each trip', async () => {
+    const { statusOfForTests } = await import('@/lib/agent/conversation');
+    const booking = (kind: 'flight' | 'hotel') => ({ kind, status: 'confirmed' }) as never;
+    expect(statusOfForTests([])).toBe('not started');
+    expect(statusOfForTests([booking('flight')])).toBe('flight booked');
+    expect(statusOfForTests([booking('hotel')])).toBe('hotel booked');
+    expect(statusOfForTests([booking('flight'), booking('hotel')])).toBe('fully booked');
+  });
+});

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bubble } from './Bubble';
+import { TripList, type Trip } from './TripList';
 import { TypingIndicator } from './TypingIndicator';
 import { OPENING_BUBBLES } from '@/lib/agent/opening';
 
@@ -10,11 +11,6 @@ interface Message {
   role: 'user' | 'assistant';
   text: string;
   animate?: boolean;
-}
-
-interface ChatResponse {
-  bubbles: string[];
-  expectsInput: boolean;
 }
 
 /** Reading-speed reveal: a short bubble appears fast, a long one takes a beat. */
@@ -30,16 +26,32 @@ export function Chat() {
   const [busy, setBusy] = useState(false);
   const [typing, setTyping] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [showTrips, setShowTrips] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const counter = useRef(0);
   const nextId = () => `local-${++counter.current}`;
 
-  const scrollToEnd = useCallback(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  const opening = (animate = false): Message[] =>
+    OPENING_BUBBLES.map((text, i) => ({
+      id: `open-${i}`,
+      role: 'assistant' as const,
+      text,
+      animate,
+    }));
+
+  const refreshTrips = useCallback(async () => {
+    try {
+      const res = await fetch('/api/conversations', { cache: 'no-store' });
+      const data = (await res.json()) as { trips: Trip[] };
+      setTrips(data.trips);
+    } catch {
+      /* the list is a convenience; never block the chat on it */
+    }
   }, []);
 
-  // Hydrate from the server; show the opening if the conversation is new.
+  // Hydrate the open trip; play the opening only when it has no history yet.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -48,14 +60,7 @@ export function Chat() {
         const data = (await res.json()) as { messages: Message[] };
         if (cancelled) return;
         if (data.messages.length > 0) {
-          setMessages([
-            ...OPENING_BUBBLES.map((t, i) => ({
-              id: `open-${i}`,
-              role: 'assistant' as const,
-              text: t,
-            })),
-            ...data.messages,
-          ]);
+          setMessages([...opening(), ...data.messages]);
         } else {
           for (const [i, text] of OPENING_BUBBLES.entries()) {
             setTyping(true);
@@ -65,6 +70,7 @@ export function Chat() {
             setMessages((m) => [...m, { id: `open-${i}`, role: 'assistant', text, animate: true }]);
           }
         }
+        void refreshTrips();
       } catch {
         setMessages([
           {
@@ -83,9 +89,11 @@ export function Chat() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshTrips]);
 
-  useEffect(scrollToEnd, [messages, typing, scrollToEnd]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, typing]);
 
   const send = useCallback(async () => {
     const text = input.trim();
@@ -100,7 +108,7 @@ export function Chat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       });
-      const data = (await res.json()) as ChatResponse;
+      const data = (await res.json()) as { bubbles: string[] };
       for (const [i, bubble] of data.bubbles.entries()) {
         await sleep(i === 0 ? Math.min(revealDelay(bubble), 900) : revealDelay(bubble));
         setTyping(i < data.bubbles.length - 1);
@@ -109,6 +117,7 @@ export function Chat() {
           { id: nextId(), role: 'assistant', text: bubble, animate: true },
         ]);
       }
+      void refreshTrips();
     } catch {
       setMessages((m) => [
         ...m,
@@ -124,7 +133,43 @@ export function Chat() {
       setBusy(false);
       inputRef.current?.focus();
     }
-  }, [input, busy]);
+  }, [input, busy, refreshTrips]);
+
+  const startNewTrip = useCallback(async () => {
+    if (busy) return;
+    setBusy(true);
+    setShowTrips(false);
+    try {
+      await fetch('/api/conversations', { method: 'POST' });
+      setMessages(opening(true));
+      void refreshTrips();
+    } finally {
+      setBusy(false);
+      inputRef.current?.focus();
+    }
+  }, [busy, refreshTrips]);
+
+  const openTrip = useCallback(
+    async (id: string) => {
+      if (busy) return;
+      setBusy(true);
+      setShowTrips(false);
+      try {
+        const res = await fetch('/api/conversation', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId: id }),
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { messages: Message[] };
+        setMessages([...opening(), ...data.messages]);
+        void refreshTrips();
+      } finally {
+        setBusy(false);
+      }
+    },
+    [busy, refreshTrips],
+  );
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -137,17 +182,46 @@ export function Chat() {
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
         <div className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-me text-me-ink text-sm font-semibold">
+          <button
+            type="button"
+            onClick={() => {
+              void refreshTrips();
+              setShowTrips(true);
+            }}
+            className="rounded-lg px-2 py-1.5 text-sm text-muted transition hover:bg-them hover:text-ink"
+            aria-label="Your trips"
+          >
+            Trips
+          </button>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-me text-sm font-semibold text-me-ink">
             D
           </div>
-          <div className="min-w-0">
-            <div className="text-[15px] font-semibold leading-tight">
+          <div className="min-w-0 flex-1">
+            <div className="text-[15px] leading-tight font-semibold">
               Doctours travel coordinator
             </div>
             <div className="text-xs text-muted">Flights and hotel for your Istanbul procedure</div>
           </div>
+          <button
+            type="button"
+            onClick={() => void startNewTrip()}
+            disabled={busy}
+            className="rounded-lg px-2 py-1.5 text-sm text-muted transition hover:bg-them hover:text-ink disabled:opacity-40"
+          >
+            New
+          </button>
         </div>
       </header>
+
+      {showTrips && (
+        <TripList
+          trips={trips}
+          busy={busy}
+          onSelect={(id) => void openTrip(id)}
+          onNew={() => void startNewTrip()}
+          onClose={() => setShowTrips(false)}
+        />
+      )}
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2.5 px-4 py-5">
         {messages.map((m) => (
@@ -157,7 +231,7 @@ export function Chat() {
         <div ref={endRef} className="h-1" />
       </main>
 
-      <footer className="sticky bottom-0 border-t border-line bg-bg/90 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+      <footer className="sticky bottom-0 border-t border-line bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <form
           className="mx-auto flex w-full max-w-2xl items-end gap-2 px-4 py-3"
           onSubmit={(e) => {

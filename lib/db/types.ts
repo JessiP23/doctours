@@ -16,6 +16,8 @@ export type ConversationRow = {
   updated_at: string;
   trip_rules: Json;
   status: ConversationStatus;
+  /** Opaque per-browser owner. Null for rows created before trips were listable. */
+  visitor_id: string | null;
 };
 
 export type MessageRow = {
@@ -77,7 +79,8 @@ export interface Database {
     Tables: {
       conversations: Table<
         ConversationRow,
-        Pick<ConversationRow, 'trip_rules'> & Partial<Pick<ConversationRow, 'id' | 'status'>>
+        Pick<ConversationRow, 'trip_rules'> &
+          Partial<Pick<ConversationRow, 'id' | 'status' | 'visitor_id'>>
       >;
       messages: Table<MessageRow, Pick<MessageRow, 'conversation_id' | 'role' | 'content'>>;
       offers: Table<OfferRow, Omit<OfferRow, 'id' | 'created_at'> & Partial<Pick<OfferRow, 'id'>>>;
