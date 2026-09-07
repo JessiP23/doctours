@@ -22,6 +22,7 @@ import {
   buildFlightShopRequest,
   buildHotelDetailsRequest,
   buildHotelPriceCheckRequest,
+  sabreGender,
   type CreateBookingFlight,
   type FlightCheckFlight,
 } from './requests';
@@ -118,6 +119,7 @@ function flightCheckPayload(offer: FlightOffer): FlightCheckFlight[][] {
       operatingFlightNumber: Number(seg.operatingFlightNumber ?? seg.flightNumber),
       marketingAirlineCode: seg.carrier,
       marketingFlightNumber: Number(seg.flightNumber),
+      ...(seg.bookingClass ? { segmentDetails: { bookingClassCode: seg.bookingClass } } : {}),
     })),
   );
 }
@@ -173,7 +175,13 @@ export class SabreProvider implements TravelProvider {
    * flights, so a stale offer surfaces here rather than at booking time.
    */
   async priceFlightOffer(offer: FlightOffer): Promise<FlightOffer> {
-    const body = buildFlightCheckRequest(flightCheckPayload(offer), 1);
+    const env = getEnv();
+    const body = buildFlightCheckRequest(flightCheckPayload(offer), {
+      adults: 1,
+      pcc: env.SABRE_PCC,
+      currency: offer.price.currency,
+      cabin: offer.cabin,
+    });
     const response = await sabreFetch<FlightShopResponse>({
       method: 'POST',
       path: '/v1/offers/flightCheck',
@@ -201,6 +209,7 @@ export class SabreProvider implements TravelProvider {
         givenName: p.givenName,
         surname: p.familyName,
         birthDate: p.dateOfBirth,
+        gender: sabreGender(p.gender),
       })),
       contact: { emails: [passengers[0].email], phones: [passengers[0].phone] },
     });

@@ -47,20 +47,32 @@ export function buildFlightShopRequest(q: FlightSearch, opts: { maxStops?: numbe
 export interface FlightCheckFlight {
   departureAirportCode: string;
   departureDate: string; // YYYY-MM-DD
-  departureTime: string; // HH:mm[:ss]
+  departureTime: string; // HH:mm — the spec pattern is ^([01][0-9]|2[0-3]):[0-5][0-9]$, seconds are a 400
   arrivalAirportCode: string;
   arrivalDate: string;
-  arrivalTime: string;
+  arrivalTime: string; // HH:mm
   operatingAirlineCode: string;
   operatingFlightNumber: number;
   marketingAirlineCode: string;
   marketingFlightNumber: number;
+  /** Booking class Flight Shop quoted, so the fare is revalidated in that class. */
+  segmentDetails?: { bookingClassCode: string };
 }
 
-export function buildFlightCheckRequest(journeys: FlightCheckFlight[][], adults: number) {
+/**
+ * Flight Check, payload-based (ATPCO). Per Sabre's spec the PCC is mandatory for
+ * ATPCO and travels in processingOptions; fare qualifiers keep the re-price in the
+ * same currency and cabin as the search.
+ */
+export function buildFlightCheckRequest(
+  journeys: FlightCheckFlight[][],
+  opts: { adults: number; pcc: string; currency: string; cabin: Cabin },
+) {
   return {
     journeys: journeys.map((flights) => ({ flights })),
-    travelers: Array.from({ length: adults }, () => ({ passengerTypeCode: 'ADT' })),
+    travelers: Array.from({ length: opts.adults }, () => ({ passengerTypeCode: 'ADT' })),
+    fare: { currencyCode: opts.currency, cabin: { name: SABRE_CABIN[opts.cabin] } },
+    processingOptions: { pseudoCityCode: opts.pcc },
   };
 }
 
@@ -213,7 +225,35 @@ export interface CreateBookingTraveler {
   givenName: string;
   surname: string;
   birthDate?: string;
+  gender?: 'MALE' | 'FEMALE' | 'UNDISCLOSED';
   passengerCode?: string;
+}
+
+/**
+ * Create Booking validates these with regular expressions and answers 400 on a
+ * mismatch, so inputs are normalized here rather than trusted:
+ *   names   ^[^\s]+(\s[^\s]+)*$   (surname additionally forbids digits)
+ *   phones  ^[0-9+-]+$              (no spaces, no parentheses)
+ */
+export function normalizeName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ');
+}
+
+export function normalizePhone(phone: string): string {
+  const cleaned = phone.replace(/[^0-9+-]/g, '');
+  // Keep a single leading +, drop any others.
+  return cleaned.startsWith('+')
+    ? `+${cleaned.slice(1).replace(/\+/g, '')}`
+    : cleaned.replace(/\+/g, '');
+}
+
+export function sabreGender(
+  g: 'M' | 'F' | 'X' | undefined,
+): CreateBookingTraveler['gender'] | undefined {
+  if (g === 'M') return 'MALE';
+  if (g === 'F') return 'FEMALE';
+  if (g === 'X') return 'UNDISCLOSED';
+  return undefined;
 }
 
 export interface CreateBookingContact {
@@ -237,12 +277,13 @@ export function buildCreateFlightBookingRequest(args: {
     receivedFrom: 'Doctours agent',
     agency: AGENCY,
     travelers: args.travelers.map((t) => ({
-      givenName: t.givenName,
-      surname: t.surname,
+      givenName: normalizeName(t.givenName),
+      surname: normalizeName(t.surname),
       ...(t.birthDate ? { birthDate: t.birthDate } : {}),
+      ...(t.gender ? { gender: t.gender } : {}),
       passengerCode: t.passengerCode ?? 'ADT',
     })),
-    contactInfo: args.contact,
+    contactInfo: { emails: args.contact.emails, phones: args.contact.phones.map(normalizePhone) },
     flightDetails: {
       flights: args.flights.map((f) => ({
         flightNumber: f.flightNumber,
@@ -277,11 +318,11 @@ export function buildCreateHotelBookingRequest(args: {
     receivedFrom: 'Doctours agent',
     agency: AGENCY,
     travelers: args.travelers.map((t) => ({
-      givenName: t.givenName,
-      surname: t.surname,
+      givenName: normalizeName(t.givenName),
+      surname: normalizeName(t.surname),
       passengerCode: t.passengerCode ?? 'ADT',
     })),
-    contactInfo: args.contact,
+    contactInfo: { emails: args.contact.emails, phones: args.contact.phones.map(normalizePhone) },
     hotel: {
       useCsl: true,
       bookingKey: args.bookingKey,

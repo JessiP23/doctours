@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { buildFlightShopRequest, buildHotelAvailRequest } from '@/lib/providers/sabre/requests';
+import {
+  buildCreateFlightBookingRequest,
+  buildFlightCheckRequest,
+  buildFlightShopRequest,
+  buildHotelAvailRequest,
+  normalizeName,
+  normalizePhone,
+  sabreGender,
+} from '@/lib/providers/sabre/requests';
 
 describe('buildFlightShopRequest', () => {
   it('builds a round trip with cabin and ATPCO source', () => {
@@ -60,5 +68,104 @@ describe('buildHotelAvailRequest', () => {
       RefPointType: '6',
     });
     expect(sc.GeoSearch?.GeoRef.Radius).toBe(15);
+  });
+});
+
+/**
+ * Patterns copied from Sabre's OpenAPI specs (Flight Check v1, Booking Management v1).
+ * Anything that fails these is a 400 before the airline is ever consulted.
+ */
+const TIME = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+const PHONE = /^[0-9+-]+$/;
+const NAME = /^[^\s]+(\s[^\s]+)*$/;
+const SURNAME = /^[^\d\s]+( [^\d\s]+)*$/;
+
+describe('buildFlightCheckRequest matches the Flight Check spec', () => {
+  const flight = {
+    departureAirportCode: 'JFK',
+    departureDate: '2026-10-11',
+    departureTime: '15:40',
+    arrivalAirportCode: 'FRA',
+    arrivalDate: '2026-10-12',
+    arrivalTime: '05:15',
+    operatingAirlineCode: 'LH',
+    operatingFlightNumber: 401,
+    marketingAirlineCode: 'UA',
+    marketingFlightNumber: 8840,
+    segmentDetails: { bookingClassCode: 'K' },
+  };
+  const body = buildFlightCheckRequest([[flight]], {
+    adults: 1,
+    pcc: 'ABCD',
+    currency: 'USD',
+    cabin: 'economy',
+  });
+
+  it('sends the PCC in processingOptions and fare qualifiers', () => {
+    expect(body.processingOptions).toEqual({ pseudoCityCode: 'ABCD' });
+    expect(body.fare).toEqual({ currencyCode: 'USD', cabin: { name: 'Economy' } });
+    expect(body.travelers).toEqual([{ passengerTypeCode: 'ADT' }]);
+  });
+
+  it('keeps times as HH:mm and preserves the operating carrier on a codeshare', () => {
+    const sent = body.journeys[0].flights[0];
+    expect(sent.departureTime).toMatch(TIME);
+    expect(sent.arrivalTime).toMatch(TIME);
+    expect(sent.operatingAirlineCode).toBe('LH');
+    expect(sent.marketingAirlineCode).toBe('UA');
+    expect(sent.segmentDetails).toEqual({ bookingClassCode: 'K' });
+  });
+});
+
+describe('Create Booking input normalization', () => {
+  it('phones lose spaces and punctuation the spec rejects', () => {
+    expect(normalizePhone('+1 646 387 5453')).toBe('+16463875453');
+    expect(normalizePhone('(646) 387-5453')).toMatch(PHONE);
+    expect(normalizePhone('+1 (646) 387 5453')).toMatch(PHONE);
+    expect(normalizePhone('6463875453')).toBe('6463875453');
+  });
+
+  it('names collapse whitespace so they satisfy the name patterns', () => {
+    expect(normalizeName('  Patricio   Estrella ')).toBe('Patricio Estrella');
+    expect(normalizeName('  Patricio   Estrella ')).toMatch(NAME);
+    expect(normalizeName('De la  Cruz')).toMatch(SURNAME);
+  });
+
+  it('maps passport gender codes to the Sabre enum', () => {
+    expect(sabreGender('M')).toBe('MALE');
+    expect(sabreGender('F')).toBe('FEMALE');
+    expect(sabreGender('X')).toBe('UNDISCLOSED');
+    expect(sabreGender(undefined)).toBeUndefined();
+  });
+
+  it('the flight booking request applies them and keeps HH:mm departure times', () => {
+    const body = buildCreateFlightBookingRequest({
+      pcc: 'ABCD',
+      flights: [
+        {
+          flightNumber: 8840,
+          airlineCode: 'UA',
+          fromAirportCode: 'JFK',
+          toAirportCode: 'FRA',
+          departureDate: '2026-10-11',
+          departureTime: '15:40',
+          bookingClass: 'K',
+        },
+      ],
+      travelers: [
+        { givenName: ' Patricio ', surname: 'Estrella', birthDate: '1985-01-01', gender: 'MALE' },
+      ],
+      contact: { emails: ['p@example.com'], phones: ['+1 646 387 5453'] },
+    });
+    expect(body.travelers[0]).toMatchObject({
+      givenName: 'Patricio',
+      surname: 'Estrella',
+      gender: 'MALE',
+      passengerCode: 'ADT',
+    });
+    expect(body.contactInfo.phones).toEqual(['+16463875453']);
+    expect(body.flightDetails.flights[0].departureTime).toMatch(TIME);
+    expect(body.flightDetails.flights[0].flightStatusCode).toBe('NN');
+    expect(body.targetPcc).toBe('ABCD');
   });
 });
