@@ -21,11 +21,29 @@ describe('the tool set the model is given', () => {
     }
   });
 
-  it('does not let the model choose dates, cabin or baggage when searching flights', () => {
+  it('never lets the model set cabin, baggage, passengers or the route', () => {
     const properties = Object.keys(
       (getTool('search_flights')!.schema as unknown as { shape: Record<string, unknown> }).shape,
     );
-    expect(properties).toEqual(['rankBy']);
+    // Ranking and narrowing to a date the rules already allow are the only choices.
+    expect(properties).toEqual(['rankBy', 'departOn', 'returnOn']);
+    for (const forbidden of [
+      'cabin',
+      'checkedBags',
+      'adults',
+      'origin',
+      'destination',
+      'currency',
+    ]) {
+      expect(properties).not.toContain(forbidden);
+    }
+  });
+
+  it('treats the date filters as optional so the default search covers every allowed date', () => {
+    const schema = getTool('search_flights')!.schema;
+    expect(schema.safeParse({}).success).toBe(true);
+    expect(schema.safeParse({ rankBy: 'fewest_stops' }).success).toBe(true);
+    expect(schema.safeParse({ returnOn: '17 October' }).success).toBe(false);
   });
 
   it('requires passport details to book a flight', () => {

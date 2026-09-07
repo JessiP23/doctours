@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkReferences } from '@/lib/agent/guard';
+import { checkAnnouncedActions, checkReferences } from '@/lib/agent/guard';
 
 describe('checkReferences', () => {
   it('passes a reference that matches a real booking', () => {
@@ -39,5 +39,49 @@ describe('checkReferences', () => {
   it('collects each violation once', () => {
     const r = checkReferences(['Ref QWE123.', 'Again QWE123 and RTY456.'], []);
     expect(r.violations.sort()).toEqual(['QWE123', 'RTY456']);
+  });
+});
+
+describe('checkAnnouncedActions', () => {
+  const acted = { actedThisTurn: true, expectsInput: false };
+  const idle = { actedThisTurn: false, expectsInput: false };
+
+  it('flags a closing reply that says it is booking when nothing was booked', () => {
+    const r = checkAnnouncedActions(
+      ['You got it.', 'Booking it now with the details you gave me.'],
+      idle,
+    );
+    expect(r.ok).toBe(false);
+    expect(r.announced).toMatch(/booking it/i);
+  });
+
+  it('allows it when a booking tool actually ran', () => {
+    expect(checkAnnouncedActions(['Booking it now.'], acted).ok).toBe(true);
+  });
+
+  it('allows a conditional promise that waits for the patient', () => {
+    expect(
+      checkAnnouncedActions(["I'll book it as soon as you confirm the price."], {
+        actedThisTurn: false,
+        expectsInput: true,
+      }).ok,
+    ).toBe(true);
+  });
+
+  it('leaves ordinary replies alone', () => {
+    expect(checkAnnouncedActions(['The cheapest is $742 on Turkish.', 'Want it?'], idle).ok).toBe(
+      true,
+    );
+    expect(checkAnnouncedActions(['Your flight is booked, reference ABC12D.'], idle).ok).toBe(true);
+  });
+
+  it('catches the other ways of announcing a booking', () => {
+    for (const phrase of [
+      "I'm booking that for you.",
+      'Let me book this.',
+      "I'll get that booked.",
+    ]) {
+      expect(checkAnnouncedActions([phrase], idle).ok).toBe(false);
+    }
   });
 });

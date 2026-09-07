@@ -10,6 +10,15 @@ import { deriveStay } from '@/lib/trip/nights';
 import { rulesFor } from './context';
 import { defineTool } from './define';
 import { loadBookableOffer } from './search_flights';
+import {
+  distinctItineraries,
+  itinerarySignature,
+  outboundDate,
+  persistFlightOffers,
+  rank,
+  returnDate,
+  searchAllowedFlights,
+} from './flight-offers';
 
 /**
  * Books the flight.
@@ -22,6 +31,44 @@ import { loadBookableOffer } from './search_flights';
  *   5. the re-priced itinerary is validated against the trip rules again
  * The reference returned is whatever Sabre sent back, never anything constructed.
  */
+/**
+ * Sabre fares live about twenty minutes, so a patient who pauses to find their
+ * passport will routinely come back to a dead offer. Refusing is correct but
+ * useless on its own, so re-shop the *same itinerary* and hand back its current
+ * price: the agent can then ask one question ("still want it at $X?") instead of
+ * starting the search over.
+ */
+async function reofferAfterExpiry(conversationId: string, expired: FlightOffer) {
+  const rules = await rulesFor(conversationId);
+  const wanted = itinerarySignature(expired);
+  const { offers } = await searchAllowedFlights(rules, {
+    outboundDate: outboundDate(expired),
+    returnDate: returnDate(expired),
+  });
+
+  const same = offers.find((o) => itinerarySignature(o) === wanted);
+  if (same) {
+    const [row] = await persistFlightOffers(conversationId, [same]);
+    return {
+      sameItinerary: {
+        offerId: row.id,
+        ...(row.summary as object),
+        previousPriceUSD: expired.price.amount,
+        priceChangeUSD: Number((same.price.amount - expired.price.amount).toFixed(2)),
+      },
+    };
+  }
+
+  const alternatives = await persistFlightOffers(
+    conversationId,
+    distinctItineraries(rank(offers, 'price'), 3),
+  );
+  return {
+    sameItinerary: null,
+    alternatives: alternatives.map((row) => ({ offerId: row.id, ...(row.summary as object) })),
+  };
+}
+
 export const passengerSchema = z.object({
   givenName: z.string().min(1).describe('First name exactly as printed on the passport'),
   familyName: z.string().min(1).describe('Surname exactly as printed on the passport'),
@@ -56,28 +103,34 @@ export const createFlightOrderTool = defineTool({
     }
 
     const { row, expired } = await loadBookableOffer(ctx.conversationId, input.offerId, 'flight');
+    const offer = row.raw as unknown as FlightOffer;
+    const provider = travelProvider();
+
     if (expired) {
+      const reoffer = await reofferAfterExpiry(ctx.conversationId, offer);
       return {
         booked: false,
         reason: 'OFFER_EXPIRED',
-        message:
-          'That fare expired before it could be booked. Search again and pick from the fresh options.',
+        message: reoffer.sameItinerary
+          ? 'That fare expired, but the same flights are still available at the price below. Confirm the new price with the patient, then book that offerId.'
+          : 'That fare expired and those exact flights are gone. Offer one of the alternatives below.',
+        ...reoffer,
       };
     }
-
-    const offer = row.raw as unknown as FlightOffer;
-    const provider = travelProvider();
 
     let priced: FlightOffer;
     try {
       priced = await provider.priceFlightOffer(offer);
     } catch (e) {
       if (isProviderError(e) && (e.code === 'OFFER_EXPIRED' || e.code === 'NO_AVAILABILITY')) {
+        const reoffer = await reofferAfterExpiry(ctx.conversationId, offer);
         return {
           booked: false,
           reason: 'OFFER_EXPIRED',
-          message:
-            'The airline no longer offers that itinerary at that price. Search again for current options.',
+          message: reoffer.sameItinerary
+            ? 'The airline would not re-price that fare, but the same flights are available at the price below.'
+            : 'The airline no longer offers that itinerary. Offer one of the alternatives below.',
+          ...reoffer,
         };
       }
       throw e;
@@ -96,26 +149,18 @@ export const createFlightOrderTool = defineTool({
     }
 
     if (priceChanged) {
-      // Never book a different price than the one the patient agreed to.
-      await repo.insertOffers(ctx.conversationId, [
-        {
-          kind: 'flight',
-          provider: priced.provider,
-          providerOfferId: priced.id,
-          summary: {
-            priceUSD: priced.price.amount,
-            note: 're-priced at booking time',
-          } as unknown as Json,
-          raw: priced.raw as Json,
-          expiresAt: priced.expiresAt,
-        },
-      ]);
+      // Never book at a price the patient did not agree to. The re-priced offer is
+      // persisted so confirming the new price is one step, not a fresh search.
+      const [fresh] = await persistFlightOffers(ctx.conversationId, [priced]);
       return {
         booked: false,
         reason: 'PRICE_CHANGED',
-        message: 'The price changed while we were talking.',
+        message:
+          'The price changed while we were talking. Confirm the new price, then book the offerId below.',
         agreedPriceUSD: offer.price.amount,
         currentPriceUSD: priced.price.amount,
+        priceChangeUSD: Number((priced.price.amount - offer.price.amount).toFixed(2)),
+        offerId: fresh.id,
       };
     }
 

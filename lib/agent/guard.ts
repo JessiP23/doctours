@@ -65,3 +65,35 @@ export function checkReferences(bubbles: string[], knownReferences: string[]): R
 
   return { ok: violations.size === 0, violations: [...violations] };
 }
+
+/**
+ * Announced-action guard.
+ *
+ * Saying "booking it now" and then ending the turn without calling a booking
+ * tool tells the patient something happened that did not. It is a milder cousin
+ * of inventing a reference, and it happened in the first real conversation, so
+ * it is checked rather than trusted to the prompt.
+ *
+ * Only replies that close the turn are checked: "I'll book it once you confirm"
+ * is a legitimate promise, and those replies are waiting for input.
+ */
+const IMMINENT_ACTION =
+  /\b(booking (it|that|this|them)|i'?m booking|i'?ll book (it|that|this|them)|let me book|i'?ll go ahead and book|placing (the|your) booking|confirming (it|that) now|i'?ll get (that|it) booked)\b/i;
+
+export interface PromiseCheck {
+  ok: boolean;
+  /** The phrase that announced an action which never happened. */
+  announced: string | null;
+}
+
+export function checkAnnouncedActions(
+  bubbles: string[],
+  context: { actedThisTurn: boolean; expectsInput: boolean },
+): PromiseCheck {
+  if (context.actedThisTurn || context.expectsInput) return { ok: true, announced: null };
+  for (const bubble of bubbles) {
+    const match = bubble.match(IMMINENT_ACTION);
+    if (match) return { ok: false, announced: match[0] };
+  }
+  return { ok: true, announced: null };
+}

@@ -8,7 +8,7 @@ import { isProviderError } from '@/lib/providers/sabre/errors';
 import { humanizeBubbles, textToBubbles } from '@/lib/text/humanize';
 import type { TripRules } from '@/lib/trip/rules';
 import { anthropicTools, getTool } from './tools';
-import { checkReferences } from './guard';
+import { checkAnnouncedActions, checkReferences } from './guard';
 import { REPLY_TOOL_NAME, replySchema } from './tools/reply';
 import { buildTripState } from './state';
 import { buildSystemPrompt } from './system';
@@ -136,6 +136,7 @@ export async function runTurn(
   const history = await loadHistory(conversationId);
   const tools = anthropicTools();
   let referenceRetryUsed = false;
+  let promiseNudgeUsed = false;
 
   for (let i = 1; i <= MAX_ITERATIONS; i++) {
     const [bookings, flightOffers, hotelOffers] = await Promise.all([
@@ -183,8 +184,10 @@ export async function runTurn(
     const others = toolUses.filter((t) => t.name !== REPLY_TOOL_NAME);
 
     const results: Anthropic.ToolResultBlockParam[] = [];
+    let actedThisTurn = false;
     for (const t of others) {
       const r = await runTool(t.name, t.input, conversationId);
+      if (t.name.startsWith('create_') && r.ok) actedThisTurn = true;
       results.push({
         type: 'tool_result',
         tool_use_id: t.id,
@@ -206,6 +209,25 @@ export async function runTurn(
         const guard = checkReferences(bubbles, knownReferences);
 
         if (guard.ok) {
+          // A reply that announces a booking without having made one is not delivered:
+          // the model is told to either do it or say what it actually needs.
+          const promise = checkAnnouncedActions(bubbles, {
+            actedThisTurn,
+            expectsInput: parsed.data.expectsInput,
+          });
+          if (!promise.ok && !promiseNudgeUsed) {
+            promiseNudgeUsed = true;
+            l.warn(
+              { announced: promise.announced, iteration: i },
+              'reply announced an action it did not take',
+            );
+            const nudge = `You told the patient "${promise.announced}" but you did not call a booking tool in this turn, so nothing was booked. Either call the booking tool now, or reply telling them plainly what you still need from them.`;
+            const nudgeBlocks = [...results, { type: 'text' as const, text: nudge }];
+            await repo.appendMessage(conversationId, 'user', nudgeBlocks as unknown as Json);
+            history.push({ role: 'user', content: nudgeBlocks });
+            continue;
+          }
+
           await repo.appendMessage(conversationId, 'user', results as unknown as Json);
           return { bubbles, expectsInput: parsed.data.expectsInput, iterations: i };
         }
