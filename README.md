@@ -87,6 +87,14 @@ hotel    POST /v5/get/hoteldetails  → /v5/hotel/pricecheck   → /v1/trip/orde
 Both bookings return Sabre's `confirmationId`, which is the reference the patient is
 given.
 
+**Codeshares.** Flight Shop is cache-based and the sell is live. In CERT, a seat sold by
+one airline on another airline's flight (`operatingAirlineCode ≠ marketingAirlineCode`)
+passes Flight Check and then fails the sell with `UC`, every time, because the operating
+carrier's confirmation is not simulated; an airline selling its own seats confirms
+instantly. Flight Shop has no "online only" filter, so `TRIP_RULES.allowCodeshares`
+makes those itineraries ineligible in `validateOffer` — they are never shown, and the
+agent can say why if asked. See DECISIONS #18.
+
 **Timezones.** Sabre returns local wall-clock times with no UTC offset. Deadline checks
 therefore use the zones declared in the trip rules, after asserting the segment's
 airport is the expected origin or destination; layovers are wall-clock differences at a

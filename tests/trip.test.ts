@@ -166,3 +166,47 @@ describe('deriveStay', () => {
     expect(deriveStay(overnight, returnOk).checkIn).toBe('2026-10-12');
   });
 });
+
+describe('codeshare sourcing rule', () => {
+  const codeshareOut = slice({
+    ...outboundOk.segments[0],
+    carrier: 'UA',
+    flightNumber: '8842',
+    operatingCarrier: 'LH',
+    operatingFlightNumber: '405',
+  });
+  const onlineOut = slice({
+    ...outboundOk.segments[0],
+    carrier: 'TK',
+    flightNumber: '12',
+    operatingCarrier: 'TK',
+    operatingFlightNumber: '12',
+  });
+
+  it('rejects an itinerary with a codeshare segment when the rules disallow them, naming both airlines', () => {
+    const r = validateOffer(offer([codeshareOut, returnOk]), {
+      ...TRIP_RULES,
+      allowCodeshares: false,
+    });
+    expect(r).toMatchObject({ ok: false, code: 'CODESHARE_NOT_ALLOWED' });
+    expect((r as { reason: string }).reason).toMatch(/UA8842.*sold by UA.*flown by LH/);
+  });
+
+  it('accepts the same itinerary when codeshares are allowed', () => {
+    expect(
+      validateOffer(offer([codeshareOut, returnOk]), { ...TRIP_RULES, allowCodeshares: true }),
+    ).toEqual({ ok: true });
+  });
+
+  it('accepts flights operated by the airline that sells them', () => {
+    expect(
+      validateOffer(offer([onlineOut, returnOk]), { ...TRIP_RULES, allowCodeshares: false }),
+    ).toEqual({ ok: true });
+  });
+
+  it('does not treat a segment with no operating carrier information as a codeshare', () => {
+    expect(
+      validateOffer(offer([outboundOk, returnOk]), { ...TRIP_RULES, allowCodeshares: false }),
+    ).toEqual({ ok: true });
+  });
+});

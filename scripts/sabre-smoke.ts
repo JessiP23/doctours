@@ -21,7 +21,7 @@ import path from 'node:path';
 import { appendFile } from 'node:fs/promises';
 import { getEnv, paymentCard } from '@/lib/env';
 import { SabreProvider, retrieveBooking, unconfirmedFlightsOf } from '@/lib/providers/sabre';
-import { excludeRefused, type RefusedFlight } from '@/lib/agent/tools/flight-offers';
+import { excludeRefused, isCodeshare, type RefusedFlight } from '@/lib/trip/select';
 import { partitionOffers } from '@/lib/trip/validate';
 import { deriveStay } from '@/lib/trip/nights';
 import { getAccessToken, tokenExpiresAt } from '@/lib/providers/sabre/auth';
@@ -477,9 +477,7 @@ async function e2e() {
       classes: candidate.slices.flatMap((sl) =>
         sl.segments.map((g) => `${g.carrier}${g.flightNumber}:${g.bookingClass}`),
       ),
-      codeshare: candidate.slices.some((sl) =>
-        sl.segments.some((g) => g.operatingCarrier !== g.carrier),
-      ),
+      codeshare: isCodeshare(candidate),
       stay,
       remainingCandidates: remaining.length,
     });

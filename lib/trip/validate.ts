@@ -17,6 +17,7 @@ export type ValidationCode =
   | 'WRONG_DESTINATION'
   | 'WRONG_CABIN'
   | 'WRONG_CURRENCY'
+  | 'CODESHARE_NOT_ALLOWED'
   | 'MISSING_SLICE';
 
 export function local(iso: string, tz: string): DateTime {
@@ -92,8 +93,20 @@ export function validateReturn(slice: FlightSlice, rules: TripRules): Validation
   return { ok: true };
 }
 
-/** Validates a full offer: cabin, currency, and each slice against its rule. */
+/** Validates a full offer: cabin, currency, sourcing, and each slice against its rule. */
 export function validateOffer(offer: FlightOffer, rules: TripRules): ValidationResult {
+  if (!rules.allowCodeshares) {
+    const codeshare = offer.slices
+      .flatMap((s) => s.segments)
+      .find((seg) => seg.operatingCarrier !== undefined && seg.operatingCarrier !== seg.carrier);
+    if (codeshare) {
+      return {
+        ok: false,
+        code: 'CODESHARE_NOT_ALLOWED',
+        reason: `${codeshare.carrier}${codeshare.flightNumber} is sold by ${codeshare.carrier} but flown by ${codeshare.operatingCarrier}; only flights operated by the airline selling them are booked`,
+      };
+    }
+  }
   if (offer.price.currency !== rules.currency)
     return {
       ok: false,

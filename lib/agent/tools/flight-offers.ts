@@ -12,12 +12,17 @@ import { partitionOffers, type ValidationCode } from '@/lib/trip/validate';
  * describe, persist and identify offers exactly the same way.
  */
 
-/** Stable identity of an itinerary, independent of fare code or price. */
-export function itinerarySignature(offer: FlightOffer): string {
-  return offer.slices
-    .flatMap((slice) => slice.segments.map((s) => `${s.carrier}${s.flightNumber}@${s.departLocal}`))
-    .join('|');
-}
+export {
+  distinctItineraries,
+  excludeRefused,
+  isCodeshare,
+  itinerarySignature,
+  outboundDate,
+  rank,
+  returnDate,
+  type Ranking,
+  type RefusedFlight,
+} from '@/lib/trip/select';
 
 export function summarizeFlightOffer(offer: FlightOffer) {
   const [outbound, inbound] = offer.slices;
@@ -115,67 +120,4 @@ export async function searchAllowedFlights(
     rejected: rejected.map((r) => ({ reason: r.reason, code: r.code })),
     failures,
   };
-}
-
-export type Ranking = 'price' | 'fewest_stops' | 'shortest';
-
-export function rank(offers: FlightOffer[], by: Ranking): FlightOffer[] {
-  const stops = (o: FlightOffer) => o.slices.reduce((n, s) => n + s.stops, 0);
-  const duration = (o: FlightOffer) => o.slices.reduce((n, s) => n + s.durationMin, 0);
-  return [...offers].sort((a, b) => {
-    if (by === 'fewest_stops') return stops(a) - stops(b) || a.price.amount - b.price.amount;
-    if (by === 'shortest') return duration(a) - duration(b) || a.price.amount - b.price.amount;
-    return a.price.amount - b.price.amount;
-  });
-}
-
-/** One entry per distinct itinerary, so the model is not shown the same flights at four fare codes. */
-export function distinctItineraries(offers: FlightOffer[], limit: number): FlightOffer[] {
-  const seen = new Set<string>();
-  const out: FlightOffer[] = [];
-  for (const offer of offers) {
-    const key = itinerarySignature(offer);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(offer);
-    if (out.length === limit) break;
-  }
-  return out;
-}
-
-export function outboundDate(offer: FlightOffer): string {
-  return offer.slices[0].segments[0].departLocal.slice(0, 10);
-}
-
-export function returnDate(offer: FlightOffer): string {
-  return offer.slices[1].segments[0].departLocal.slice(0, 10);
-}
-
-export interface RefusedFlight {
-  carrier: string;
-  flightNumber: string;
-}
-
-/**
- * Drops itineraries the airline has just shown it will not confirm.
- *
- * Two rules, learned from CERT: the exact flights that returned UC are out, and
- * so is any other codeshare *marketed by the same carrier* — when UA-marketed,
- * LH-operated segments will not confirm, the next UA-marketed LH-operated pair
- * will not either, and offering it just costs the patient another refusal.
- * Online (non-codeshare) flights by that carrier are still allowed.
- */
-export function excludeRefused(offers: FlightOffer[], refused: RefusedFlight[]): FlightOffer[] {
-  if (refused.length === 0) return offers;
-  const flights = new Set(refused.map((r) => `${r.carrier}${r.flightNumber}`));
-  const carriers = new Set(refused.map((r) => r.carrier));
-  return offers.filter((offer) =>
-    offer.slices.every((slice) =>
-      slice.segments.every((s) => {
-        if (flights.has(`${s.carrier}${s.flightNumber}`)) return false;
-        const codeshare = s.operatingCarrier !== undefined && s.operatingCarrier !== s.carrier;
-        return !(codeshare && carriers.has(s.carrier));
-      }),
-    ),
-  );
 }

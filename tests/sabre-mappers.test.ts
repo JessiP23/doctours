@@ -98,7 +98,7 @@ describe('the real payload passed through the trip rules', () => {
 
   it('rejects some real offers and explains why', () => {
     expect(rejected.length).toBeGreaterThan(0);
-    for (const r of rejected) expect(r.reason).toMatch(/cutoff|before the earliest|expected/);
+    for (const r of rejected) expect(r.reason).toMatch(/cutoff|before the earliest|expected|flown by/);
   });
 
   it('every surviving offer honours both hard deadlines', () => {
@@ -147,7 +147,7 @@ describe('operating carrier is preserved for Flight Check', () => {
 
 describe('excludeRefused — learning from a UC refusal', () => {
   it('drops the refused flights and every other codeshare marketed by that carrier, keeps the rest', async () => {
-    const { excludeRefused } = await import('@/lib/agent/tools/flight-offers');
+    const { excludeRefused } = await import('@/lib/trip/select');
     const { offers } = mapFlightShopResponse(fixture.response);
 
     // Take whichever carrier has codeshares in this payload (DL-marketed KL/AF flights
@@ -189,7 +189,7 @@ describe('excludeRefused — learning from a UC refusal', () => {
   });
 
   it('is a no-op with nothing refused', async () => {
-    const { excludeRefused } = await import('@/lib/agent/tools/flight-offers');
+    const { excludeRefused } = await import('@/lib/trip/select');
     const { offers } = mapFlightShopResponse(fixture.response);
     expect(excludeRefused(offers, [])).toBe(offers);
   });
@@ -208,5 +208,21 @@ describe('parseUnconfirmedFlights', () => {
       { carrier: 'UA', flightNumber: '8842' },
       { carrier: 'UA', flightNumber: '9126' },
     ]);
+  });
+});
+
+describe('the sourcing rule on the real payload', () => {
+  it('excludes every codeshare and keeps only itineraries the sandbox can sell', () => {
+    const { offers } = mapFlightShopResponse(fixture.response);
+    const { valid, rejected } = partitionOffers(offers, { ...TRIP_RULES, allowCodeshares: false });
+    const codeshares = rejected.filter((r) => r.code === 'CODESHARE_NOT_ALLOWED');
+    expect(codeshares.length).toBeGreaterThan(0);
+    for (const o of valid) {
+      for (const seg of o.slices.flatMap((s) => s.segments))
+        expect(seg.operatingCarrier).toBe(seg.carrier);
+    }
+    // There is still something to book: the Turkish non-stops.
+    expect(valid.length).toBeGreaterThan(0);
+    expect(valid.some((o) => o.slices.every((s) => s.stops === 0))).toBe(true);
   });
 });

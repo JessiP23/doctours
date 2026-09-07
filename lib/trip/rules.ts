@@ -34,6 +34,13 @@ export interface TripRules {
   cabin: Cabin;
   checkedBags: number;
   currency: string;
+  /**
+   * Whether itineraries may include codeshare segments — a seat sold by one
+   * airline on a flight operated by another. Sabre CERT cannot confirm those
+   * sells (the operating carrier's confirmation is not simulated), so they are
+   * excluded here; production can allow them once the sell path is proven.
+   */
+  allowCodeshares: boolean;
   hotel: HotelRule;
 }
 
@@ -52,6 +59,7 @@ export const TRIP_RULES: TripRules = {
   cabin: 'economy',
   checkedBags: 0,
   currency: 'USD',
+  allowCodeshares: false,
   hotel: {
     // Pinned after probing CERT inventory: of the three Istanbul properties that
     // return bookable rates for these dates (Holiday Inn City $107.94/night,
