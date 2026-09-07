@@ -606,12 +606,96 @@ async function e2e() {
   step('recorded in docs/BOOKINGS.md', { rows: rows.length });
 }
 
+/**
+ * Reads an order back from Sabre and prints what actually matters: whether the
+ * segments are confirmed, the dates held, and the hotel's own vendor
+ * confirmation. This is how a reference quoted in the chat is verified.
+ */
 async function lookup() {
   const [reference] = args;
   if (!reference) throw new Error('usage: lookup <reference>');
   const { result, requests } = await withProviderTrace(() => retrieveBooking(reference));
+  const b = result.raw as {
+    bookingId?: string;
+    startDate?: string;
+    endDate?: string;
+    isCancelable?: boolean;
+    isTicketed?: boolean;
+    travelers?: { givenName?: string; surname?: string }[];
+    flights?: {
+      airlineCode?: string;
+      flightNumber?: number;
+      fromAirportCode?: string;
+      toAirportCode?: string;
+      departureDate?: string;
+      departureTime?: string;
+      arrivalDate?: string;
+      arrivalTime?: string;
+      bookingClass?: string;
+      cabinTypeName?: string;
+      flightStatusCode?: string;
+      flightStatusName?: string;
+    }[];
+    hotels?: {
+      hotelName?: string;
+      confirmationId?: string;
+      checkInDate?: string;
+      checkOutDate?: string;
+      paymentPolicy?: string;
+      room?: {
+        roomType?: string;
+        description?: string;
+        roomRate?: { amount?: string; currencyCode?: string };
+      };
+    }[];
+  };
+
   const file = await saveFixture(`getbooking-${reference}`, { response: result.raw });
-  console.log(JSON.stringify({ ok: true, file, requests, shape: summarize(result.raw) }, null, 2));
+  const flights = (b.flights ?? []).map((f) => ({
+    segment: `${f.airlineCode}${f.flightNumber} ${f.fromAirportCode}→${f.toAirportCode}`,
+    departs: `${f.departureDate} ${f.departureTime?.slice(0, 5)}`,
+    arrives: `${f.arrivalDate} ${f.arrivalTime?.slice(0, 5)}`,
+    cabin: f.cabinTypeName,
+    class: f.bookingClass,
+    status: `${f.flightStatusCode} (${f.flightStatusName})`,
+  }));
+  const hotels = (b.hotels ?? []).map((h) => ({
+    property: h.hotelName,
+    vendorConfirmation: h.confirmationId,
+    checkIn: h.checkInDate,
+    checkOut: h.checkOutDate,
+    nights:
+      h.checkInDate && h.checkOutDate
+        ? Math.round((Date.parse(h.checkOutDate) - Date.parse(h.checkInDate)) / 86_400_000)
+        : undefined,
+    room: h.room?.roomType,
+    nightlyRate: h.room?.roomRate
+      ? `${h.room.roomRate.amount} ${h.room.roomRate.currencyCode}`
+      : undefined,
+    paymentPolicy: h.paymentPolicy,
+  }));
+
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        reference,
+        bookingId: b.bookingId,
+        holds: { from: b.startDate, to: b.endDate },
+        isTicketed: b.isTicketed,
+        isCancelable: b.isCancelable,
+        travelers: (b.travelers ?? []).map((t) => `${t.givenName} ${t.surname}`),
+        flights,
+        hotels,
+        allSegmentsConfirmed:
+          flights.length > 0 ? flights.every((f) => f.status.startsWith('HK')) : undefined,
+        file,
+        requests,
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 const commands: Record<string, () => Promise<void>> = {

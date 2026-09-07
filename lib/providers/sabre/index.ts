@@ -11,6 +11,7 @@ import type {
   Passenger,
   TravelProvider,
 } from '@/lib/providers/types';
+import { TtlCache } from '@/lib/providers/cache';
 import { ProviderError } from './errors';
 import { sabreFetch } from './http';
 import { mapFlightShopResponse, type FlightShopResponse } from './mappers';
@@ -39,6 +40,27 @@ import {
  */
 
 const SHOP_TIMEOUT_MS = 60_000;
+
+/**
+ * How long an identical flight search may be reused. Long enough to cover a
+ * patient refining their request across a few turns, short enough that the
+ * candidate set stays current. Prices are always re-checked live regardless.
+ */
+const SHOP_CACHE_TTL_MS = 180_000;
+
+const shopCache = new TtlCache<FlightShopResponse>('flightShop', { ttlMs: SHOP_CACHE_TTL_MS });
+
+function shopCacheKey(q: FlightSearch): string {
+  return [
+    q.origin,
+    q.destination,
+    q.departDate,
+    q.returnDate ?? '-',
+    q.adults,
+    q.cabin,
+    q.currency,
+  ].join('|');
+}
 
 interface CreateBookingResponse {
   confirmationId?: string;
@@ -172,13 +194,14 @@ export class SabreProvider implements TravelProvider {
   readonly name = 'sabre';
 
   async searchFlights(q: FlightSearch): Promise<FlightOffer[]> {
-    const body = buildFlightShopRequest(q);
-    const response = await sabreFetch<FlightShopResponse>({
-      method: 'POST',
-      path: '/v1/offers/flightShop',
-      body,
-      timeoutMs: SHOP_TIMEOUT_MS,
-    });
+    const response = await shopCache.get(shopCacheKey(q), () =>
+      sabreFetch<FlightShopResponse>({
+        method: 'POST',
+        path: '/v1/offers/flightShop',
+        body: buildFlightShopRequest(q),
+        timeoutMs: SHOP_TIMEOUT_MS,
+      }),
+    );
     const { offers, skipped } = mapFlightShopResponse(response, this.name);
     if (skipped.length > 0) log.warn({ skipped }, 'some flight offers could not be mapped');
     if (offers.length === 0) {

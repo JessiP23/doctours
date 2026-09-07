@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DateTime } from 'luxon';
 import * as repo from '@/lib/db/repo';
 import type { Json } from '@/lib/db/types';
 import { travelProvider } from '@/lib/providers/sabre';
@@ -37,6 +38,8 @@ export const searchHotelRatesTool = defineTool({
     let checkIn = input.checkIn;
     let checkOut = input.checkOut;
     let derivedFrom = 'the dates you gave me';
+    /** Local arrival time, so an early landing can be mentioned rather than discovered at the desk. */
+    let arriveLocal: string | undefined;
 
     if (!checkIn || !checkOut) {
       const flight = await repo.getLiveBooking(ctx.conversationId, 'flight');
@@ -56,6 +59,7 @@ export const searchHotelRatesTool = defineTool({
         const stay = deriveStay(offer.slices[0], offer.slices[1]);
         checkIn = stay.checkIn;
         checkOut = stay.checkOut;
+        arriveLocal = offer.slices[0].segments.at(-1)?.arriveLocal;
       } else {
         const details = flight.details as { hotelNights?: number } | null;
         return {
@@ -111,10 +115,29 @@ export const searchHotelRatesTool = defineTool({
       })),
     );
 
+    // The room is not ready until check-in time; if the flight lands well before it,
+    // that is the patient's problem to know about now, not at the desk.
+    let earlyArrival: { arriveLocal: string; checkInFrom: string; hoursEarly: number } | undefined;
+    if (arriveLocal) {
+      const arrival = DateTime.fromISO(arriveLocal, { zone: rules.destinationTz });
+      const ready = DateTime.fromISO(`${checkIn}T${rules.hotel.checkInTime}`, {
+        zone: rules.destinationTz,
+      });
+      const hoursEarly = ready.diff(arrival, 'hours').hours;
+      if (hoursEarly >= 2) {
+        earlyArrival = {
+          arriveLocal,
+          checkInFrom: rules.hotel.checkInTime,
+          hoursEarly: Math.round(hoursEarly * 10) / 10,
+        };
+      }
+    }
+
     return {
       hotel: rules.hotel.name,
       checkIn,
       checkOut,
+      ...(earlyArrival ? { earlyArrival } : {}),
       nights: rows[0] ? (rows[0].summary as { nights?: number }).nights : undefined,
       datesFrom: derivedFrom,
       checkInFrom: rules.hotel.checkInTime,

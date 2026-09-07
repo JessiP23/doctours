@@ -146,6 +146,32 @@ npm run check      # typecheck, lint, prettier, tests
 `npm run check` also runs on `git push` via a pre-push hook. The mapper tests run
 against committed real CERT payloads, so they need no network.
 
+## What a booking actually is
+
+Both bookings are Sabre orders in the CERT environment, retrievable by reference.
+`npm run sabre:smoke -- lookup <reference>` reads one back and prints what Sabre holds.
+A confirmed flight order looks like this:
+
+| Field                                     | Meaning                                                                                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `bookingId`                               | the record locator quoted to the patient, e.g. `OCGMJQ`                                                            |
+| `flights[].flightStatusCode`              | **`HK` = confirmed** — the seat is held. This is the field that proves a booking is real                           |
+| `flights[].bookingClass`, `cabinTypeName` | the class actually sold, e.g. `V` / `ECONOMY`                                                                      |
+| `startDate`, `endDate`                    | the span the order holds                                                                                           |
+| `isTicketed`                              | `false` — booked, not yet ticketed. Ticketing is a separate step (Fulfill Flight Tickets) and is out of scope here |
+| `travelers[]`                             | the passenger as filed                                                                                             |
+
+A hotel order carries `hotels[]` with the property name, `checkInDate` / `checkOutDate`,
+the room and rate, `paymentPolicy` (`DEPOSIT` here — hence the agency card), and
+`confirmationId`, which is _the hotel's own_ confirmation number, separate from the Sabre
+record locator.
+
+**"Fixed property"** means what the brief asks for: one named hotel where every patient
+stays, not a hotel search. It is `TRIP_RULES.hotel` — Holiday Inn City Istanbul, CERT
+property `100071112`. The **nights are not fixed**: they are derived from the flight
+actually booked, so a flight landing a day early produces a six-night stay and a
+different flight a five-night one. Both cases have been booked and verified.
+
 ## Deploying
 
 1. Import the repo on Vercel (framework auto-detects as Next.js; no build config needed).
