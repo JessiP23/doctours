@@ -438,25 +438,88 @@ async function e2e() {
   step('flights shopped', { found: found.length, valid: valid.length, rejected: rejected.length });
   if (valid.length === 0) throw new Error('No flight satisfies the trip rules');
 
-  const cheapest = [...valid].sort((a, b) => a.price.amount - b.price.amount)[0];
-  const stay = deriveStay(cheapest.slices[0], cheapest.slices[1]);
-  step('cheapest valid flight', {
-    priceUSD: cheapest.price.amount,
-    outbound: `${cheapest.slices[0].segments[0].departLocal} → ${cheapest.slices[0].segments.at(-1)!.arriveLocal}`,
-    inbound: `${cheapest.slices[1].segments[0].departLocal} → ${cheapest.slices[1].segments.at(-1)!.arriveLocal}`,
-    stops: cheapest.slices.map((s) => s.stops),
-    codeshare: cheapest.slices.some((s) =>
-      s.segments.some((g) => g.operatingCarrier !== g.carrier),
-    ),
-    stay,
-  });
+  // Cheapest first, one entry per distinct itinerary. Flight Shop is cache-based and
+  // Create Booking is live, so an airline can refuse the cached class ("UC"); the
+  // script then moves to the next itinerary, as a patient would.
+  const seen = new Set<string>();
+  const candidates = [...valid]
+    .sort((a, b) => a.price.amount - b.price.amount)
+    .filter((o) => {
+      const key = o.slices
+        .flatMap((sl) => sl.segments.map((g) => `${g.carrier}${g.flightNumber}@${g.departLocal}`))
+        .join('|');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 3);
 
-  // 2. Flight Check re-prices it (this is where a stale offer or a bad payload fails).
-  const priced = await provider.priceFlightOffer(cheapest);
-  step('flight check ok', {
-    priceUSD: priced.price.amount,
-    changed: priced.price.amount !== cheapest.price.amount,
-  });
+  let chosen = candidates[0];
+  let priced = chosen;
+  let stay = deriveStay(chosen.slices[0], chosen.slices[1]);
+  let flight: Awaited<ReturnType<typeof provider.createFlightOrder>> | undefined;
+
+  for (const [attempt, candidate] of candidates.entries()) {
+    chosen = candidate;
+    stay = deriveStay(candidate.slices[0], candidate.slices[1]);
+    step(`candidate ${attempt + 1}`, {
+      priceUSD: candidate.price.amount,
+      outbound: `${candidate.slices[0].segments[0].departLocal} → ${candidate.slices[0].segments.at(-1)!.arriveLocal}`,
+      inbound: `${candidate.slices[1].segments[0].departLocal} → ${candidate.slices[1].segments.at(-1)!.arriveLocal}`,
+      stops: candidate.slices.map((sl) => sl.stops),
+      classes: candidate.slices.flatMap((sl) =>
+        sl.segments.map((g) => `${g.carrier}${g.flightNumber}:${g.bookingClass}`),
+      ),
+      codeshare: candidate.slices.some((sl) =>
+        sl.segments.some((g) => g.operatingCarrier !== g.carrier),
+      ),
+      stay,
+    });
+
+    // 2. Flight Check re-prices it live. Keep the raw response: if the classes it
+    //    validated differ from the cached ones, this fixture is how we prove it.
+    const check = await provider.flightCheck(candidate);
+    await saveFixture(`e2e-flightcheck-${attempt + 1}`, {
+      request: 'see provider',
+      response: check.raw,
+    });
+    if (!check.offer) {
+      step('flight check found nothing', { attempt: attempt + 1 });
+      continue;
+    }
+    priced =
+      check.offer.slices.length > 0 ? check.offer : { ...check.offer, slices: candidate.slices };
+    step('flight check ok', {
+      priceUSD: priced.price.amount,
+      changed: priced.price.amount !== candidate.price.amount,
+      classes: priced.slices.flatMap((sl) =>
+        sl.segments.map((g) => `${g.carrier}${g.flightNumber}:${g.bookingClass}`),
+      ),
+    });
+
+    if (dryRun) break;
+
+    // 4a. Book the flight. A UC (airline could not confirm) moves to the next candidate.
+    try {
+      flight = await provider.createFlightOrder(priced, [guest]);
+      step('FLIGHT BOOKED', {
+        bookingReference: flight.bookingReference,
+        orderId: flight.id,
+        attempt: attempt + 1,
+      });
+      break;
+    } catch (e) {
+      const err = e as { code?: string; message?: string };
+      if (err.code === 'NO_AVAILABILITY') {
+        step('airline could not confirm, trying next itinerary', {
+          attempt: attempt + 1,
+          reason: err.message,
+        });
+        continue;
+      }
+      throw e;
+    }
+  }
 
   // 3. Rooms for the derived nights, cheapest first.
   const rates = await provider.searchHotelRates({
@@ -483,11 +546,10 @@ async function e2e() {
     step('dry run complete — nothing booked');
     return;
   }
+  if (!flight)
+    throw new Error(`No candidate itinerary could be booked (${candidates.length} tried)`);
 
-  // 4. Book the flight, then the hotel. References come only from Sabre's responses.
-  const flight = await provider.createFlightOrder(priced, [guest]);
-  step('FLIGHT BOOKED', { bookingReference: flight.bookingReference, orderId: flight.id });
-
+  // 4b. Book the hotel. References come only from Sabre's responses.
   const hotel = await provider.createHotelBooking(room, guest);
   step('HOTEL BOOKED', {
     bookingReference: hotel.bookingReference,
@@ -526,7 +588,7 @@ async function e2e() {
   // 6. Record the run.
   const date = started.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
   const rows = [
-    `| ${date} | flight | ${flight.bookingReference} | ${flight.id} | scripts/sabre-smoke.ts e2e | $${priced.price.amount} ${cheapest.slices[0].segments[0].carrier}, ${stay.nights} nights derived |`,
+    `| ${date} | flight | ${flight.bookingReference} | ${flight.id} | scripts/sabre-smoke.ts e2e | $${priced.price.amount} ${chosen.slices[0].segments[0].carrier}, ${stay.nights} nights derived |`,
     `| ${date} | hotel | ${hotel.bookingReference} | ${hotel.id} | scripts/sabre-smoke.ts e2e | ${room.propertyName}, ${room.roomName}, $${hotel.total.amount} |`,
   ];
   await appendFile(path.resolve(process.cwd(), 'docs/BOOKINGS.md'), rows.join('\n') + '\n');

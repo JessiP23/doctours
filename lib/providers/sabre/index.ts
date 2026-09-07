@@ -170,12 +170,14 @@ export class SabreProvider implements TravelProvider {
   }
 
   /**
-   * Re-validates a chosen itinerary and returns the current offer.
-   *
-   * This is the expiry/price-change check: Flight Check re-prices the exact
-   * flights, so a stale offer surfaces here rather than at booking time.
+   * Flight Check: revalidates the exact flights live and returns the current
+   * offer, plus the raw response so a mismatch can be diagnosed from a fixture.
+   * The returned offer's segments carry the booking class Flight Check actually
+   * validated, which may differ from the cached class Flight Shop quoted.
    */
-  async priceFlightOffer(offer: FlightOffer): Promise<FlightOffer> {
+  async flightCheck(
+    offer: FlightOffer,
+  ): Promise<{ raw: FlightShopResponse; offer: FlightOffer | null }> {
     const env = getEnv();
     const body = buildFlightCheckRequest(flightCheckPayload(offer), {
       adults: 1,
@@ -183,22 +185,43 @@ export class SabreProvider implements TravelProvider {
       currency: offer.price.currency,
       cabin: offer.cabin,
     });
-    const response = await sabreFetch<FlightShopResponse>({
+    const raw = await sabreFetch<FlightShopResponse>({
       method: 'POST',
       path: '/v1/offers/flightCheck',
       body,
       timeoutMs: SHOP_TIMEOUT_MS,
     });
-    const { offers } = mapFlightShopResponse(response, this.name);
-    const priced = offers[0];
+    const { offers, skipped } = mapFlightShopResponse(raw, this.name);
+    if (skipped.length > 0) log.warn({ skipped }, 'flight check offers could not be mapped');
+    const priced = offers[0] ?? null;
+    if (priced) {
+      const before = offer.slices.flatMap((sl) => sl.segments.map((g) => g.bookingClass));
+      const after = priced.slices.flatMap((sl) => sl.segments.map((g) => g.bookingClass));
+      if (before.join() !== after.join()) {
+        log.info(
+          { before, after },
+          'flight check moved the itinerary to different booking classes',
+        );
+      }
+    }
+    return { raw, offer: priced };
+  }
+
+  /**
+   * Re-validates a chosen itinerary and returns the current offer.
+   *
+   * This is the expiry/price-change check: a stale fare surfaces here rather than
+   * at booking time.
+   */
+  async priceFlightOffer(offer: FlightOffer): Promise<FlightOffer> {
+    const { offer: priced } = await this.flightCheck(offer);
     if (!priced) {
       throw new ProviderError(
         'OFFER_EXPIRED',
         'These flights are no longer available at that price',
       );
     }
-    // Keep the caller's slices (already validated) but adopt the fresh price and id.
-    return { ...priced, slices: priced.slices.length > 0 ? priced.slices : offer.slices };
+    return priced.slices.length > 0 ? priced : { ...priced, slices: offer.slices };
   }
 
   async createFlightOrder(offer: FlightOffer, passengers: Passenger[]): Promise<FlightOrder> {

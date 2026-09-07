@@ -38,7 +38,11 @@ import {
  * price: the agent can then ask one question ("still want it at $X?") instead of
  * starting the search over.
  */
-async function reofferAfterExpiry(conversationId: string, expired: FlightOffer) {
+async function reofferAfterExpiry(
+  conversationId: string,
+  expired: FlightOffer,
+  opts: { excludeSameItinerary?: boolean } = {},
+) {
   const rules = await rulesFor(conversationId);
   const wanted = itinerarySignature(expired);
   const { offers } = await searchAllowedFlights(rules, {
@@ -46,7 +50,9 @@ async function reofferAfterExpiry(conversationId: string, expired: FlightOffer) 
     returnDate: returnDate(expired),
   });
 
-  const same = offers.find((o) => itinerarySignature(o) === wanted);
+  const same = opts.excludeSameItinerary
+    ? undefined
+    : offers.find((o) => itinerarySignature(o) === wanted);
   if (same) {
     const [row] = await persistFlightOffers(conversationId, [same]);
     return {
@@ -164,7 +170,26 @@ export const createFlightOrderTool = defineTool({
       };
     }
 
-    const order = await provider.createFlightOrder(priced, [input.passenger]);
+    let order;
+    try {
+      order = await provider.createFlightOrder(priced, [input.passenger]);
+    } catch (e) {
+      if (isProviderError(e) && e.code === 'NO_AVAILABILITY') {
+        // The airline refused to sell that booking class. Those exact flights are
+        // not bookable right now, so offer other itineraries, never the same one.
+        const reoffer = await reofferAfterExpiry(ctx.conversationId, offer, {
+          excludeSameItinerary: true,
+        });
+        return {
+          booked: false,
+          reason: 'AIRLINE_COULD_NOT_CONFIRM',
+          message:
+            'The airline would not confirm seats on those flights at that fare, so nothing was booked or charged. Tell the patient plainly and offer one of the alternatives below.',
+          ...reoffer,
+        };
+      }
+      throw e;
+    }
     const stay = deriveStay(order.slices[0], order.slices[1]);
 
     const booking = await repo.insertBooking(ctx.conversationId, {
