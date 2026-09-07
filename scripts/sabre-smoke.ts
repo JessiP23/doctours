@@ -238,6 +238,18 @@ async function hotelsProbe() {
       }),
     },
     {
+      name: 'beta hotelSearch @ Istanbul lat/long 20mi',
+      path: '/v1/hotels/hotelSearch',
+      body: {
+        radiusInMiles: 20,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        numberOfAdults: 1,
+        latitude: 41.0082,
+        longitude: 28.9784,
+      },
+    },
+    {
       name: 'v5 avail geo IST 30mi source 100,113',
       path: '/v5/get/hotelavail',
       body: buildHotelAvailRequest(

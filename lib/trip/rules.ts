@@ -53,9 +53,12 @@ export const TRIP_RULES: TripRules = {
   checkedBags: 0,
   currency: 'USD',
   hotel: {
-    // Placeholder until the CERT smoke test confirms a property with availability.
-    providerPropertyId: 'TBD',
-    name: 'TBD',
+    // Pinned after probing CERT inventory: of the three Istanbul properties that
+    // return bookable rates for these dates (Holiday Inn City $107.94/night,
+    // Hilton $382.54, Ritz-Carlton $468.91) this is the cheapest and sits in
+    // Fatih, close to the hospital district. See docs/DECISIONS.md #13.
+    providerPropertyId: '100071112',
+    name: 'Holiday Inn City Istanbul',
     city: 'Istanbul',
     checkInTime: '15:00',
     checkOutTime: '12:00',
