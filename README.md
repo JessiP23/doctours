@@ -8,8 +8,8 @@ The trip it books: **JFK → IST → JFK**, procedure 13 October 2026 at 8:00 AM
 time, on the ground in Istanbul by 8:00 PM on the 12th, no flight home before noon on
 the 17th, economy, no checked bags, USD, staying at the **Holiday Inn City Istanbul**.
 
-- Live app: _add the Vercel URL_
-- Health check: `/api/health`
+- Live app: **https://doctours.vercel.app**
+- Health check: [/api/health](https://doctours.vercel.app/api/health) — four checks: configuration, database schema, Sabre auth, model
 - Judgment calls: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 - Known bugs, honestly: [`docs/BUGS.md`](docs/BUGS.md)
 - Booking references from real runs: [`docs/BOOKINGS.md`](docs/BOOKINGS.md)

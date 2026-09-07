@@ -12,6 +12,13 @@ Only references returned by Sabre CERT. Never hand-typed from memory.
 | 2026-09-07 21:40 UTC | flight | RSZVBJ    | RSZVBJ                                  | chat conversation                            | Turkish non-stop, Oct 11 → 17, $1440.83. Patient asked for non-stop and named airline; preferences layer.                    |
 | 2026-09-07 21:47 UTC | hotel  | RVXYRW    | RVXYRW                                  | chat conversation                            | Holiday Inn City Istanbul, Oct 12 → 17 (5 nights derived from RSZVBJ), flexible rate $708.79.                                |
 
+## Production
+
+Deployed at https://doctours.vercel.app. Verified there on 2026-09-07: health reports
+configuration (including the agency card), all five tables, Sabre auth and the model;
+the chat searches live and answers honestly about what is not available ("There's
+nothing on Delta for this route" — followed by the carriers that do fly it).
+
 ## Verifying a reference
 
 ```
