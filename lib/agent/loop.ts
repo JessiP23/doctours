@@ -1,0 +1,224 @@
+import Anthropic from '@anthropic-ai/sdk';
+import { getEnv } from '@/lib/env';
+import { log } from '@/lib/log';
+import * as repo from '@/lib/db/repo';
+import type { Json } from '@/lib/db/types';
+import { withProviderTrace } from '@/lib/providers/trace';
+import { isProviderError } from '@/lib/providers/sabre/errors';
+import { humanizeBubbles, textToBubbles } from '@/lib/text/humanize';
+import type { TripRules } from '@/lib/trip/rules';
+import { anthropicTools, getTool } from './tools';
+import { REPLY_TOOL_NAME, replySchema } from './tools/reply';
+import { buildTripState } from './state';
+import { buildSystemPrompt } from './system';
+
+/**
+ * One user turn = one call to runTurn().
+ *
+ *  load history ─▶ build state + system ─▶ model (tool_choice: any)
+ *       ▲                                         │
+ *       │        persist assistant blocks         ▼
+ *       └── persist tool_results ◀── run tools ◀──┴── reply? → return bubbles
+ *
+ * Stateless: everything is read from and written to the DB each turn.
+ */
+export interface TurnResult {
+  bubbles: string[];
+  expectsInput: boolean;
+  iterations: number;
+}
+
+export interface ModelClient {
+  create(params: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message>;
+}
+
+const MAX_ITERATIONS = 8;
+const MAX_TOKENS = 1024;
+
+function defaultClient(): ModelClient {
+  const anthropic = new Anthropic({ apiKey: getEnv().ANTHROPIC_API_KEY });
+  return { create: (p) => anthropic.messages.create(p) };
+}
+
+function asJson(v: unknown): Json {
+  return JSON.parse(JSON.stringify(v ?? null)) as Json;
+}
+
+async function loadHistory(conversationId: string): Promise<Anthropic.MessageParam[]> {
+  const rows = await repo.listMessages(conversationId);
+  return rows.map((r) => ({
+    role: r.role,
+    content: r.content as unknown as Anthropic.MessageParam['content'],
+  }));
+}
+
+async function runTool(name: string, input: unknown, conversationId: string) {
+  const tool = getTool(name);
+  const started = Date.now();
+  const l = log.child({ conversationId, tool: name });
+
+  if (!tool) {
+    const error = { code: 'UNKNOWN_TOOL', message: `No tool named ${name}` };
+    await repo.recordToolCall(conversationId, {
+      toolName: name,
+      input: asJson(input),
+      output: null,
+      error,
+      providerRequests: null,
+      durationMs: 0,
+    });
+    return { ok: false as const, error };
+  }
+
+  const parsed = tool.schema.safeParse(input);
+  if (!parsed.success) {
+    const error = {
+      code: 'INVALID_INPUT',
+      message: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+    };
+    l.warn({ error }, 'tool input rejected');
+    await repo.recordToolCall(conversationId, {
+      toolName: name,
+      input: asJson(input),
+      output: null,
+      error,
+      providerRequests: null,
+      durationMs: Date.now() - started,
+    });
+    return { ok: false as const, error };
+  }
+
+  try {
+    const { result, requests } = await withProviderTrace(() =>
+      tool.handler(parsed.data, { conversationId }),
+    );
+    const durationMs = Date.now() - started;
+    l.info({ durationMs, providerRequests: requests }, 'tool ok');
+    await repo.recordToolCall(conversationId, {
+      toolName: name,
+      input: asJson(parsed.data),
+      output: asJson(result),
+      error: null,
+      providerRequests: asJson(requests),
+      durationMs,
+    });
+    return { ok: true as const, result };
+  } catch (e) {
+    const durationMs = Date.now() - started;
+    const error = isProviderError(e)
+      ? e.toJSON()
+      : { code: 'TOOL_FAILED', message: e instanceof Error ? e.message : String(e) };
+    l.error({ error, durationMs }, 'tool failed');
+    await repo.recordToolCall(conversationId, {
+      toolName: name,
+      input: asJson(parsed.data),
+      output: null,
+      error,
+      providerRequests: null,
+      durationMs,
+    });
+    return { ok: false as const, error };
+  }
+}
+
+export async function runTurn(
+  conversationId: string,
+  userText: string,
+  rules: TripRules,
+  deps: { client?: ModelClient; model?: string } = {},
+): Promise<TurnResult> {
+  const client = deps.client ?? defaultClient();
+  const model = deps.model ?? getEnv().ANTHROPIC_MODEL;
+  const l = log.child({ conversationId });
+
+  await repo.appendMessage(conversationId, 'user', [{ type: 'text', text: userText }]);
+  const history = await loadHistory(conversationId);
+  const tools = anthropicTools();
+
+  for (let i = 1; i <= MAX_ITERATIONS; i++) {
+    const [bookings, flightOffers, hotelOffers] = await Promise.all([
+      repo.listBookings(conversationId),
+      repo.listRecentOffers(conversationId, 'flight', 6),
+      repo.listRecentOffers(conversationId, 'hotel_rate', 6),
+    ]);
+    const state = buildTripState(rules, bookings, [...flightOffers, ...hotelOffers]);
+    const system = buildSystemPrompt(state);
+
+    const response = await client.create({
+      model,
+      max_tokens: MAX_TOKENS,
+      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+      tools,
+      tool_choice: { type: 'any' },
+      messages: history,
+    });
+    l.info({ iteration: i, stop: response.stop_reason, usage: response.usage }, 'model response');
+
+    const assistantContent = response.content as unknown as Json;
+    await repo.appendMessage(conversationId, 'assistant', assistantContent);
+    history.push({ role: 'assistant', content: response.content });
+
+    const toolUses = response.content.filter(
+      (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use',
+    );
+
+    // No tool call at all (shouldn't happen with tool_choice any): humanize free text.
+    if (toolUses.length === 0) {
+      const text = response.content
+        .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+        .map((b) => b.text)
+        .join('\n\n');
+      return {
+        bubbles: textToBubbles(
+          text || 'Give me a second, I lost my train of thought. Could you say that again?',
+        ),
+        expectsInput: true,
+        iterations: i,
+      };
+    }
+
+    const reply = toolUses.find((t) => t.name === REPLY_TOOL_NAME);
+    const others = toolUses.filter((t) => t.name !== REPLY_TOOL_NAME);
+
+    const results: Anthropic.ToolResultBlockParam[] = [];
+    for (const t of others) {
+      const r = await runTool(t.name, t.input, conversationId);
+      results.push({
+        type: 'tool_result',
+        tool_use_id: t.id,
+        content: JSON.stringify(r.ok ? r.result : { error: r.error }),
+        is_error: !r.ok,
+      });
+    }
+
+    if (reply) {
+      const parsed = replySchema.safeParse(reply.input);
+      // Close the tool_use so history stays valid for the next turn.
+      results.push({ type: 'tool_result', tool_use_id: reply.id, content: 'delivered' });
+      await repo.appendMessage(conversationId, 'user', results as unknown as Json);
+      if (parsed.success) {
+        return {
+          bubbles: humanizeBubbles(parsed.data.bubbles),
+          expectsInput: parsed.data.expectsInput,
+          iterations: i,
+        };
+      }
+      l.warn({ issues: parsed.error.issues }, 'reply rejected by schema, falling back');
+      const raw = (reply.input as { bubbles?: unknown })?.bubbles;
+      const bubbles = Array.isArray(raw)
+        ? humanizeBubbles(raw.map(String))
+        : ['Sorry, I garbled that. Could you say it again?'];
+      return { bubbles, expectsInput: true, iterations: i };
+    }
+
+    await repo.appendMessage(conversationId, 'user', results as unknown as Json);
+    history.push({ role: 'user', content: results });
+  }
+
+  l.error('agent loop exhausted without a reply');
+  return {
+    bubbles: ['I got a bit tangled up there. Could you tell me again what you’d like to do?'],
+    expectsInput: true,
+    iterations: MAX_ITERATIONS,
+  };
+}
