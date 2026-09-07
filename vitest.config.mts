@@ -7,6 +7,10 @@ export default defineConfig({
     passWithNoTests: true,
   },
   resolve: {
-    alias: { '@': new URL('.', import.meta.url).pathname },
+    alias: {
+      '@': new URL('.', import.meta.url).pathname,
+      // `server-only` throws on import outside RSC; stub it so server modules are testable.
+      'server-only': new URL('./tests/stubs/server-only.ts', import.meta.url).pathname,
+    },
   },
 });

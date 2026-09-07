@@ -1,12 +1,13 @@
 import type { ToolDefinition } from './define';
 import { toAnthropicTool } from './define';
 import { replyTool } from './reply';
+import { getTripStateTool } from './get_trip_state';
 
 /**
  * Tool registry. Booking tools register here as they land; the loop only ever
  * consults this list. Order matters slightly: the model reads it top to bottom.
  */
-const registry: ToolDefinition[] = [replyTool];
+const registry: ToolDefinition[] = [getTripStateTool, replyTool];
 
 export function registerTools(...tools: ToolDefinition[]): void {
   for (const t of tools) {

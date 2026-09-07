@@ -6,6 +6,7 @@ import { z } from 'zod';
 const mem = {
   messages: [] as { role: string; content: unknown }[],
   toolCalls: [] as { toolName: string; error: unknown }[],
+  bookings: [] as { kind: string; status: string; booking_reference: string }[],
 };
 vi.mock('@/lib/db/repo', () => ({
   appendMessage: vi.fn(async (_c: string, role: string, content: unknown) => {
@@ -15,7 +16,7 @@ vi.mock('@/lib/db/repo', () => ({
   listMessages: vi.fn(async () =>
     mem.messages.map((m, i) => ({ id: i + 1, role: m.role, content: m.content })),
   ),
-  listBookings: vi.fn(async () => []),
+  listBookings: vi.fn(async () => mem.bookings),
   listRecentOffers: vi.fn(async () => []),
   recordToolCall: vi.fn(async (_c: string, t: { toolName: string; error: unknown }) => {
     mem.toolCalls.push(t);
@@ -78,6 +79,7 @@ function scripted(
 beforeEach(() => {
   mem.messages = [];
   mem.toolCalls = [];
+  mem.bookings = [];
 });
 
 describe('runTurn', () => {
@@ -144,6 +146,55 @@ describe('runTurn', () => {
     ]);
     const r = await runTurn('c1', 'x', TRIP_RULES, { client, model: 'test' });
     expect(r.bubbles).toEqual(['Hello', 'I can help. Ready?']);
+  });
+
+  it('never delivers a fabricated booking reference: corrects the model, then delivers the corrected reply', async () => {
+    const client = scripted([
+      msg([
+        use('t1', 'reply', {
+          bubbles: ['All booked! Your reference is XYZ789.'],
+          expectsInput: false,
+        }),
+      ]),
+      msg([
+        use('t2', 'reply', {
+          bubbles: ['Sorry, nothing is booked yet. Want me to look for flights?'],
+          expectsInput: true,
+        }),
+      ]),
+    ]);
+    const r = await runTurn('c1', 'did you book it?', TRIP_RULES, { client, model: 'test' });
+    expect(r.bubbles.join(' ')).not.toContain('XYZ789');
+    expect(r.bubbles[0]).toContain('nothing is booked yet');
+    expect(r.iterations).toBe(2);
+    // the model was told what it did wrong
+    const correction = JSON.stringify(client.calls[1].messages.at(-1)!.content);
+    expect(correction).toContain('XYZ789');
+    expect(correction).toContain('Nothing has been booked yet');
+  });
+
+  it('allows a reference that exists in the bookings table', async () => {
+    mem.bookings = [{ kind: 'flight', status: 'confirmed', booking_reference: 'ABC12D' }];
+    const client = scripted([
+      msg([
+        use('t1', 'reply', { bubbles: ['You’re set, reference ABC12D.'], expectsInput: false }),
+      ]),
+    ]);
+    const r = await runTurn('c1', 'reference?', TRIP_RULES, { client, model: 'test' });
+    expect(r.bubbles[0]).toContain('ABC12D');
+    expect(r.iterations).toBe(1);
+  });
+
+  it('gives up safely if the model invents a reference twice', async () => {
+    const client = scripted([
+      msg([use('t1', 'reply', { bubbles: ['Booked, ref QWE123.'], expectsInput: false })]),
+      msg([use('t2', 'reply', { bubbles: ['Sorry, ref RTY456.'], expectsInput: false })]),
+    ]);
+    const r = await runTurn('c1', 'x', TRIP_RULES, { client, model: 'test' });
+    const text = r.bubbles.join(' ');
+    expect(text).not.toContain('QWE123');
+    expect(text).not.toContain('RTY456');
+    expect(text).toContain('mixed up');
   });
 
   it('injects live state into the system prompt', async () => {

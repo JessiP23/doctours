@@ -8,6 +8,7 @@ import { isProviderError } from '@/lib/providers/sabre/errors';
 import { humanizeBubbles, textToBubbles } from '@/lib/text/humanize';
 import type { TripRules } from '@/lib/trip/rules';
 import { anthropicTools, getTool } from './tools';
+import { checkReferences } from './guard';
 import { REPLY_TOOL_NAME, replySchema } from './tools/reply';
 import { buildTripState } from './state';
 import { buildSystemPrompt } from './system';
@@ -134,6 +135,7 @@ export async function runTurn(
   await repo.appendMessage(conversationId, 'user', [{ type: 'text', text: userText }]);
   const history = await loadHistory(conversationId);
   const tools = anthropicTools();
+  let referenceRetryUsed = false;
 
   for (let i = 1; i <= MAX_ITERATIONS; i++) {
     const [bookings, flightOffers, hotelOffers] = await Promise.all([
@@ -195,14 +197,49 @@ export async function runTurn(
       const parsed = replySchema.safeParse(reply.input);
       // Close the tool_use so history stays valid for the next turn.
       results.push({ type: 'tool_result', tool_use_id: reply.id, content: 'delivered' });
-      await repo.appendMessage(conversationId, 'user', results as unknown as Json);
+
       if (parsed.success) {
-        return {
-          bubbles: humanizeBubbles(parsed.data.bubbles),
-          expectsInput: parsed.data.expectsInput,
-          iterations: i,
-        };
+        const bubbles = humanizeBubbles(parsed.data.bubbles);
+        const knownReferences = bookings
+          .filter((b) => b.status === 'confirmed')
+          .map((b) => b.booking_reference);
+        const guard = checkReferences(bubbles, knownReferences);
+
+        if (guard.ok) {
+          await repo.appendMessage(conversationId, 'user', results as unknown as Json);
+          return { bubbles, expectsInput: parsed.data.expectsInput, iterations: i };
+        }
+
+        // The reply quoted something shaped like a record locator that is not in the
+        // bookings table. Never deliver it: correct the model once, then give up safely.
+        l.error(
+          { violations: guard.violations, iteration: i },
+          'reply quoted an unknown booking reference',
+        );
+        const correction = `You wrote ${guard.violations.join(', ')} as if it were a booking reference, but no booking with that reference exists for this trip. ${
+          knownReferences.length
+            ? `The only real references are: ${knownReferences.join(', ')}.`
+            : 'Nothing has been booked yet.'
+        } Never state a reference that is not in the booked state above. Reply again without inventing one.`;
+        const correctionBlocks = [...results, { type: 'text' as const, text: correction }];
+        await repo.appendMessage(conversationId, 'user', correctionBlocks as unknown as Json);
+
+        if (referenceRetryUsed) {
+          return {
+            bubbles: [
+              'Sorry, I mixed up the booking details there.',
+              'Let me re-check where your trip actually stands before I tell you anything else.',
+            ],
+            expectsInput: true,
+            iterations: i,
+          };
+        }
+        referenceRetryUsed = true;
+        history.push({ role: 'user', content: correctionBlocks });
+        continue;
       }
+
+      await repo.appendMessage(conversationId, 'user', results as unknown as Json);
       l.warn({ issues: parsed.error.issues }, 'reply rejected by schema, falling back');
       const raw = (reply.input as { bubbles?: unknown })?.bubbles;
       const bubbles = Array.isArray(raw)
