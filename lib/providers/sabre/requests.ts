@@ -185,6 +185,113 @@ export function buildGetBookingRequest(confirmationId: string) {
   return { confirmationId };
 }
 
+/** Agency identity stamped on every booking. Placeholder values are fine in CERT. */
+export const AGENCY = {
+  address: {
+    name: 'Doctours',
+    street: '1 Medical Tourism Way',
+    city: 'New York',
+    stateProvince: 'NY',
+    postalCode: '10001',
+    countryCode: 'US',
+    freeText: 'Doctours medical travel',
+  },
+  ticketingPolicy: 'TODAY',
+} as const;
+
+export interface CreateBookingFlight {
+  flightNumber: number;
+  airlineCode: string;
+  fromAirportCode: string;
+  toAirportCode: string;
+  departureDate: string;
+  departureTime: string; // HH:mm
+  bookingClass: string;
+}
+
+export interface CreateBookingTraveler {
+  givenName: string;
+  surname: string;
+  birthDate?: string;
+  passengerCode?: string;
+}
+
+export interface CreateBookingContact {
+  emails: string[];
+  phones: string[];
+}
+
+/**
+ * Create Booking for air content. Returns a confirmationId (the PNR locator),
+ * which is the booking reference the patient is given.
+ */
+export function buildCreateFlightBookingRequest(args: {
+  pcc: string;
+  flights: CreateBookingFlight[];
+  travelers: CreateBookingTraveler[];
+  contact: CreateBookingContact;
+}) {
+  return {
+    errorHandlingPolicy: ['HALT_ON_ERROR'],
+    targetPcc: args.pcc,
+    receivedFrom: 'Doctours agent',
+    agency: AGENCY,
+    travelers: args.travelers.map((t) => ({
+      givenName: t.givenName,
+      surname: t.surname,
+      ...(t.birthDate ? { birthDate: t.birthDate } : {}),
+      passengerCode: t.passengerCode ?? 'ADT',
+    })),
+    contactInfo: args.contact,
+    flightDetails: {
+      flights: args.flights.map((f) => ({
+        flightNumber: f.flightNumber,
+        airlineCode: f.airlineCode,
+        fromAirportCode: f.fromAirportCode,
+        toAirportCode: f.toAirportCode,
+        departureDate: f.departureDate,
+        departureTime: f.departureTime,
+        bookingClass: f.bookingClass,
+        flightStatusCode: 'NN',
+      })),
+      flightPricing: [{}],
+    },
+  };
+}
+
+/**
+ * Create Booking for a CSL hotel. `bookingKey` comes from Hotel Price Check;
+ * `paymentPolicy` from the guarantee type it reports.
+ */
+export function buildCreateHotelBookingRequest(args: {
+  pcc: string;
+  bookingKey: string;
+  travelers: CreateBookingTraveler[];
+  contact: CreateBookingContact;
+  paymentPolicy: string;
+  specialInstruction?: string;
+}) {
+  return {
+    errorHandlingPolicy: ['HALT_ON_ERROR'],
+    targetPcc: args.pcc,
+    receivedFrom: 'Doctours agent',
+    agency: AGENCY,
+    travelers: args.travelers.map((t) => ({
+      givenName: t.givenName,
+      surname: t.surname,
+      passengerCode: t.passengerCode ?? 'ADT',
+    })),
+    contactInfo: args.contact,
+    hotel: {
+      useCsl: true,
+      bookingKey: args.bookingKey,
+      rooms: [{ travelerIndices: args.travelers.map((_, i) => i + 1) }],
+      ...(args.specialInstruction ? { specialInstruction: args.specialInstruction } : {}),
+      paymentPolicy: args.paymentPolicy,
+    },
+  };
+}
+
 /** Agentic-ready Hotel Search (beta): flat JSON, searches around an airport code. */
 export function buildHotelSearchBetaRequest(
   stay: Pick<HotelSearch, 'checkIn' | 'checkOut' | 'adults'>,
