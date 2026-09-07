@@ -194,6 +194,12 @@ export function buildHotelPriceCheckRequest(pcc: string, rateKey: string) {
   };
 }
 
+/** Sabre allows up to 10 000 ms for asynchronous segment confirmation. */
+export const ASYNC_CONFIRM_WAIT_MS = 8000;
+
+/** Flight status codes that mean the segment was not sold (Sabre's documented default halt list). */
+export const UNSOLD_FLIGHT_STATUSES = ['NO', 'UC', 'US', 'UN', 'UU', 'LL', 'HL'] as const;
+
 /** Agency identity stamped on every booking. Placeholder values are fine in CERT. */
 export const AGENCY = {
   address: {
@@ -272,6 +278,10 @@ export function buildCreateFlightBookingRequest(args: {
     errorHandlingPolicy: ['HALT_ON_ERROR'],
     targetPcc: args.pcc,
     receivedFrom: 'Doctours agent',
+    // Codeshare and interline segments confirm asynchronously; with the default of
+    // 0 ms they are still "NN" (requested) when Sabre inspects them and the
+    // booking is rejected. Wait for the airline's answer.
+    asynchronousUpdateWaitTime: ASYNC_CONFIRM_WAIT_MS,
     agency: AGENCY,
     travelers: args.travelers.map((t) => ({
       givenName: normalizeName(t.givenName),
@@ -282,6 +292,9 @@ export function buildCreateFlightBookingRequest(args: {
     })),
     contactInfo: { emails: args.contact.emails, phones: args.contact.phones.map(normalizePhone) },
     flightDetails: {
+      // The statuses that mean "not sold" per Sabre's spec. Stated explicitly so a
+      // pending NN is not treated as a failure while the airline is still answering.
+      haltOnFlightStatusCodes: UNSOLD_FLIGHT_STATUSES,
       flights: args.flights.map((f) => ({
         flightNumber: f.flightNumber,
         airlineCode: f.airlineCode,

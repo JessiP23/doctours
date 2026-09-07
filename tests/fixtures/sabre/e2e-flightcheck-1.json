@@ -1,0 +1,203 @@
+{
+  "request": "see provider",
+  "response": {
+    "timestamp": "2026-09-07T20:47:58.792916411Z",
+    "flights": [
+      {
+        "id": "f3290e64-b3a0-4015-b839-fef7cb02e99f",
+        "departureAirportCode": "JFK",
+        "departureDate": "2026-10-10",
+        "departureTime": "21:50",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-11",
+        "arrivalTime": "11:45",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 405,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 8842,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "343",
+        "durationInMinutes": 475,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "b2eea372-ead2-4783-9d5c-0a4709b32e60",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-11",
+        "departureTime": "13:00",
+        "arrivalAirportCode": "IST",
+        "arrivalDate": "2026-10-11",
+        "arrivalTime": "17:05",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1300,
+        "marketingAirlineCode": "UA",
+        "marketingFlightNumber": 9126,
+        "disclosureAirlineCode": "LH",
+        "aircraftTypeCode": "32N",
+        "durationInMinutes": 185,
+        "departureTerminal": "1"
+      },
+      {
+        "id": "b5e827fb-760b-4a01-bb70-1407b7a24398",
+        "departureAirportCode": "FRA",
+        "departureDate": "2026-10-17",
+        "departureTime": "17:15",
+        "arrivalAirportCode": "JFK",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "20:05",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 404,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 404,
+        "aircraftTypeCode": "343",
+        "durationInMinutes": 530,
+        "departureTerminal": "1",
+        "arrivalTerminal": "1"
+      },
+      {
+        "id": "4719eba7-af9c-4739-8f7a-0f3f3266e2b2",
+        "departureAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "13:55",
+        "arrivalAirportCode": "FRA",
+        "arrivalDate": "2026-10-17",
+        "arrivalTime": "16:05",
+        "operatingAirlineCode": "LH",
+        "operatingFlightNumber": 1299,
+        "marketingAirlineCode": "LH",
+        "marketingFlightNumber": 1299,
+        "aircraftTypeCode": "32N",
+        "durationInMinutes": 190,
+        "arrivalTerminal": "1"
+      }
+    ],
+    "journeys": [
+      {
+        "id": "55ac366e-f866-4351-8c8f-289d13fa17d8",
+        "flightRefs": [
+          "4719eba7-af9c-4739-8f7a-0f3f3266e2b2",
+          "b5e827fb-760b-4a01-bb70-1407b7a24398"
+        ],
+        "requestedJourneyIndex": 1
+      },
+      {
+        "id": "c1c9985c-b1fe-4617-b954-8bbd04a1eddf",
+        "flightRefs": [
+          "f3290e64-b3a0-4015-b839-fef7cb02e99f",
+          "b2eea372-ead2-4783-9d5c-0a4709b32e60"
+        ],
+        "requestedJourneyIndex": 0
+      }
+    ],
+    "offers": [
+      {
+        "type": "FlightOffer",
+        "id": "e8cdcd92-34b6-4ec4-b85d-51a5717ec71b",
+        "createdAt": "2026-09-07T20:47:58.792Z",
+        "validUntil": "2026-09-07T21:07:58.792Z",
+        "source": {
+          "provider": "Sabre",
+          "distributionModel": "ATPCO"
+        },
+        "totalPrice": {
+          "amount": "1233.83",
+          "currencyCode": "USD"
+        },
+        "paymentTimeLimit": "2026-09-10T23:59:00Z",
+        "applicableToPseudoCityCodes": [
+          "REDACTED_PCC"
+        ],
+        "journeyRefs": [
+          "c1c9985c-b1fe-4617-b954-8bbd04a1eddf",
+          "55ac366e-f866-4351-8c8f-289d13fa17d8"
+        ],
+        "items": [
+          {
+            "type": "FlightOfferItem",
+            "id": "dummy-be42e477-6781-4fb4-b012-c40cfb6eccca",
+            "isMandatory": true,
+            "fares": [
+              {
+                "travelers": [
+                  {
+                    "passengerTypeCode": "ADT",
+                    "requestedTravelerIndex": 0
+                  }
+                ],
+                "fareTotal": {
+                  "equivalentFare": "481.00",
+                  "taxAmount": "752.83",
+                  "amount": "1233.83",
+                  "currencyCode": "USD"
+                },
+                "validatingAirlineCode": "UA",
+                "fareComponents": [
+                  {
+                    "amount": "100.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "200.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "TLW87TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "f3290e64-b3a0-4015-b839-fef7cb02e99f",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "b2eea372-ead2-4783-9d5c-0a4709b32e60",
+                        "bookingClassCode": "T",
+                        "cabinName": "Economy",
+                        "availabilityBreak": true
+                      }
+                    ],
+                    "brand": {
+                      "code": "BE",
+                      "name": "BASIC ECONOMY",
+                      "programId": 252891
+                    }
+                  },
+                  {
+                    "amount": "381.00",
+                    "currencyCode": "NUC",
+                    "publishedAmount": "762.00",
+                    "publishedCurrencyCode": "USD",
+                    "exchangeRate": "1.00000",
+                    "fareBasisCode": "VKA00TBQ",
+                    "segmentDetails": [
+                      {
+                        "flightRef": "4719eba7-af9c-4739-8f7a-0f3f3266e2b2",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy"
+                      },
+                      {
+                        "flightRef": "b5e827fb-760b-4a01-bb70-1407b7a24398",
+                        "bookingClassCode": "V",
+                        "cabinName": "Economy",
+                        "availabilityBreak": true
+                      }
+                    ],
+                    "brand": {
+                      "code": "ECOLIGHT",
+                      "name": "ECONOMY LIGHT",
+                      "programId": 252568
+                    }
+                  }
+                ]
+              }
+            ],
+            "isPartial": false
+          }
+        ]
+      }
+    ],
+    "offerValidationResults": [
+      {
+        "bookingClassCodeValidation": "Same cabin",
+        "offerRef": "e8cdcd92-34b6-4ec4-b85d-51a5717ec71b"
+      }
+    ]
+  }
+}

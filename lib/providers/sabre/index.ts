@@ -248,6 +248,21 @@ export class SabreProvider implements TravelProvider {
     // The reference is only ever read from the provider's response.
     const bookingReference = response.confirmationId;
     if (!bookingReference) {
+      const errors =
+        (response as { errors?: { type?: string; description?: string }[] }).errors ?? [];
+      // The airline did not confirm the segments (UC, or left at NN past the wait):
+      // the fare is effectively not sellable right now. Surface it as availability,
+      // which the tools know how to recover from, rather than as an opaque failure.
+      const unconfirmed = errors.filter(
+        (e) => e.type === 'UNABLE_TO_BOOK_FLIGHTS_WRONG_STATUS_CODE',
+      );
+      if (unconfirmed.length > 0) {
+        throw new ProviderError(
+          'NO_AVAILABILITY',
+          `The airline could not confirm seats: ${unconfirmed.map((e) => e.description).join('; ')}`,
+          { details: response },
+        );
+      }
       throw new ProviderError('BOOKING_FAILED', 'Sabre created no confirmation for this flight', {
         details: response,
       });

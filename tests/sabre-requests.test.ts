@@ -219,3 +219,30 @@ describe('buildCreateHotelBookingRequest', () => {
     expect(body.payment?.formsOfPayment[0].cardHolder.phone).toMatch(PHONE);
   });
 });
+
+describe('Create Booking waits for asynchronous confirmation', () => {
+  it('asks Sabre to wait for codeshare confirmation and states the unsold statuses explicitly', () => {
+    const body = buildCreateFlightBookingRequest({
+      pcc: 'ABCD',
+      flights: [
+        {
+          flightNumber: 8842,
+          airlineCode: 'UA',
+          fromAirportCode: 'JFK',
+          toAirportCode: 'FRA',
+          departureDate: '2026-10-10',
+          departureTime: '21:50',
+          bookingClass: 'T',
+        },
+      ],
+      travelers: [{ givenName: 'A', surname: 'B' }],
+      contact: { emails: ['a@b.c'], phones: ['1'] },
+    });
+    expect(body.asynchronousUpdateWaitTime).toBeGreaterThan(0);
+    expect(body.asynchronousUpdateWaitTime).toBeLessThanOrEqual(10000);
+    // NN (requested, pending) must not be in the halt list: it is what a codeshare
+    // looks like while the partner airline is still answering.
+    expect(body.flightDetails.haltOnFlightStatusCodes).not.toContain('NN');
+    expect(body.flightDetails.haltOnFlightStatusCodes).toContain('UC');
+  });
+});
