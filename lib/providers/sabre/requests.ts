@@ -65,16 +65,25 @@ export function buildFlightCheckRequest(journeys: FlightCheckFlight[][], adults:
 }
 
 export interface HotelGeoSearch {
-  /** IATA airport/city code used as the reference point (RefPointType 6 = airport). */
+  /** IATA airport/city code used as the reference point. */
   refPointCode: string;
   radiusMiles?: number;
   pageSize?: number;
+  /** RefPointType: '6' = airport, '16' = city. */
+  refPointType?: string;
 }
+
+/**
+ * Rate sources to query. '100' is Sabre GDS content, '113' aggregator content
+ * (e.g. Booking.com). CERT inventory differs per source, so this is configurable.
+ */
+export type RateSource = string;
 
 export function buildHotelAvailRequest(
   pcc: string,
   stay: Pick<HotelSearch, 'checkIn' | 'checkOut' | 'adults' | 'currency'>,
   target: { hotelCodes: string[] } | HotelGeoSearch,
+  opts: { rateSource?: RateSource } = {},
 ) {
   const searchTarget =
     'hotelCodes' in target
@@ -88,7 +97,11 @@ export function buildHotelAvailRequest(
             GeoRef: {
               Radius: target.radiusMiles ?? 20,
               UOM: 'MI',
-              RefPoint: { Value: target.refPointCode, ValueContext: 'CODE', RefPointType: '6' },
+              RefPoint: {
+                Value: target.refPointCode,
+                ValueContext: 'CODE',
+                RefPointType: target.refPointType ?? '6',
+              },
             },
           },
         };
@@ -110,7 +123,7 @@ export function buildHotelAvailRequest(
           PrepaidQualifier: 'IncludePrepaid',
           StayDateTimeRange: { StartDate: stay.checkIn, EndDate: stay.checkOut },
           Rooms: { Room: [{ Index: 1, Adults: stay.adults, Children: 0 }] },
-          RateSource: '100',
+          RateSource: opts.rateSource ?? '100',
         },
       },
     },
