@@ -1,0 +1,63 @@
+import type { Cabin } from '@/lib/providers/types';
+
+/**
+ * The trip contract for Level 0.
+ *
+ * Every hard constraint from the brief lives here — not in the prompt. Tools read
+ * these values instead of accepting them from the model, and `validate.ts` enforces
+ * them before anything is booked. Later levels turn some fields into per-conversation
+ * parameters (they are already snapshotted into `conversations.trip_rules`).
+ *
+ * Local times are wall-clock strings interpreted in the paired IANA zone.
+ */
+export interface HotelRule {
+  providerPropertyId: string;
+  name: string;
+  city: string;
+  checkInTime: string; // HH:mm local
+  checkOutTime: string; // HH:mm local
+}
+
+export interface TripRules {
+  origin: string;
+  destination: string;
+  originTz: string;
+  destinationTz: string;
+  procedureAtLocal: string; // destination local
+  mustArriveByLocal: string; // destination local, inclusive
+  earliestReturnDepartureLocal: string; // destination local, inclusive
+  /** Departure dates (origin local) to shop for the outbound leg. */
+  outboundDepartureDates: string[];
+  /** Departure dates (destination local) to shop for the return leg. */
+  returnDepartureDates: string[];
+  adults: number;
+  cabin: Cabin;
+  checkedBags: number;
+  currency: string;
+  hotel: HotelRule;
+}
+
+export const TRIP_RULES: TripRules = {
+  origin: 'JFK',
+  destination: 'IST',
+  originTz: 'America/New_York',
+  destinationTz: 'Europe/Istanbul',
+  procedureAtLocal: '2026-10-13T08:00',
+  mustArriveByLocal: '2026-10-12T20:00',
+  earliestReturnDepartureLocal: '2026-10-17T12:00',
+  // JFK→IST is overnight (~10h + 7h offset): a departure on the 11th lands on the 12th.
+  outboundDepartureDates: ['2026-10-11', '2026-10-10'],
+  returnDepartureDates: ['2026-10-17', '2026-10-18'],
+  adults: 1,
+  cabin: 'economy',
+  checkedBags: 0,
+  currency: 'USD',
+  hotel: {
+    // Placeholder until the CERT smoke test confirms a property with availability.
+    providerPropertyId: 'TBD',
+    name: 'TBD',
+    city: 'Istanbul',
+    checkInTime: '15:00',
+    checkOutTime: '12:00',
+  },
+};
