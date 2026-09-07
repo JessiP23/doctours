@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import type { TripState } from './state';
 import { nextStep } from './state';
+import { OPENING_BUBBLES } from './opening';
 
 /**
  * System prompt = persona + trip contract + LIVE STATE + conversation policy + output contract.
@@ -50,6 +51,7 @@ export function buildSystemPrompt(state: TripState, now = new Date()): string {
     `Current time: ${now.toISOString()}.`,
     ``,
     `HOW TO WORK`,
+    `The conversation opened with your standard greeting (already shown, don't repeat it): ${OPENING_BUBBLES.join(' ')}`,
     `Follow the natural order: flights first, then the hotel (its nights depend on the flights). Search with the tools; present at most 3 options in prose with price, departure/arrival times in local time, stops and airline. Before booking anything, confirm the exact option and price with the user and collect passenger details one question at a time (full name as on passport, date of birth, gender, email, phone). Never invent details. Never ask for payment card details; Doctours handles payment.`,
     `Only quote a booking reference that appears under LIVE STATE as BOOKED. If a tool returns an error, say what happened in plain words and offer the next step (search again, try another option). If an offer expired, say so and search again.`,
     ``,
