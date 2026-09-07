@@ -1,0 +1,424 @@
+{
+  "response": {
+    "GetHotelAvailRS": {
+      "ApplicationResults": {
+        "status": "Complete",
+        "Success": [
+          {
+            "timeStamp": "2026-09-07T12:11:52.179-05:00"
+          }
+        ]
+      },
+      "HotelAvailInfos": {
+        "OffSet": 1,
+        "MaxSearchResults": 1,
+        "HotelAvailInfo": [
+          {
+            "HotelInfo": {
+              "HotelCode": "100071112",
+              "CodeContext": "GLOBAL",
+              "HotelName": "Holiday Inn City Istanbul",
+              "ChainCode": "HI",
+              "ChainName": "Holiday Inn",
+              "BrandCode": "10001",
+              "BrandName": "Holiday Inn",
+              "SabreRating": "5.0",
+              "Ordinal": 1,
+              "SabreHotelCode": "37260",
+              "LocationInfo": {
+                "Latitude": "41.0166",
+                "Longitude": "28.929311",
+                "Address": {
+                  "AddressLine1": "Millet Cad 187",
+                  "CityName": {
+                    "CityCode": "IST",
+                    "value": "Istanbul"
+                  },
+                  "PostalCode": "34280",
+                  "CountryName": {
+                    "Code": "TR",
+                    "value": "Turkey"
+                  }
+                },
+                "Contact": {
+                  "Phone": "90-212-5309900",
+                  "Fax": "90-212-5309924"
+                }
+              },
+              "Amenities": {
+                "Amenity": [
+                  {
+                    "Code": 101,
+                    "Description": "Wheelchair access",
+                    "value": ""
+                  },
+                  {
+                    "Code": 137,
+                    "Description": "Complimentary in-room coffee or tea",
+                    "value": ""
+                  },
+                  {
+                    "Code": 179,
+                    "Description": "Wireless internet connection in public areas",
+                    "value": ""
+                  },
+                  {
+                    "Code": 198,
+                    "Description": "Non-smoking rooms (generic)",
+                    "value": ""
+                  },
+                  {
+                    "Code": 2,
+                    "Description": "24-hour room service",
+                    "value": ""
+                  },
+                  {
+                    "Code": 2005,
+                    "Description": "Minibar",
+                    "value": ""
+                  },
+                  {
+                    "Code": 2007,
+                    "Description": "In Room Safe",
+                    "value": ""
+                  },
+                  {
+                    "Code": 2008,
+                    "Description": "Smoking rooms available",
+                    "value": "1"
+                  },
+                  {
+                    "Code": 2009,
+                    "Description": "Free WIFI in meeting rooms",
+                    "value": ""
+                  },
+                  {
+                    "Code": 2017,
+                    "Description": "Crib charge",
+                    "value": ""
+                  },
+                  {
+                    "Code": 2035,
+                    "Description": "Recreation Facilities",
+                    "value": ""
+                  },
+                  {
+                    "Code": 2036,
+                    "Description": "Dining Room",
+                    "value": ""
+                  },
+                  {
+                    "Code": 215,
+                    "Description": "Exhibition/convention floor",
+                    "value": ""
+                  },
+                  {
+                    "Code": 22,
+                    "Description": "Concierge desk",
+                    "ComplimentaryInd": false,
+                    "value": ""
+                  },
+                  {
+                    "Code": 224,
+                    "Description": "Pets allowed",
+                    "ComplimentaryInd": false,
+                    "value": ""
+                  },
+                  {
+                    "Code": 228,
+                    "Description": "Business center",
+                    "value": ""
+                  },
+                  {
+                    "Code": 258,
+                    "Description": "ADA accessible",
+                    "value": ""
+                  },
+                  {
+                    "Code": 259,
+                    "Description": "High speed internet access",
+                    "value": ""
+                  },
+                  {
+                    "Code": 260,
+                    "Description": "Interior corridors",
+                    "value": ""
+                  },
+                  {
+                    "Code": 261,
+                    "Description": "High speed wireless",
+                    "value": ""
+                  },
+                  {
+                    "Code": 269,
+                    "Description": "Meeting rooms",
+                    "value": ""
+                  },
+                  {
+                    "Code": 48,
+                    "Description": "Health club",
+                    "value": ""
+                  },
+                  {
+                    "Code": 5,
+                    "Description": "Air conditioning",
+                    "value": ""
+                  },
+                  {
+                    "Code": 66,
+                    "Description": "Outdoor pool",
+                    "value": ""
+                  },
+                  {
+                    "Code": 71,
+                    "Description": "Pool",
+                    "value": ""
+                  },
+                  {
+                    "Code": 77,
+                    "Description": "Room service",
+                    "value": ""
+                  },
+                  {
+                    "Code": 92,
+                    "Description": "Translation services",
+                    "ComplimentaryInd": false,
+                    "value": ""
+                  },
+                  {
+                    "Code": 96,
+                    "Description": "Dry cleaning",
+                    "ComplimentaryInd": false,
+                    "value": ""
+                  },
+                  {
+                    "Code": 68,
+                    "Description": "Parking",
+                    "value": ""
+                  },
+                  {
+                    "Code": 42,
+                    "Description": "Free Parking",
+                    "value": ""
+                  }
+                ]
+              },
+              "SecurityFeatures": {
+                "SecurityFeature": [
+                  {
+                    "Code": 9,
+                    "Description": "Complies with Local/State/Federal fire laws",
+                    "value": ""
+                  }
+                ]
+              },
+              "PropertyQualityInfo": {
+                "PropertyQuality": [
+                  {
+                    "Code": 2001,
+                    "Description": "First Class"
+                  }
+                ]
+              }
+            },
+            "HotelRateInfo": {
+              "RateInfos": {
+                "ConvertedRateInfo": [
+                  {
+                    "StartDate": "2026-10-12",
+                    "EndDate": "2026-10-17",
+                    "AmountBeforeTax": "481.89",
+                    "AmountAfterTax": "539.72",
+                    "AverageNightlyRate": "107.94",
+                    "AverageNightlyRateBeforeTax": "96.37",
+                    "HighestNightlyRate": "96.37",
+                    "ApproxTotalPrice": "539.72",
+                    "CurrencyCode": "USD",
+                    "TaxInclusive": true,
+                    "RateSource": "100",
+                    "RateKey": "8qzNATcj8iNsG6y/NqosZBCsmazMBIbRsuhp4sK8Pm8zkseD/cEiWyIBwYUyGrAiD+vQrsO9siW/LbWzbuVYcGZ8tJJz/mpcFDBsL4JOXFSCnAAZg/qFjAEZwXWTQwgY5wUFReOws6x3GUKHRslQRMWLASik6tkWLVoyFB7f5EN18Pvk1rTk6K+b78or0lyZRQhVomToi0XU4cTBYRw9ICzLJsB7lTror5rHcobP/GW5JvKh9eSblW8lnanz+ojCSogiehQYH+mDEfkqfE8ivTEHTOp/x+ro0IKAiHb+B0tHnaI+mKQxB70M+zMYPoU5nuv3zA3wXHl9REZ1G0Iq4VhVJL1f1b362d18rxjL/J6L8pakqDLk2P8Dt4GZUe2tWqSQg5HunxuYNnPU8PrfI42oGaX+rmGexO4ojOvS0TYjWpPepmVqoQ0nilLAL295Ue+M4lqxq94W4clH+mL9/w0SYPRkwuNX4j7pWcjgKiSqnjwpB93v1G83AwzmRZRyWeAZb6p09jSa+RgOEsCMFCM60o+RhjBnvgBehAI+BBUNRaDCSKmznTZlGb0P9RfvTsvkkn2Cxnbcs2htD6zA/kJF0XoFH2A0479hXzOfY760hS3R2hIP+jDmtLbR1/WT8grOO/M8JwRW0dVAe5ypsg==",
+                    "Commission": {
+                      "Type": "Percentage",
+                      "CommissionDescription": {
+                        "Text": [
+                          "Commissionable Rate"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "Rooms": {
+                "Room": [
+                  {
+                    "RoomIndex": 1,
+                    "RoomType": "Standard Room",
+                    "RoomTypeCode": 82,
+                    "Adults": 1,
+                    "RoomDescription": {
+                      "Name": "BOOK EARLY ADVANCE PURCHASE",
+                      "Text": [
+                        "Standard Room"
+                      ]
+                    },
+                    "Occupancy": {
+                      "Max": 4
+                    },
+                    "RatePlans": {
+                      "RatePlan": [
+                        {
+                          "RatePlanName": "BOOK EARLY ADVANCE PURCHASE",
+                          "RatePlanCode": "005T",
+                          "RatePlanType": "24",
+                          "RatePlanTypeDescription": "Published",
+                          "PrepaidIndicator": true,
+                          "LimitedAvailability": "false",
+                          "RateSource": "100",
+                          "RateKey": "8qzNATcj8iNsG6y/NqosZBCsmazMBIbRsuhp4sK8Pm8zkseD/cEiWyIBwYUyGrAiD+vQrsO9siW/LbWzbuVYcGZ8tJJz/mpcFDBsL4JOXFSCnAAZg/qFjAEZwXWTQwgY5wUFReOws6x3GUKHRslQRMWLASik6tkWLVoyFB7f5EN18Pvk1rTk6K+b78or0lyZRQhVomToi0XU4cTBYRw9ICzLJsB7lTror5rHcobP/GW5JvKh9eSblW8lnanz+ojCSogiehQYH+mDEfkqfE8ivTEHTOp/x+ro0IKAiHb+B0tHnaI+mKQxB70M+zMYPoU5nuv3zA3wXHl9REZ1G0Iq4VhVJL1f1b362d18rxjL/J6L8pakqDLk2P8Dt4GZUe2tWqSQg5HunxuYNnPU8PrfI42oGaX+rmGexO4ojOvS0TYjWpPepmVqoQ0nilLAL295Ue+M4lqxq94W4clH+mL9/w0SYPRkwuNX4j7pWcjgKiSqnjwpB93v1G83AwzmRZRyWeAZb6p09jSa+RgOEsCMFCM60o+RhjBnvgBehAI+BBUNRaDCSKmznTZlGb0P9RfvTsvkkn2Cxnbcs2htD6zA/kJF0XoFH2A0479hXzOfY760hS3R2hIP+jDmtLbR1/WT8grOO/M8JwRW0dVAe5ypsg==",
+                          "ProductCode": "STN005T",
+                          "LoyaltyProgramName": "HI_TEST",
+                          "RatePlanDescription": {
+                            "Text": [
+                              "Standard Room"
+                            ]
+                          },
+                          "MealsIncluded": {
+                            "Breakfast": false,
+                            "Lunch": false,
+                            "Dinner": false,
+                            "MealPlanIndicator": false,
+                            "MealPlanCode": 14,
+                            "MealPlanDescription": "Room only"
+                          },
+                          "ConvertedRateInfo": {
+                            "StartDate": "2026-10-12",
+                            "EndDate": "2026-10-17",
+                            "AmountBeforeTax": "481.89",
+                            "AmountAfterTax": "539.72",
+                            "AverageNightlyRate": "107.94",
+                            "AverageNightlyRateBeforeTax": "96.37",
+                            "HighestNightlyRate": "96.37",
+                            "ApproxTotalPrice": "539.72",
+                            "CurrencyCode": "USD",
+                            "TaxInclusive": true,
+                            "Rates": {
+                              "Rate": [
+                                {
+                                  "StartDate": "2026-10-12",
+                                  "EndDate": "2026-10-17",
+                                  "AmountBeforeTax": "96.37",
+                                  "AmountAfterTax": "107.94",
+                                  "CurrencyCode": "USD"
+                                }
+                              ]
+                            },
+                            "Taxes": {
+                              "Amount": "57.82",
+                              "CurrencyCode": "USD",
+                              "Tax": [
+                                {
+                                  "StartDate": "2026-10-12",
+                                  "EndDate": "2026-10-17",
+                                  "Amount": "11.56",
+                                  "CurrencyCode": "USD"
+                                }
+                              ],
+                              "TaxGroups": {
+                                "TaxGroup": [
+                                  {
+                                    "Code": 17,
+                                    "Description": "Total tax",
+                                    "Amount": "57.82",
+                                    "CurrencyCode": "USD",
+                                    "TaxDescription": {
+                                      "Text": [
+                                        "12% per night not included in rate effective 12 October, 2026 through 17 October, 2026. This tax is not included as part of the Base Rate."
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "CancelPenalties": {
+                              "CancelPenalty": [
+                                {
+                                  "Refundable": false,
+                                  "PenaltyDescription": {
+                                    "Text": [
+                                      "Canceling your reservation after 8:07 PM (local hotel time) on 7 September, 2026, or failing to arrive will result in forfeiture of your deposit. Taxes may apply."
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                            "Guarantee": {
+                              "GuaranteeType": "DEP",
+                              "GuaranteesAccepted": {
+                                "GuaranteeAccepted": [
+                                  {
+                                    "GuaranteeTypeCode": 5,
+                                    "GuaranteeTypeDescription": "Credit card",
+                                    "PaymentCards": {
+                                      "PaymentCard": [
+                                        {
+                                          "CardCode": "AX",
+                                          "value": "AMERICAN EXPRESS"
+                                        },
+                                        {
+                                          "CardCode": "VS",
+                                          "value": "VISA"
+                                        },
+                                        {
+                                          "CardCode": "MC",
+                                          "value": "MASTER CARD"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "GuaranteeTypeCode": 43,
+                                    "GuaranteeTypeDescription": "Virtual card",
+                                    "PaymentCards": {
+                                      "PaymentCard": [
+                                        {
+                                          "CardCode": "VS",
+                                          "value": "VISA"
+                                        },
+                                        {
+                                          "CardCode": "MC",
+                                          "value": "MASTER CARD"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              "DepositPolicies": {
+                                "DepositPolicy": [
+                                  {
+                                    "Deadline": {
+                                      "AbsoluteDeadline": "2026-09-07T20:07:03+03:00"
+                                    },
+                                    "AmountPercent": {
+                                      "Percent": 100,
+                                      "Amount": "539.72",
+                                      "CurrencyCode": "USD"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -99,18 +99,32 @@ export interface HotelSearch {
 }
 
 export interface HotelRate {
-  id: string; // provider rate key
+  /** Provider rate key. Long and opaque; the model only ever sees our own offer id. */
+  id: string;
   provider: string;
   propertyId: string;
   propertyName: string;
   roomName: string;
-  bedType: string | null;
+  /** Human description of the room, e.g. "2 Single Beds Standard 22 SqM Room". */
+  roomDescription: string | null;
+  bedTypes: string[];
+  maxOccupancy: number | null;
+  /** Rate plan product code, required to create the booking. */
+  productCode: string | null;
+  ratePlanName: string | null;
   checkIn: string;
   checkOut: string;
   nights: number;
   nightly: Money;
+  /** Total including taxes and fees — what the patient actually pays. */
   total: Money;
+  taxes: Money | null;
   refundable: boolean | null;
+  /** Free cancellation deadline, ISO with offset, when the provider states one. */
+  cancelBy: string | null;
+  mealPlan: string | null;
+  prepaid: boolean | null;
+  availableQuantity: number | null;
   expiresAt: string | null;
   raw: unknown;
 }
