@@ -69,31 +69,50 @@ export function checkReferences(bubbles: string[], knownReferences: string[]): R
 /**
  * Announced-action guard.
  *
- * Saying "booking it now" and then ending the turn without calling a booking
- * tool tells the patient something happened that did not. It is a milder cousin
- * of inventing a reference, and it happened in the first real conversation, so
- * it is checked rather than trusted to the prompt.
+ * Saying "booking it now" or "let me pull up the room rates" and then ending the
+ * turn without calling the tool tells the patient something is happening that is
+ * not. It is a milder cousin of inventing a reference, and it has happened in
+ * real conversations twice, so it is checked rather than trusted to the prompt.
  *
- * Only replies that close the turn are checked: "I'll book it once you confirm"
- * is a legitimate promise, and those replies are waiting for input.
+ * The promise is matched to the kind of work it implies: a booking phrase needs a
+ * booking tool to have succeeded this turn, a retrieval phrase needs a search or
+ * lookup to have been attempted. Only turn-closing replies are checked —
+ * "I'll book it once you confirm" is a legitimate promise, and it waits for input.
  */
-const IMMINENT_ACTION =
+const BOOKING_PHRASE =
   /\b(booking (it|that|this|them)|i'?m booking|i'?ll book (it|that|this|them)|let me book|i'?ll go ahead and book|placing (the|your) booking|confirming (it|that) now|i'?ll get (that|it) booked)\b/i;
+
+const RETRIEVAL_PHRASE =
+  /\b(?:(?:let me|i'?ll|i'?m going to|i am going to)\s+(?:go\s+)?(?:pull up|pull|find|check|look up|look for|look at|search|grab|fetch)|(?:pulling|checking|looking|searching|fetching)\s+(?:that|those|these|it|them|up)|one moment while i)\b/i;
 
 export interface PromiseCheck {
   ok: boolean;
-  /** The phrase that announced an action which never happened. */
+  /** The phrase that announced work which never happened. */
   announced: string | null;
+  kind: 'booking' | 'retrieval' | null;
 }
 
-export function checkAnnouncedActions(
-  bubbles: string[],
-  context: { actedThisTurn: boolean; expectsInput: boolean },
-): PromiseCheck {
-  if (context.actedThisTurn || context.expectsInput) return { ok: true, announced: null };
+export interface TurnActivity {
+  /** A create_* tool succeeded. */
+  bookedThisTurn: boolean;
+  /** A search_* or get_* tool was called, whether or not it succeeded. */
+  searchedThisTurn: boolean;
+  expectsInput: boolean;
+}
+
+export function checkAnnouncedActions(bubbles: string[], activity: TurnActivity): PromiseCheck {
+  const clean: PromiseCheck = { ok: true, announced: null, kind: null };
+  if (activity.expectsInput) return clean;
+
   for (const bubble of bubbles) {
-    const match = bubble.match(IMMINENT_ACTION);
-    if (match) return { ok: false, announced: match[0] };
+    if (!activity.bookedThisTurn) {
+      const booking = bubble.match(BOOKING_PHRASE);
+      if (booking) return { ok: false, announced: booking[0], kind: 'booking' };
+    }
+    if (!activity.searchedThisTurn) {
+      const retrieval = bubble.match(RETRIEVAL_PHRASE);
+      if (retrieval) return { ok: false, announced: retrieval[0], kind: 'retrieval' };
+    }
   }
-  return { ok: true, announced: null };
+  return clean;
 }

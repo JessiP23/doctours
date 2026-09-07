@@ -189,12 +189,14 @@ export async function runTurn(
 
     const results: Anthropic.ToolResultBlockParam[] = [];
     const content: Anthropic.ContentBlockParam[] = [];
-    let actedThisTurn = false;
+    let bookedThisTurn = false;
+    let searchedThisTurn = false;
     const exhausted: string[] = [];
 
     for (const t of others) {
       const r = await runTool(t.name, t.input, conversationId);
-      if (t.name.startsWith('create_') && r.ok) actedThisTurn = true;
+      if (t.name.startsWith('create_') && r.ok) bookedThisTurn = true;
+      if (t.name.startsWith('search_') || t.name.startsWith('get_')) searchedThisTurn = true;
       if (!r.ok) {
         const key = `${t.name}:${(r.error as { code?: string }).code ?? 'error'}`;
         const count = (failureCounts.get(key) ?? 0) + 1;
@@ -225,7 +227,8 @@ export async function runTurn(
           // A reply that announces a booking without having made one is not delivered:
           // the model is told to either do it or say what it actually needs.
           const promise = checkAnnouncedActions(bubbles, {
-            actedThisTurn,
+            bookedThisTurn,
+            searchedThisTurn,
             expectsInput: parsed.data.expectsInput,
           });
           if (!promise.ok && !promiseNudgeUsed) {
@@ -234,7 +237,10 @@ export async function runTurn(
               { announced: promise.announced, iteration: i },
               'reply announced an action it did not take',
             );
-            const nudge = `You told the patient "${promise.announced}" but you did not call a booking tool in this turn, so nothing was booked. Either call the booking tool now, or reply telling them plainly what you still need from them.`;
+            const nudge =
+              promise.kind === 'booking'
+                ? `You told the patient "${promise.announced}" but you did not call a booking tool in this turn, so nothing was booked. Either call the booking tool now, or reply telling them plainly what you still need from them.`
+                : `You told the patient "${promise.announced}" but you did not call the tool that does it, so nothing was looked up and they are waiting on nothing. Call the tool now and reply with what it returns, or ask them the question you actually need answered.`;
             const nudgeBlocks = [...results, { type: 'text' as const, text: nudge }];
             await repo.appendMessage(conversationId, 'user', nudgeBlocks as unknown as Json);
             history.push({ role: 'user', content: nudgeBlocks });

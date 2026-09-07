@@ -43,8 +43,9 @@ describe('checkReferences', () => {
 });
 
 describe('checkAnnouncedActions', () => {
-  const acted = { actedThisTurn: true, expectsInput: false };
-  const idle = { actedThisTurn: false, expectsInput: false };
+  const idle = { bookedThisTurn: false, searchedThisTurn: false, expectsInput: false };
+  const booked = { bookedThisTurn: true, searchedThisTurn: false, expectsInput: false };
+  const searched = { bookedThisTurn: false, searchedThisTurn: true, expectsInput: false };
 
   it('flags a closing reply that says it is booking when nothing was booked', () => {
     const r = checkAnnouncedActions(
@@ -52,17 +53,41 @@ describe('checkAnnouncedActions', () => {
       idle,
     );
     expect(r.ok).toBe(false);
+    expect(r.kind).toBe('booking');
     expect(r.announced).toMatch(/booking it/i);
   });
 
   it('allows it when a booking tool actually ran', () => {
-    expect(checkAnnouncedActions(['Booking it now.'], acted).ok).toBe(true);
+    expect(checkAnnouncedActions(['Booking it now.'], booked).ok).toBe(true);
+  });
+
+  // Both of these were said in a real conversation, and neither tool was called.
+  it('flags "let me find you a room" when no search ran', () => {
+    const r = checkAnnouncedActions(
+      ["You'll stay 6 nights.", 'Let me find you a room at the Holiday Inn City Istanbul now.'],
+      booked, // the flight was booked this turn, but the promised room search was not
+    );
+    expect(r.ok).toBe(false);
+    expect(r.kind).toBe('retrieval');
+  });
+
+  it('flags "let me pull up the room rates" when no search ran', () => {
+    const r = checkAnnouncedActions(
+      ["Let me pull up the room rates for your dates and we'll get you sorted."],
+      idle,
+    );
+    expect(r.ok).toBe(false);
+    expect(r.kind).toBe('retrieval');
+  });
+
+  it('allows a retrieval promise when the search did run', () => {
+    expect(checkAnnouncedActions(['Let me pull up the room rates.'], searched).ok).toBe(true);
   });
 
   it('allows a conditional promise that waits for the patient', () => {
     expect(
       checkAnnouncedActions(["I'll book it as soon as you confirm the price."], {
-        actedThisTurn: false,
+        ...idle,
         expectsInput: true,
       }).ok,
     ).toBe(true);
@@ -72,16 +97,37 @@ describe('checkAnnouncedActions', () => {
     expect(checkAnnouncedActions(['The cheapest is $742 on Turkish.', 'Want it?'], idle).ok).toBe(
       true,
     );
-    expect(checkAnnouncedActions(['Your flight is booked, reference ABC12D.'], idle).ok).toBe(true);
+    expect(checkAnnouncedActions(['Your flight is booked, reference ABC12D.'], booked).ok).toBe(
+      true,
+    );
   });
 
-  it('catches the other ways of announcing a booking', () => {
+  it('does not mistake ordinary phrases for promises', () => {
+    // "let me know" and "I'll get back to you" promise nothing the agent must do now.
+    for (const phrase of [
+      'Let me know which one you prefer.',
+      "I'll get back to you with the confirmation by email.",
+      'Check your email for the confirmation.',
+    ]) {
+      expect(checkAnnouncedActions([phrase], idle).ok, phrase).toBe(true);
+    }
+  });
+
+  it('catches the other ways of announcing work', () => {
     for (const phrase of [
       "I'm booking that for you.",
       'Let me book this.',
       "I'll get that booked.",
     ]) {
-      expect(checkAnnouncedActions([phrase], idle).ok).toBe(false);
+      expect(checkAnnouncedActions([phrase], idle).kind, phrase).toBe('booking');
+    }
+    for (const phrase of [
+      'Let me check the rates.',
+      "I'll look up the options.",
+      'Pulling those up now.',
+      'One moment while I search.',
+    ]) {
+      expect(checkAnnouncedActions([phrase], idle).kind, phrase).toBe('retrieval');
     }
   });
 });
