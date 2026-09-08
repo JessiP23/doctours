@@ -181,4 +181,24 @@ describe('detectDisruption', () => {
       kind: 'flight_cancelled',
     });
   });
+
+  it('still catches a cancellation with no stored itinerary to compare against', () => {
+    // Bookings made before the baseline was kept have no slices on the row. The
+    // statuses are still authoritative, so the check must not silently pass —
+    // this is the path that reported findings but recorded nothing.
+    const report = detectDisruption([], order([{ flightStatusCode: 'HX' }, {}]));
+    expect(report.healthy).toBe(false);
+    expect(report.findings).toHaveLength(1);
+    expect(report.findings[0]).toMatchObject({ segment: 'TK4 JFK→IST', kind: 'flight_cancelled' });
+    // Which direction it was cannot be known without the baseline, and is not guessed.
+    expect(report.legs).toEqual([]);
+  });
+
+  it('cannot see a schedule change without a baseline, and does not pretend to', () => {
+    const moved = order([{ departureTime: '19:05:00', arrivalTime: '11:45:00' }, {}]);
+    expect(detectDisruption([], moved).healthy).toBe(true);
+    expect(detectDisruption(booked, moved).findings[0]).toMatchObject({
+      kind: 'flight_schedule_change',
+    });
+  });
 });

@@ -218,7 +218,12 @@ export const createFlightOrderTool = defineTool({
         passenger: `${input.passenger.givenName} ${input.passenger.familyName}`,
         hotelNights: stay.nights,
       } as unknown as Json,
-      raw: order.raw as Json,
+      // Sabre's response, plus the itinerary we actually sold, segment by segment.
+      // `details` is summarised into the prompt every turn, so the baseline cannot
+      // live there — but without a baseline a schedule change that leaves the
+      // status on HK is invisible, which is most of them. Rows booked before this
+      // key existed have no baseline and fall back to a status-only comparison.
+      raw: { ...(order.raw as object), bookedSlices: order.slices } as unknown as Json,
     });
 
     log.info(

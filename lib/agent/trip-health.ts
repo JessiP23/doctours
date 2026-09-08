@@ -25,6 +25,28 @@ export interface HealthCheck {
   note?: string;
 }
 
+/**
+ * The itinerary to compare the live order against.
+ *
+ * Preferred source is the booking row, which stores the slices we actually sold.
+ * Rows written before that key existed fall back to the offer the booking was made
+ * from — same flights, priced a few seconds earlier — so a trip booked last week is
+ * still checkable instead of being written off as uncomparable.
+ */
+async function bookedItinerary(
+  conversationId: string,
+  booking: { raw: unknown; offer_id: string | null },
+): Promise<FlightSlice[]> {
+  const raw = (booking.raw ?? {}) as { bookedSlices?: FlightSlice[]; slices?: FlightSlice[] };
+  const stored = raw.bookedSlices ?? raw.slices;
+  if (stored?.length) return stored;
+
+  if (!booking.offer_id) return [];
+  const offer = await repo.getOffer(conversationId, booking.offer_id);
+  const fromOffer = (offer?.raw ?? {}) as { slices?: FlightSlice[] };
+  return fromOffer.slices ?? [];
+}
+
 export async function checkFlightHealth(conversationId: string): Promise<HealthCheck> {
   const booking = await repo.getLiveBooking(conversationId, 'flight');
   if (!booking)
@@ -36,37 +58,34 @@ export async function checkFlightHealth(conversationId: string): Promise<HealthC
       note: 'No flight booked.',
     };
 
-  const raw = (booking.raw ?? {}) as { slices?: FlightSlice[] };
-  const details = (booking.details ?? {}) as { slices?: FlightSlice[] };
-  const booked = raw.slices ?? details.slices ?? [];
+  const booked = await bookedItinerary(conversationId, booking);
 
   const order = (await retrieveBooking(booking.booking_reference)).raw as {
     flights?: OrderFlight[];
   };
   const current = order.flights ?? [];
 
-  if (booked.length === 0) {
-    // Nothing to compare against: report the raw statuses rather than claim health.
-    const unhealthy = current.filter((f) => (f.flightStatusCode ?? '').toUpperCase() !== 'HK');
-    return {
-      reference: booking.booking_reference,
-      healthy: unhealthy.length === 0,
-      eventsRecorded: 0,
-      findings: unhealthy.map((f) => ({
-        segment: `${f.airlineCode}${f.flightNumber}`,
-        status: f.flightStatusCode,
-      })),
-      note: 'The booked itinerary was not stored in a comparable form; only statuses were checked.',
-    };
-  }
-
+  // Without a baseline the statuses still tell the truth about a cancellation, so
+  // the check runs either way and says which comparison it managed. What is lost
+  // is a schedule change that moved the times while leaving the status on HK, and
+  // a segment that vanished from the order entirely.
+  const partial = booked.length === 0;
   const report = detectDisruption(booked, current);
+  const note = partial
+    ? 'Neither the booking row nor its offer held a comparable itinerary, so only per-segment statuses were checked; a schedule change that kept status HK would not be seen.'
+    : undefined;
   if (report.healthy) {
     log.info(
       { conversationId, reference: booking.booking_reference },
       'flight order still held as booked',
     );
-    return { reference: booking.booking_reference, healthy: true, eventsRecorded: 0, findings: [] };
+    return {
+      reference: booking.booking_reference,
+      healthy: true,
+      eventsRecorded: 0,
+      findings: [],
+      ...(note ? { note } : {}),
+    };
   }
 
   // One event per kind, carrying every affected segment, so the agent raises it once
@@ -98,6 +117,7 @@ export async function checkFlightHealth(conversationId: string): Promise<HealthC
     healthy: false,
     eventsRecorded: recorded.length,
     findings: report.findings,
+    ...(note ? { note } : {}),
   };
 }
 
