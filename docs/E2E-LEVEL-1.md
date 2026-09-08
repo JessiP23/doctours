@@ -15,8 +15,12 @@ alternative hotels, cheapest-whole-trip ranking — all four are planned, in tha
 in `PLAN-LEVEL-1.md`. Section E is how you check the agent is honest about not having
 them, which is the requirement until they exist.
 
-Two terminals: the app (`npm run dev`, or the deployed URL) and a shell for the smoke
-script. Every step is either a message you type into the chat or a command you run.
+Two windows: the chat (`npm run dev`, or the deployed URL) as the patient, and the
+**operator console** at `/ops` as the airline, clinic and hotel. The console needs
+`OPS_TOKEN` set in the environment (any 12+ characters); enter it once. Every button
+there writes the same `trip_events` the CLI `disrupt` writes and nothing else — no
+booking is touched and Sabre is not called, except _Re-read_, which only reads. The
+CLI commands below still work and are interchangeable with the buttons.
 
 ---
 
@@ -62,9 +66,8 @@ baseline. **Second run:** `healthy: true`, no note, no findings. If you ever see
 schedule changes of a few minutes on an untouched booking, that is the bug in BUGS #19
 and it is a false positive, not a disruption.
 
-```
-npm run sabre:smoke -- disrupt <conversationId> outbound cancelled
-```
+In the console, on that trip, click **Airline cancels the outbound** (or from a shell:
+`npm run sabre:smoke -- disrupt <conversationId> outbound cancelled`).
 
 **Pass:** each real segment is named — `QR704 JFK→DOH`, `QR239 DOH→IST` — with the times
 the order holds. `"QR outbound flight"` with no number means the baseline is missing.
@@ -132,21 +135,22 @@ Repeating it every turn was the bug fixed alongside this doc.
 
 ### Variants worth one run each
 
-```
-npm run sabre:smoke -- ack <conversationId>
-npm run sabre:smoke -- disrupt <conversationId> return cancelled
-```
+**Clear open events**, then **Airline cancels the return**.
 
 **Pass:** it raises the return leg and connects it to the `Oct 17, 12:00` rule, not the
 arrival deadline.
 
-```
-npm run sabre:smoke -- ack <conversationId>
-npm run sabre:smoke -- disrupt <conversationId> outbound delayed
-```
+**Clear open events**, then **Airline changes the outbound schedule**.
 
 **Pass:** it describes a schedule change, not a cancellation, and says what the new times
 do to the hotel check-in. It must not say the flight was cancelled.
+
+**Clear open events**, then **Hotel cancels the reservation**.
+
+**Pass:** it raises that the hotel released the room, searches rooms for the nights the
+flights imply, states the price and terms, and moves the room with `rebook_hotel` once
+you agree. **Fail:** it treats the old reservation as still held, or books without
+telling you the cost first.
 
 ---
 

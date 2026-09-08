@@ -178,3 +178,40 @@ export async function simulateFlightDisruption(
     },
   ]);
 }
+
+/**
+ * A hotel dropping a reservation. Same shape and same reason as the flight version:
+ * CERT cannot originate it, so the operator console writes what a real notice would.
+ * The room the patient holds is named from the booking, never invented.
+ */
+export async function simulateHotelCancellation(conversationId: string): Promise<TripEventRow[]> {
+  const booking = await repo.getLiveBooking(conversationId, 'hotel');
+  if (!booking) throw new Error('No room is booked on this trip');
+
+  const details = (booking.details ?? {}) as {
+    hotel?: string;
+    room?: string;
+    checkIn?: string;
+    checkOut?: string;
+    nights?: number;
+  };
+
+  return repo.insertTripEvents(conversationId, [
+    {
+      bookingId: booking.id,
+      kind: 'hotel_cancelled',
+      detail: {
+        reference: booking.booking_reference,
+        hotel: details.hotel ?? null,
+        room: details.room ?? null,
+        was: {
+          checkIn: details.checkIn ?? null,
+          checkOut: details.checkOut ?? null,
+          nights: details.nights ?? null,
+        },
+        statusName: 'Cancelled by the hotel',
+      } as unknown as Json,
+      source: 'simulated',
+    },
+  ]);
+}

@@ -136,6 +136,7 @@ export function checkAnnouncedActions(bubbles: string[], activity: TurnActivity)
 const RAISED: Record<string, RegExp> = {
   flight_cancelled:
     /\b(cancel(?:led|ed|s|ling)?|dropped|no longer (?:flying|operating|running))\b/i,
+  hotel_cancelled: /\b(cancel(?:led|ed|s|ling)?|dropped|released|no longer (?:has|holds|have))\b/i,
   flight_schedule_change:
     /\b(schedul\w*|time[sd]?|moved|shifted|changed|earlier|later|delay\w*)\b/i,
 };

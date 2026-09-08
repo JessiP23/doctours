@@ -171,6 +171,15 @@ describe('checkRaisedEvents', () => {
     expect(checkRaisedEvents(['You land at 11:55 am.'], []).ok).toBe(true);
   });
 
+  it('knows the words a hotel cancellation is described with', () => {
+    expect(
+      checkRaisedEvents(['The hotel has released your room for the 12th.'], ['hotel_cancelled']).ok,
+    ).toBe(true);
+    expect(
+      checkRaisedEvents(['Your flights are all set for the 11th.'], ['hotel_cancelled']).ok,
+    ).toBe(false);
+  });
+
   it('does not judge a kind it has no words for', () => {
     expect(checkRaisedEvents(['Anything else?'], ['hotel_closed']).ok).toBe(true);
   });

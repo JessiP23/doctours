@@ -50,6 +50,10 @@ const schema = z.object({
     .optional(),
   PAYMENT_CARD_HOLDER_GIVEN_NAME: z.string().min(1).default('Doctours'),
   PAYMENT_CARD_HOLDER_SURNAME: z.string().min(1).default('Travel'),
+
+  // Operator console at /ops. Unset means the console is off. It plays the airline,
+  // the clinic and the hotel for scenarios the Sabre sandbox cannot originate.
+  OPS_TOKEN: z.string().min(12, 'OPS_TOKEN must be at least 12 characters').optional(),
 });
 
 export interface PaymentCard {

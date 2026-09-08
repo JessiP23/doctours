@@ -16,6 +16,7 @@
  *   npm run sabre:smoke -- check <conversationId>                re-read the order; record any disruption found
  *   npm run sabre:smoke -- disrupt <conversationId> <leg> [kind] inject a disruption so the flow can be driven
  *   npm run sabre:smoke -- ack <conversationId>                  clear the open events on a trip
+ *   npm run sabre:smoke -- ops <action> <conversationId>         any operator-console action, from the terminal
  *                                                                leg: outbound | return, kind: cancelled | delayed
  *   npm run sabre:smoke -- trips                                 list recent conversations with what they hold
  *
@@ -29,6 +30,7 @@ import { getEnv, paymentCard } from '@/lib/env';
 import { SabreProvider, retrieveBooking, unconfirmedFlightsOf } from '@/lib/providers/sabre';
 import { checkFlightHealth, simulateFlightDisruption } from '@/lib/agent/trip-health';
 import * as repo from '@/lib/db/repo';
+import { OPS_ACTIONS, isOpsAction, runOpsAction } from '@/lib/ops/actions';
 import { excludeRefused, isCodeshare, type RefusedFlight } from '@/lib/trip/select';
 import { partitionOffers } from '@/lib/trip/validate';
 import { deriveStay } from '@/lib/trip/nights';
@@ -810,6 +812,16 @@ async function ack() {
   );
 }
 
+/** Any operator-console action from the terminal, so the two surfaces share one list. */
+async function ops() {
+  const [action, conversationId] = args;
+  if (!action || !conversationId || !isOpsAction(action)) {
+    throw new Error(`usage: ops <${Object.keys(OPS_ACTIONS).join('|')}> <conversationId>`);
+  }
+  const result = await runOpsAction(action, conversationId);
+  console.log(JSON.stringify({ ok: true, action, conversationId, result }, null, 2));
+}
+
 /** Recent conversations and what they hold, so a conversationId is easy to find. */
 async function trips() {
   const rows = await repo.listRecentConversations(10);
@@ -838,6 +850,7 @@ const commands: Record<string, () => Promise<void>> = {
   check,
   disrupt,
   ack,
+  ops,
   trips,
   auth,
   flights,
