@@ -21,7 +21,7 @@ export const getTripStateTool = defineTool({
   handler: async (_input, ctx) => {
     const [conversation, bookings, flightOffers, hotelOffers] = await Promise.all([
       repo.getConversation(ctx.conversationId),
-      repo.listBookings(ctx.conversationId),
+      repo.listBookingHistory(ctx.conversationId),
       repo.listRecentOffers(ctx.conversationId, 'flight', 6),
       repo.listRecentOffers(ctx.conversationId, 'hotel_rate', 6),
     ]);
@@ -66,6 +66,19 @@ export const getTripStateTool = defineTool({
         flights: state.offers.flights.map(describeOffer),
         rooms: state.offers.hotelRates.map(describeOffer),
       },
+      // History, so the agent can answer "what happened to my original flight?"
+      // without ever mistaking a dead booking for a live one.
+      history: bookings
+        .filter((b) => b.status !== 'confirmed')
+        .map((b) => ({
+          kind: b.kind,
+          reference: b.booking_reference,
+          status: b.status,
+          reason: b.change_reason,
+          replacedByReference: b.replaced_by
+            ? (bookings.find((x) => x.id === b.replaced_by)?.booking_reference ?? null)
+            : null,
+        })),
       nextStep: nextStep(state),
     };
   },

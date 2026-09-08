@@ -218,6 +218,59 @@ export async function listBookingsForConversations(
   return data;
 }
 
+/**
+ * Marks a booking cancelled. The reason is kept in the words the patient was given,
+ * so an operator reading the row later sees the same explanation the patient did.
+ */
+export async function cancelBookingRow(id: string, reason: string): Promise<BookingRow> {
+  const { data, error } = await db()
+    .from('bookings')
+    .update({ status: 'cancelled', cancelled_at: new Date().toISOString(), change_reason: reason })
+    .eq('id', id)
+    .eq('status', 'confirmed')
+    .select()
+    .single();
+  if (error) fail('cancelBookingRow', error);
+  return data;
+}
+
+/**
+ * Links a rebooking to what it replaced. The old row becomes 'superseded' rather
+ * than 'cancelled': the trip was not abandoned, it moved, and the chain is how that
+ * history stays readable.
+ */
+export async function supersedeBookingRow(
+  oldId: string,
+  newId: string,
+  reason: string,
+): Promise<BookingRow> {
+  const { data, error } = await db()
+    .from('bookings')
+    .update({
+      status: 'superseded',
+      replaced_by: newId,
+      cancelled_at: new Date().toISOString(),
+      change_reason: reason,
+    })
+    .eq('id', oldId)
+    .eq('status', 'confirmed')
+    .select()
+    .single();
+  if (error) fail('supersedeBookingRow', error);
+  return data;
+}
+
+/** Every booking this conversation has ever held, newest first, live and historic. */
+export async function listBookingHistory(conversationId: string): Promise<BookingRow[]> {
+  const { data, error } = await db()
+    .from('bookings')
+    .select()
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: false });
+  if (error) fail('listBookingHistory', error);
+  return data;
+}
+
 export async function listBookings(conversationId: string): Promise<BookingRow[]> {
   const { data, error } = await db()
     .from('bookings')

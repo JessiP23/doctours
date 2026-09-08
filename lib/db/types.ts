@@ -8,7 +8,11 @@ export type ConversationStatus = 'open' | 'completed' | 'cancelled';
 export type MessageRole = 'user' | 'assistant';
 export type OfferKind = 'flight' | 'hotel_rate';
 export type BookingKind = 'flight' | 'hotel';
-export type BookingStatus = 'confirmed' | 'cancelled';
+/**
+ * A booking is confirmed until it is either cancelled outright or superseded by a
+ * rebooking. There is no 'paid' or 'pending' — see docs/DECISIONS.md.
+ */
+export type BookingStatus = 'confirmed' | 'cancelled' | 'superseded';
 
 export type ConversationRow = {
   id: string;
@@ -48,6 +52,11 @@ export type BookingRow = {
   provider_order_id: string;
   booking_reference: string;
   status: BookingStatus;
+  /** The booking that took this one's place, when the trip was rebooked. */
+  replaced_by: string | null;
+  cancelled_at: string | null;
+  /** Why it was cancelled or superseded, in the words the patient was given. */
+  change_reason: string | null;
   offer_id: string | null;
   details: Json;
   raw: Json;
@@ -86,8 +95,19 @@ export interface Database {
       offers: Table<OfferRow, Omit<OfferRow, 'id' | 'created_at'> & Partial<Pick<OfferRow, 'id'>>>;
       bookings: Table<
         BookingRow,
-        Omit<BookingRow, 'id' | 'created_at' | 'updated_at' | 'status'> &
-          Partial<Pick<BookingRow, 'id' | 'status'>>
+        Omit<
+          BookingRow,
+          | 'id'
+          | 'created_at'
+          | 'updated_at'
+          | 'status'
+          | 'replaced_by'
+          | 'cancelled_at'
+          | 'change_reason'
+        > &
+          Partial<
+            Pick<BookingRow, 'id' | 'status' | 'replaced_by' | 'cancelled_at' | 'change_reason'>
+          >
       >;
       tool_calls: Table<ToolCallRow, Omit<ToolCallRow, 'id' | 'created_at'>>;
     };
