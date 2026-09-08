@@ -128,9 +128,42 @@ export async function simulateFlightDisruption(
   const booking = await repo.getLiveBooking(conversationId, 'flight');
   if (!booking) throw new Error('No flight is booked on this trip');
 
+  // Same shape a real detection writes, down to the per-segment naming, so the
+  // agent cannot behave differently for a simulated one. Times come from the stored
+  // baseline — the order — not from the shopped summary in `details`, which is what
+  // put times in a patient's ear that the airline never held.
+  const baseline = storedBaseline(booking);
+  const slice = baseline[leg === 'outbound' ? 0 : 1];
+
   type LegDetail = { carrier?: string; departLocal?: string; arriveLocal?: string };
   const details = (booking.details ?? {}) as { outbound?: LegDetail; inbound?: LegDetail };
-  const affected = leg === 'outbound' ? details.outbound : details.inbound;
+  const summary = leg === 'outbound' ? details.outbound : details.inbound;
+
+  const segments = slice
+    ? slice.segments.map((s) => ({
+        segment: `${s.carrier}${s.flightNumber} ${s.from.iata}→${s.to.iata}`,
+        status: kind === 'flight_cancelled' ? 'HX' : 'SC',
+        statusName: kind === 'flight_cancelled' ? 'Cancelled by carrier' : 'Schedule change',
+        kind,
+        was: { departLocal: s.departLocal, arriveLocal: s.arriveLocal },
+      }))
+    : [
+        {
+          // No baseline yet: name the leg rather than invent a segment.
+          segment: `${summary?.carrier ?? 'the'} ${leg} flight`,
+          status: kind === 'flight_cancelled' ? 'HX' : 'SC',
+          statusName: kind === 'flight_cancelled' ? 'Cancelled by carrier' : 'Schedule change',
+          kind,
+          ...(summary?.departLocal
+            ? {
+                was: {
+                  departLocal: summary.departLocal,
+                  arriveLocal: summary.arriveLocal ?? '',
+                },
+              }
+            : {}),
+        },
+      ];
 
   return repo.insertTripEvents(conversationId, [
     {
@@ -139,22 +172,7 @@ export async function simulateFlightDisruption(
       detail: {
         reference: booking.booking_reference,
         legs: [leg],
-        segments: [
-          {
-            segment: `${affected?.carrier ?? 'the'} ${leg} flight`,
-            status: kind === 'flight_cancelled' ? 'HX' : 'SC',
-            statusName: kind === 'flight_cancelled' ? 'Cancelled by carrier' : 'Schedule change',
-            kind,
-            ...(affected?.departLocal
-              ? {
-                  was: {
-                    departLocal: affected.departLocal,
-                    arriveLocal: affected.arriveLocal ?? '',
-                  },
-                }
-              : {}),
-          },
-        ],
+        segments,
       } as unknown as Json,
       source: 'simulated',
     },
