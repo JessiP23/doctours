@@ -9,6 +9,7 @@ describe('the tool set the model is given', () => {
       'create_flight_order',
       'search_hotel_rates',
       'create_hotel_booking',
+      'cancel_trip',
       'reply',
     ]);
   });
@@ -96,5 +97,52 @@ describe('the tool set the model is given', () => {
 
   it('lets the hotel search run with no arguments so dates come from the flight', () => {
     expect(getTool('search_hotel_rates')!.schema.safeParse({}).success).toBe(true);
+  });
+});
+
+describe('cancel_trip cannot be called casually', () => {
+  const schema = () => getTool('cancel_trip')!.schema;
+
+  it('refuses without an explicit confirmation', () => {
+    expect(
+      schema().safeParse({ scope: 'both', reason: 'patient changed their mind' }).success,
+    ).toBe(false);
+    expect(
+      schema().safeParse({ scope: 'both', confirmed: false, reason: 'patient changed their mind' })
+        .success,
+    ).toBe(false);
+  });
+
+  it('requires a reason, so the operator record is never empty', () => {
+    expect(schema().safeParse({ scope: 'both', confirmed: true }).success).toBe(false);
+    expect(schema().safeParse({ scope: 'both', confirmed: true, reason: 'x' }).success).toBe(false);
+  });
+
+  it('accepts a confirmed cancellation with a reason', () => {
+    expect(
+      schema().safeParse({
+        scope: 'both',
+        confirmed: true,
+        reason: 'Procedure postponed indefinitely',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('can cancel a single leg', () => {
+    for (const scope of ['flight', 'hotel', 'both']) {
+      expect(
+        schema().safeParse({ scope, confirmed: true, reason: 'patient asked' }).success,
+        scope,
+      ).toBe(true);
+    }
+    expect(
+      schema().safeParse({ scope: 'everything', confirmed: true, reason: 'patient asked' }).success,
+    ).toBe(false);
+  });
+
+  it('defaults to cancelling the whole trip', () => {
+    const parsed = schema().safeParse({ confirmed: true, reason: 'patient asked to cancel' });
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && (parsed.data as { scope: string }).scope).toBe('both');
   });
 });

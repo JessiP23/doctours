@@ -6,6 +6,7 @@ import { searchFlightsTool } from './search_flights';
 import { createFlightOrderTool } from './create_flight_order';
 import { searchHotelRatesTool } from './search_hotel_rates';
 import { createHotelBookingTool } from './create_hotel_booking';
+import { cancelTripTool } from './cancel_trip';
 
 /**
  * Tool registry. Booking tools register here as they land; the loop only ever
@@ -17,6 +18,7 @@ const registry: ToolDefinition[] = [
   createFlightOrderTool,
   searchHotelRatesTool,
   createHotelBookingTool,
+  cancelTripTool,
   replyTool,
 ];
 
