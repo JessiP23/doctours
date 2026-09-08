@@ -32,6 +32,13 @@ export function Chat() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const counter = useRef(0);
   const nextId = () => `local-${++counter.current}`;
+  /**
+   * Which greeting reveal is current. The opening plays out over a few seconds; if
+   * the patient starts a new trip or opens another one mid-reveal, the stale loop
+   * must stop appending bubbles — it was re-adding `open-1` on top of the fresh
+   * greeting, which is the duplicate-key warning React raised.
+   */
+  const reveal = useRef(0);
 
   const opening = (animate = false): Message[] =>
     OPENING_BUBBLES.map((text, i) => ({
@@ -62,10 +69,11 @@ export function Chat() {
         if (data.messages.length > 0) {
           setMessages([...opening(), ...data.messages]);
         } else {
+          const run = ++reveal.current;
           for (const [i, text] of OPENING_BUBBLES.entries()) {
             setTyping(true);
             await sleep(i === 0 ? 500 : revealDelay(text));
-            if (cancelled) return;
+            if (cancelled || reveal.current !== run) return;
             setTyping(false);
             setMessages((m) => [...m, { id: `open-${i}`, role: 'assistant', text, animate: true }]);
           }
@@ -139,6 +147,8 @@ export function Chat() {
     if (busy) return;
     setBusy(true);
     setShowTrips(false);
+    reveal.current++;
+    setTyping(false);
     try {
       await fetch('/api/conversations', { method: 'POST' });
       setMessages(opening(true));
@@ -154,6 +164,8 @@ export function Chat() {
       if (busy) return;
       setBusy(true);
       setShowTrips(false);
+      reveal.current++;
+      setTyping(false);
       try {
         const res = await fetch('/api/conversation', {
           method: 'PUT',
