@@ -6,6 +6,7 @@ import type {
   FlightOrder,
   FlightSearch,
   FlightSlice,
+  GeoPoint,
   Guest,
   HotelBooking,
   HotelRate,
@@ -21,6 +22,7 @@ import { mapFlightShopResponse, type FlightShopResponse } from './mappers';
 import { cheapestFirst, mapHotelDetailsResponse, type HotelDetailsResponse } from './hotel-mappers';
 import {
   buildCreateFlightBookingRequest,
+  buildHotelAvailRequest,
   buildCreateHotelBookingRequest,
   buildFlightCheckRequest,
   buildCancelBookingRequest,
@@ -477,6 +479,51 @@ export class SabreProvider implements TravelProvider {
     log.info({ reference, cancelled, remaining }, 'cancel booking verified');
     return { reference, cancelled, remaining, raw };
   }
+}
+
+/**
+ * Coordinates never change, so a resolved airport is cached for the life of the
+ * process. The lookup itself is a hotel availability search around that airport
+ * code — Sabre echoes the point it resolved the code to, which is the only place
+ * in this integration that turns an IATA code into a position.
+ */
+const airportPointCache = new Map<string, GeoPoint | null>();
+
+/**
+ * Where an airport is, as Sabre resolves it. Works for any IATA code the GDS
+ * knows; returns null rather than a guess when it resolves nothing, so a caller
+ * can say it does not know.
+ */
+export async function resolveAirportPoint(iata: string): Promise<GeoPoint | null> {
+  const code = iata.trim().toUpperCase();
+  const cached = airportPointCache.get(code);
+  if (cached !== undefined) return cached;
+
+  const env = getEnv();
+  // A one-night stay far in the future: the dates are irrelevant, the reference
+  // point is the whole reason for the call, and a small page keeps it cheap.
+  const body = buildHotelAvailRequest(
+    env.SABRE_PCC,
+    { checkIn: '2027-01-11', checkOut: '2027-01-12', adults: 1, currency: 'USD' },
+    { refPointCode: code, radiusMiles: 1, pageSize: 1 },
+  );
+
+  let point: GeoPoint | null = null;
+  try {
+    const response = await sabreFetch<{
+      GetHotelAvailRS?: { HotelAvailInfos?: { SearchLatitude?: number; SearchLongitude?: number } };
+    }>({ method: 'POST', path: '/v5/get/hotelavail', body, timeoutMs: SHOP_TIMEOUT_MS });
+    const infos = response.GetHotelAvailRS?.HotelAvailInfos;
+    if (typeof infos?.SearchLatitude === 'number' && typeof infos.SearchLongitude === 'number') {
+      point = { latitude: infos.SearchLatitude, longitude: infos.SearchLongitude };
+    }
+  } catch (e) {
+    // Not knowing where an airport is must never break a room search.
+    log.warn({ code, err: (e as Error).message }, 'could not resolve an airport to a point');
+  }
+
+  airportPointCache.set(code, point);
+  return point;
 }
 
 export interface RetrievedBooking {

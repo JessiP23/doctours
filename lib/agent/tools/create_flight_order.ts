@@ -19,7 +19,7 @@ import {
 } from '@/lib/trip/select';
 import { rulesFor } from './context';
 import { defineTool } from './define';
-import { persistFlightOffers, searchAllowedFlights } from './flight-offers';
+import { persistFlightOffers, searchAllowedFlights, terminalsOf } from './flight-offers';
 import { loadBookableOffer } from './search_flights';
 
 /**
@@ -218,11 +218,14 @@ export const createFlightOrderTool = defineTool({
           departLocal: order.slices[0].segments[0].departLocal,
           arriveLocal: order.slices[0].segments.at(-1)!.arriveLocal,
           stops: order.slices[0].stops,
+          arrivalAirport: order.slices[0].segments.at(-1)!.to.iata,
+          ...terminalsOf(order.slices[0]),
         },
         inbound: {
           departLocal: order.slices[1].segments[0].departLocal,
           arriveLocal: order.slices[1].segments.at(-1)!.arriveLocal,
           stops: order.slices[1].stops,
+          ...terminalsOf(order.slices[1]),
         },
         passenger: `${input.passenger.givenName} ${input.passenger.familyName}`,
         hotelNights: stay.nights,

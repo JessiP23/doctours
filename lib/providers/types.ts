@@ -42,6 +42,9 @@ export interface FlightSegment {
   operatingFlightNumber?: string;
   /** Provider's own id for this flight, used to build the Flight Check payload. */
   providerFlightId?: string;
+  /** Terminal names exactly as the provider reports them, when it reports them. */
+  departureTerminal?: string;
+  arrivalTerminal?: string;
 }
 
 /** One direction of travel (outbound or return), possibly with connections. */
@@ -129,7 +132,28 @@ export interface HotelRate {
   prepaid: boolean | null;
   availableQuantity: number | null;
   expiresAt: string | null;
+  /** The property's address and coordinates, when the provider reports them. */
+  location: PropertyLocation | null;
   raw: unknown;
+}
+
+export interface GeoPoint {
+  latitude: number;
+  longitude: number;
+}
+
+/**
+ * Where a property actually is. Every field is optional because a provider may
+ * report any subset, and a missing field must read as unknown rather than as an
+ * invented one.
+ */
+export interface PropertyLocation {
+  addressLines: string[];
+  city: string | null;
+  postalCode: string | null;
+  country: string | null;
+  phone: string | null;
+  coords: GeoPoint | null;
 }
 
 export interface Guest {

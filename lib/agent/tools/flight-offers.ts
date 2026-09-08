@@ -2,7 +2,7 @@ import * as repo from '@/lib/db/repo';
 import type { Json, OfferRow } from '@/lib/db/types';
 import { log } from '@/lib/log';
 import { travelProvider } from '@/lib/providers/sabre';
-import type { FlightOffer } from '@/lib/providers/types';
+import type { FlightOffer, FlightSlice } from '@/lib/providers/types';
 import { deriveStay } from '@/lib/trip/nights';
 import type { TripRules } from '@/lib/trip/rules';
 import { partitionOffers, type ValidationCode } from '@/lib/trip/validate';
@@ -12,6 +12,20 @@ import { partitionOffers, type ValidationCode } from '@/lib/trip/validate';
  * and booking tools describe and persist offers identically. Pure selection
  * (ranking, de-duplication, exclusions) lives in `lib/trip/select.ts`.
  */
+
+/**
+ * Departure and arrival terminals, only when the provider filed them. A terminal
+ * the model supplies from memory is the kind of confident detail that sends a
+ * patient to the wrong building.
+ */
+export function terminalsOf(slice: FlightSlice) {
+  const departure = slice.segments[0].departureTerminal;
+  const arrival = slice.segments.at(-1)!.arrivalTerminal;
+  return {
+    ...(departure ? { departureTerminal: departure } : {}),
+    ...(arrival ? { arrivalTerminal: arrival } : {}),
+  };
+}
 
 export function summarizeFlightOffer(offer: FlightOffer) {
   const [outbound, inbound] = offer.slices;
@@ -25,12 +39,14 @@ export function summarizeFlightOffer(offer: FlightOffer) {
       stops: outbound.stops,
       via: outbound.segments.slice(0, -1).map((s) => s.to.iata),
       durationHours: Math.round((outbound.durationMin / 60) * 10) / 10,
+      ...terminalsOf(outbound),
     },
     inbound: {
       departLocal: inbound.segments[0].departLocal,
       arriveLocal: inbound.segments.at(-1)!.arriveLocal,
       stops: inbound.stops,
       via: inbound.segments.slice(0, -1).map((s) => s.to.iata),
+      ...terminalsOf(inbound),
     },
     hotelNights: stay.nights,
     checkIn: stay.checkIn,

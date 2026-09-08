@@ -1,4 +1,4 @@
-import type { HotelRate, Money } from '@/lib/providers/types';
+import type { HotelRate, Money, PropertyLocation } from '@/lib/providers/types';
 import { nightsBetween } from '@/lib/trip/nights';
 
 /**
@@ -20,6 +20,48 @@ import { nightsBetween } from '@/lib/trip/nights';
 function toArray<T>(value: T | T[] | undefined | null): T[] {
   if (value === undefined || value === null) return [];
   return Array.isArray(value) ? value : [value];
+}
+
+interface SabreLocationInfo {
+  Latitude?: number;
+  Longitude?: number;
+  Address?: {
+    AddressLine1?: string;
+    AddressLine2?: string;
+    CityName?: { value?: string };
+    PostalCode?: string;
+    CountryName?: { value?: string };
+  };
+  Contact?: { Phone?: string; Fax?: string };
+}
+
+/**
+ * The property's address as the provider states it.
+ *
+ * Get Hotel Details already carries this on every room search, and dropping it is
+ * why the agent had to tell a patient it did not know where their hotel was. Every
+ * field is taken only if present: an address the provider did not send must stay
+ * unknown rather than be filled in from anywhere else.
+ */
+function mapLocation(location: SabreLocationInfo | undefined): PropertyLocation | null {
+  if (!location) return null;
+  const address = location.Address;
+  const lines = [address?.AddressLine1, address?.AddressLine2].filter(
+    (l): l is string => typeof l === 'string' && l.trim().length > 0,
+  );
+  const coords =
+    typeof location.Latitude === 'number' && typeof location.Longitude === 'number'
+      ? { latitude: location.Latitude, longitude: location.Longitude }
+      : null;
+  if (lines.length === 0 && !coords && !location.Contact?.Phone) return null;
+  return {
+    addressLines: lines,
+    city: address?.CityName?.value ?? null,
+    postalCode: address?.PostalCode ?? null,
+    country: address?.CountryName?.value ?? null,
+    phone: location.Contact?.Phone ?? null,
+    coords,
+  };
 }
 
 function money(amount: string | undefined, currency: string | undefined): Money | null {
@@ -76,6 +118,7 @@ export interface HotelDetailsResponse {
   GetHotelDetailsRS?: {
     HotelDetailsInfo?: {
       HotelInfo?: { HotelCode?: string; HotelName?: string };
+      HotelDescriptiveInfo?: { LocationInfo?: SabreLocationInfo };
       HotelRateInfo?: { RoomSets?: { RoomSet?: SabreRoomSet | SabreRoomSet[] } };
     };
   };
@@ -117,6 +160,7 @@ export function mapHotelDetailsResponse(
   const info = response.GetHotelDetailsRS?.HotelDetailsInfo;
   const propertyId = info?.HotelInfo?.HotelCode ?? fallback.propertyId;
   const propertyName = info?.HotelInfo?.HotelName ?? 'the hotel';
+  const location = mapLocation(info?.HotelDescriptiveInfo?.LocationInfo);
 
   const rates: HotelRate[] = [];
   const skipped: { room: string; reason: string }[] = [];
@@ -149,6 +193,7 @@ export function mapHotelDetailsResponse(
             provider,
             propertyId,
             propertyName,
+            location,
             roomName: room.RoomType ?? roomName,
             roomDescription:
               room.RoomDescription?.Text?.[0] ?? plan.RatePlanDescription?.Text?.[0] ?? null,

@@ -3,9 +3,10 @@ import { log } from '@/lib/log';
 import * as repo from '@/lib/db/repo';
 import type { Json } from '@/lib/db/types';
 import { travelProvider } from '@/lib/providers/sabre';
-import type { HotelRate } from '@/lib/providers/types';
+import type { FlightSlice, HotelRate } from '@/lib/providers/types';
 import { isProviderError } from '@/lib/providers/sabre/errors';
 import { defineTool } from './define';
+import { describeProperty } from './property';
 import { loadBookableOffer } from './search_flights';
 
 /**
@@ -57,6 +58,13 @@ export const createHotelBookingTool = defineTool({
       throw e;
     }
 
+    // Kept on the booking so "where is it, how far from where I land" is answerable
+    // for the rest of the trip without another provider call.
+    const flight = await repo.getLiveBooking(ctx.conversationId, 'flight');
+    const flightSlices = ((flight?.raw ?? {}) as { bookedSlices?: FlightSlice[] }).bookedSlices;
+    const arrivalAirport = flightSlices?.[0]?.segments.at(-1)?.to.iata;
+    const property = await describeProperty(rate.location ?? null, arrivalAirport);
+
     const saved = await repo.insertBooking(ctx.conversationId, {
       kind: 'hotel',
       provider: booking.provider,
@@ -73,6 +81,7 @@ export const createHotelBookingTool = defineTool({
         refundable: rate.refundable,
         cancelBy: rate.cancelBy,
         guest: `${input.guest.givenName} ${input.guest.familyName}`,
+        ...(property ? { property } : {}),
       } as unknown as Json,
       raw: booking.raw as Json,
     });
@@ -90,6 +99,7 @@ export const createHotelBookingTool = defineTool({
       checkIn: booking.checkIn,
       checkOut: booking.checkOut,
       totalUSD: booking.total.amount,
+      ...(property ? { property } : {}),
     };
   },
 });

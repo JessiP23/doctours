@@ -7,6 +7,7 @@ import { deriveStay } from '@/lib/trip/nights';
 import type { FlightOffer } from '@/lib/providers/types';
 import { rulesFor } from './context';
 import { defineTool } from './define';
+import { describeProperty } from './property';
 
 /**
  * Room search at the pinned property.
@@ -40,6 +41,8 @@ export const searchHotelRatesTool = defineTool({
     let derivedFrom = 'the dates you gave me';
     /** Local arrival time, so an early landing can be mentioned rather than discovered at the desk. */
     let arriveLocal: string | undefined;
+    /** Where the patient actually lands, which is what "how far is the hotel" means. */
+    let arrivalAirport: string | undefined = rules.destination;
 
     if (!checkIn || !checkOut) {
       const flight = await repo.getLiveBooking(ctx.conversationId, 'flight');
@@ -60,6 +63,7 @@ export const searchHotelRatesTool = defineTool({
         checkIn = stay.checkIn;
         checkOut = stay.checkOut;
         arriveLocal = offer.slices[0].segments.at(-1)?.arriveLocal;
+        arrivalAirport = offer.slices[0].segments.at(-1)?.to.iata;
       } else {
         const details = flight.details as { hotelNights?: number } | null;
         return {
@@ -133,8 +137,14 @@ export const searchHotelRatesTool = defineTool({
       }
     }
 
+    // Where the property is, and how far that is from wherever this patient lands.
+    // Both come from calls already being made; the agent had to say it did not know
+    // the address of a hotel whose address was sitting in the same response.
+    const property = await describeProperty(shown[0]?.location ?? null, arrivalAirport);
+
     return {
       hotel: rules.hotel.name,
+      ...(property ? { property } : {}),
       checkIn,
       checkOut,
       ...(earlyArrival ? { earlyArrival } : {}),

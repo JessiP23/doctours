@@ -203,6 +203,8 @@ export function mapFlightShopResponse(response: FlightShopResponse, provider = '
               flight.operatingFlightNumber ?? flight.marketingFlightNumber,
             ),
             providerFlightId: flight.id,
+            ...(flight.departureTerminal ? { departureTerminal: flight.departureTerminal } : {}),
+            ...(flight.arrivalTerminal ? { arrivalTerminal: flight.arrivalTerminal } : {}),
           };
         });
 
