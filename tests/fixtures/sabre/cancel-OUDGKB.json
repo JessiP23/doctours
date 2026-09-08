@@ -1,0 +1,26 @@
+{
+  "response": {
+    "timestamp": "2026-09-08T16:28:36",
+    "request": {
+      "confirmationId": "OUDGKB",
+      "retrieveBooking": true,
+      "errorHandlingPolicy": "ALLOW_PARTIAL_CANCEL",
+      "cancelAll": true,
+      "targetPcc": "REDACTED_PCC",
+      "voidNonElectronicTickets": false,
+      "refundDocumentsType": "Tickets"
+    },
+    "booking": {
+      "bookingId": "OUDGKB",
+      "travelers": [
+        {
+          "givenName": "AJAI",
+          "surname": "GUKESH",
+          "type": "ADULT",
+          "passengerCode": "ADT",
+          "nameAssociationId": "1"
+        }
+      ]
+    }
+  }
+}

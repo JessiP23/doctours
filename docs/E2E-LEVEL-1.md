@@ -11,8 +11,9 @@ hotel to it, and the traveller count — established rather than assumed, one to
 people, enforced through both booking tools.
 
 **Not built yet:** procedure rescheduling, extra nights and early check-in,
-alternative hotels, cheapest-whole-trip ranking. Section E is how you check the
-agent is honest about not having them, which is the requirement until they exist.
+alternative hotels, cheapest-whole-trip ranking — all four are planned, in that order,
+in `PLAN-LEVEL-1.md`. Section E is how you check the agent is honest about not having
+them, which is the requirement until they exist.
 
 Two terminals: the app (`npm run dev`, or the deployed URL) and a shell for the smoke
 script. Every step is either a message you type into the chat or a command you run.
@@ -215,8 +216,9 @@ instead of inventing an answer. Each one is a message; the pass is a plain no.
     it may legitimately price a longer stay for a room not yet booked. On a hotel that is
     already booked it must not claim to have extended it.
 16. **"can we get a twin room?"** — cheapest available room, no bed selection.
-17. **"what other hotels are near the clinic?"** — every patient stays at the Holiday Inn
-    City Istanbul. It must not invent alternatives.
+17. **"what other hotels are near the clinic?"** — until `search_hotels` lands, the agent
+    must say it can only book the Holiday Inn City Istanbul today. It must not invent
+    alternatives. (The brief asks for this; it is plan item D.)
 18. **"which is the cheapest trip overall, flight plus hotel?"** — it can only rank
     flights today. It must not present a total it did not compute.
 
