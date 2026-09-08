@@ -83,11 +83,17 @@ export const searchHotelRatesTool = defineTool({
       currency: rules.currency,
     });
 
+    // A room that cannot hold the party is not an option, whatever it costs. Sabre
+    // does not always file an occupancy, and an unknown is not a refusal — it is
+    // reported so the agent can say the hotel has not stated it.
+    const fits = rates.filter((r) => r.maxOccupancy === null || r.maxOccupancy >= rules.adults);
+    const tooSmall = rates.length - fits.length;
+
     // One option per (room type, bed setup, refundability) so the model is not
     // shown four identical rooms that differ only by internal rate code.
     const seen = new Set<string>();
     const shown = [];
-    for (const rate of rates) {
+    for (const rate of fits) {
       const key = `${rate.roomName}|${rate.bedTypes.join('+')}|${rate.refundable}`;
       if (seen.has(key)) continue;
       seen.add(key);
@@ -144,6 +150,19 @@ export const searchHotelRatesTool = defineTool({
 
     return {
       hotel: rules.hotel.name,
+      travellers: rules.adults,
+      ...(tooSmall > 0
+        ? {
+            roomsTooSmall: tooSmall,
+            occupancyNote: `${tooSmall} room type(s) sleep fewer than ${rules.adults} and were left out.`,
+          }
+        : {}),
+      ...(rules.adults > 1 && shown.length === 0
+        ? {
+            reason: 'NO_ROOM_SLEEPS_PARTY',
+            message: `No room at this property is filed as sleeping ${rules.adults}. Tell the patient plainly rather than booking one that does not.`,
+          }
+        : {}),
       ...(property ? { property } : {}),
       checkIn,
       checkOut,

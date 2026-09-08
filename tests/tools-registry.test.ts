@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { anthropicTools, getTool, listTools } from '@/lib/agent/tools';
 
 describe('the tool set the model is given', () => {
-  it('is exactly the Level 0 six, with reply last', () => {
+  it('is exactly the registered set, with reply last', () => {
     expect(listTools().map((t) => t.name)).toEqual([
       'get_trip_state',
+      'set_party_size',
       'search_flights',
       'create_flight_order',
       'search_hotel_rates',
@@ -55,22 +56,35 @@ describe('the tool set the model is given', () => {
     expect(schema.safeParse({ returnOn: '17 October' }).success).toBe(false);
   });
 
-  it('requires passport details to book a flight', () => {
+  it('requires passport details for every traveller to book a flight', () => {
     const schema = getTool('create_flight_order')!.schema;
+    const passenger = {
+      givenName: 'Jessi',
+      familyName: 'Pavia',
+      dateOfBirth: '1990-05-02',
+      gender: 'F',
+      email: 'j@example.com',
+      phone: '+1 555 123 4567',
+    };
     expect(schema.safeParse({ offerId: 'x' }).success).toBe(false);
+    // An empty list is not a booking, and a single passenger is no longer a special case.
+    expect(schema.safeParse({ offerId: 'x', passengers: [] }).success).toBe(false);
+    expect(schema.safeParse({ offerId: 'x', passengers: [passenger] }).success).toBe(true);
     expect(
       schema.safeParse({
         offerId: 'x',
-        passenger: {
-          givenName: 'Jessi',
-          familyName: 'Pavia',
-          dateOfBirth: '1990-05-02',
-          gender: 'F',
-          email: 'j@example.com',
-          phone: '+1 555 123 4567',
-        },
+        passengers: [passenger, { ...passenger, givenName: 'Sam' }],
       }).success,
     ).toBe(true);
+  });
+
+  it('will not let the model choose the traveller count out of range', () => {
+    const schema = getTool('set_party_size')!.schema;
+    expect(schema.safeParse({ travellers: 0 }).success).toBe(false);
+    expect(schema.safeParse({ travellers: 1 }).success).toBe(true);
+    expect(schema.safeParse({ travellers: 4 }).success).toBe(true);
+    expect(schema.safeParse({ travellers: 5 }).success).toBe(false);
+    expect(schema.safeParse({ travellers: 2.5 }).success).toBe(false);
   });
 
   it('rejects a malformed date of birth and a bad email', () => {

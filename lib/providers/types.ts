@@ -196,7 +196,7 @@ export interface TravelProvider {
   priceFlightOffer(offer: FlightOffer): Promise<FlightOffer>;
   createFlightOrder(offer: FlightOffer, passengers: Passenger[]): Promise<FlightOrder>;
   searchHotelRates(q: HotelSearch): Promise<HotelRate[]>;
-  createHotelBooking(rate: HotelRate, guest: Guest): Promise<HotelBooking>;
+  createHotelBooking(rate: HotelRate, guests: Guest[]): Promise<HotelBooking>;
   /** Cancels an order and verifies the outcome before reporting success. */
   cancelBooking(reference: string): Promise<CancellationResult>;
 }

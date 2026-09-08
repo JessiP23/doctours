@@ -233,6 +233,19 @@ export async function listBookingsForConversations(
 }
 
 /**
+ * Replaces the conversation's snapshot of the trip rules.
+ *
+ * The snapshot is the authority every tool reads, which is what makes a detail
+ * like the traveller count a property of this trip rather than a module constant
+ * or something the model remembers. Whatever is written here is what the next
+ * search, price and booking obey.
+ */
+export async function updateTripRules(id: string, rules: Json): Promise<void> {
+  const { error } = await db().from('conversations').update({ trip_rules: rules }).eq('id', id);
+  if (error) fail('updateTripRules', error);
+}
+
+/**
  * Records the itinerary a booking holds, as the provider reports it.
  *
  * Written at booking time, and backfilled the first time an older booking is

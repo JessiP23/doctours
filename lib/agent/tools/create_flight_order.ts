@@ -18,6 +18,7 @@ import {
   type RefusedFlight,
 } from '@/lib/trip/select';
 import { rulesFor } from './context';
+import { MAX_TRAVELLERS } from './set_party_size';
 import { defineTool } from './define';
 import { persistFlightOffers, searchAllowedFlights, terminalsOf } from './flight-offers';
 import { loadBookableOffer } from './search_flights';
@@ -93,13 +94,29 @@ export const passengerSchema = z.object({
 export const createFlightOrderTool = defineTool({
   name: 'create_flight_order',
   description:
-    'Book a flight option the patient has confirmed. Only call this after they have chosen a specific offerId, agreed to the price, and given you their passport name, date of birth, gender, email and phone. It re-checks price and timing with the airline first, so it may report that the option expired.',
+    'Book a flight option the patient has confirmed. Only call this after they have chosen a specific offerId, agreed to the price, and given you passport name, date of birth, gender, email and phone for EVERY traveller on the trip. It re-checks price and timing with the airline first, so it may report that the option expired.',
   schema: z.object({
     offerId: z.string().describe('offerId from search_flights'),
-    passenger: passengerSchema,
+    passengers: z
+      .array(passengerSchema)
+      .min(1)
+      .max(MAX_TRAVELLERS)
+      .describe('One entry per traveller on this trip, the patient first'),
   }),
   handler: async (input, ctx) => {
     const rules = await rulesFor(ctx.conversationId);
+
+    // The party size is trip state, not something the model may imply by sending a
+    // different number of passports. A mismatch means the two disagree about who is
+    // going, which is exactly the confusion that got a companion booked in words only.
+    if (input.passengers.length !== rules.adults) {
+      return {
+        booked: false,
+        reason: 'TRAVELLER_COUNT_MISMATCH',
+        message: `This trip is set to ${rules.adults} traveller(s) but you sent ${input.passengers.length}. Collect details for every traveller, or call set_party_size first if the number itself is wrong.`,
+        travellers: rules.adults,
+      };
+    }
 
     const existing = await repo.getLiveBooking(ctx.conversationId, 'flight');
     if (existing) {
@@ -175,7 +192,7 @@ export const createFlightOrderTool = defineTool({
 
     let order;
     try {
-      order = await provider.createFlightOrder(priced, [input.passenger]);
+      order = await provider.createFlightOrder(priced, input.passengers);
     } catch (e) {
       if (isProviderError(e) && e.code === 'NO_AVAILABILITY') {
         // The airline refused to sell that booking class. Those exact flights are
@@ -227,7 +244,7 @@ export const createFlightOrderTool = defineTool({
           stops: order.slices[1].stops,
           ...terminalsOf(order.slices[1]),
         },
-        passenger: `${input.passenger.givenName} ${input.passenger.familyName}`,
+        travellers: input.passengers.map((p) => `${p.givenName} ${p.familyName}`),
         hotelNights: stay.nights,
       } as unknown as Json,
       // Sabre's response, plus the itinerary the order holds, segment by segment.

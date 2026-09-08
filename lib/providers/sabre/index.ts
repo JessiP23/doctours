@@ -376,7 +376,14 @@ export class SabreProvider implements TravelProvider {
     return cheapestFirst(rates);
   }
 
-  async createHotelBooking(rate: HotelRate, guest: Guest): Promise<HotelBooking> {
+  async createHotelBooking(rate: HotelRate, guests: Guest[]): Promise<HotelBooking> {
+    if (guests.length === 0) {
+      throw new ProviderError('BOOKING_FAILED', 'A room booking needs at least one guest');
+    }
+    // The lead guest carries the contact details; everyone in the party goes on the
+    // room, which is what makes a two-person booking a two-person booking rather
+    // than one name and an assumption.
+    const [lead] = guests;
     const env = getEnv();
     const card = paymentCard(env);
 
@@ -414,8 +421,8 @@ export class SabreProvider implements TravelProvider {
       body: buildCreateHotelBookingRequest({
         pcc: env.SABRE_PCC,
         bookingKey,
-        travelers: [{ givenName: guest.givenName, surname: guest.familyName }],
-        contact: { emails: [guest.email], phones: [guest.phone] },
+        travelers: guests.map((g) => ({ givenName: g.givenName, surname: g.familyName })),
+        contact: { emails: [lead.email], phones: [lead.phone] },
         paymentPolicy,
         card,
       }),
@@ -439,7 +446,7 @@ export class SabreProvider implements TravelProvider {
       checkIn: rate.checkIn,
       checkOut: rate.checkOut,
       total: rate.total,
-      guest,
+      guest: lead,
       raw: response,
     };
   }

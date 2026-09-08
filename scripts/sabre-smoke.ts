@@ -569,7 +569,7 @@ async function e2e() {
     );
 
   // 4b. Book the hotel. References come only from Sabre's responses.
-  const hotel = await provider.createHotelBooking(room, guest);
+  const hotel = await provider.createHotelBooking(room, [guest]);
   step('HOTEL BOOKED', {
     bookingReference: hotel.bookingReference,
     orderId: hotel.id,

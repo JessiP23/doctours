@@ -31,6 +31,12 @@ export interface TripRules {
   /** Departure dates (destination local) to shop for the return leg. */
   returnDepartureDates: string[];
   adults: number;
+  /**
+   * Whether the traveller count came from the patient rather than this default.
+   * Without it the prompt cannot tell "one, they told me" from "one, nobody asked",
+   * and the second is how a companion ends up mentioned but never booked.
+   */
+  travellersConfirmed?: boolean;
   cabin: Cabin;
   checkedBags: number;
   currency: string;

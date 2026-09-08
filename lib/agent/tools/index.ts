@@ -7,6 +7,7 @@ import { createFlightOrderTool } from './create_flight_order';
 import { searchHotelRatesTool } from './search_hotel_rates';
 import { createHotelBookingTool } from './create_hotel_booking';
 import { cancelTripTool } from './cancel_trip';
+import { setPartySizeTool } from './set_party_size';
 
 /**
  * Tool registry. Booking tools register here as they land; the loop only ever
@@ -14,6 +15,7 @@ import { cancelTripTool } from './cancel_trip';
  */
 const registry: ToolDefinition[] = [
   getTripStateTool,
+  setPartySizeTool,
   searchFlightsTool,
   createFlightOrderTool,
   searchHotelRatesTool,

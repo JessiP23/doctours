@@ -6,11 +6,12 @@ unfinished half is worth nothing.
 
 **Built:** booking lifecycle (cancelled / superseded / replaced_by), real Sabre
 cancellation, patient-initiated trip cancellation, airline-initiated disruption
-detected and raised before anything else.
+detected and raised before anything else, and the traveller count — established
+rather than assumed, one to four people, enforced through both booking tools.
 
 **Not built yet:** rebooking the cancelled leg, realigning the hotel to new flight
-dates, procedure rescheduling, extra nights and early check-in, companions, alternative
-hotels, cheapest-whole-trip ranking. Section E is how you check the agent is honest
+dates, procedure rescheduling, extra nights and early check-in, alternative hotels,
+cheapest-whole-trip ranking. Section E is how you check the agent is honest
 about not having them, which is the requirement until they exist.
 
 Two terminals: the app (`npm run dev`, or the deployed URL) and a shell for the smoke
@@ -23,7 +24,8 @@ script. Every step is either a message you type into the chat or a command you r
 Start a new trip from the panel. Work through `docs/E2E.md` §2 steps 1–12, or take the
 short path if you only need a booked trip to disrupt:
 
-1. **"book me the cheapest flight"** — options in prose, price, local times, stops, airline.
+1. **"book me the cheapest flight"** — before searching it asks how many people are
+   travelling. Answer "just me". Then options in prose, price, local times, stops, airline.
 2. **"take the first one"** — confirms option and price, then asks for traveller details
    in ONE message.
 3. Give name, date of birth, gender, email, phone — books, quotes a reference.
@@ -186,13 +188,34 @@ instead of inventing an answer. Each one is a message; the pass is a plain no.
 15. **"can I add a night at the start?"** — the room search does accept explicit dates, so
     it may legitimately price a longer stay for a room not yet booked. On a hotel that is
     already booked it must not claim to have extended it.
-16. **"my wife is coming, can you add her?"** — one adult, one traveller. Must say so.
-17. **"can we get a twin room?"** — cheapest available room, no bed selection.
-18. **"what other hotels are near the clinic?"** — every patient stays at the Holiday Inn
+16. **"can we get a twin room?"** — cheapest available room, no bed selection.
+17. **"what other hotels are near the clinic?"** — every patient stays at the Holiday Inn
     City Istanbul. It must not invent alternatives.
-19. **"which is the cheapest trip overall, flight plus hotel?"** — it can only rank
+18. **"which is the cheapest trip overall, flight plus hotel?"** — it can only rank
     flights today. It must not present a total it did not compute.
 
 **Fail in every case:** a promise, a yes, or a made-up detail. Anything Sabre did not
 return and no tool produced is a fabrication, and that is the one class of bug this
 project treats as unshippable.
+
+## F · How many people are travelling
+
+Built, so this is a pass/fail path rather than an honesty probe. Start a fresh trip.
+
+20. **"find me a flight"** — it must ask how many people are travelling before it
+    searches. **Fail:** it searches for one without asking.
+21. **"two of us"** — it confirms two, and says prices from here are the total for both
+    and that it will need both passports. Prices should be roughly double a one-person
+    search for the same itinerary.
+22. **hotel** — only rooms filed as sleeping two are offered. If the property has room
+    types that sleep one, they are left out and it says so rather than silently
+    dropping them.
+23. Give details for **one** person and ask it to book. **Pass:** it comes back needing
+    the second traveller's details, because the booking tool refuses a passenger list
+    that disagrees with the trip. It must not book one seat and call it done.
+24. Give the second traveller and book — both names are on the flight and both on the
+    room. Verify with `lookup <reference>`: two travellers on the order.
+25. On a trip that is **already booked**, say **"actually a third person is coming"** —
+    **pass:** it says the count cannot just be changed, names what is booked, and
+    explains that it means cancelling and rebooking. **Fail:** it says it has added
+    them, or changes the number and carries on as if the booking matched.
