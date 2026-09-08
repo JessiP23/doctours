@@ -196,6 +196,15 @@ export const createFlightOrderTool = defineTool({
     }
     const stay = deriveStay(order.slices[0], order.slices[1]);
 
+    // The order is authoritative, and its schedule can differ by minutes from the
+    // cached one the patient agreed to. They should hear that from us now, not read
+    // a different time on their boarding pass.
+    const timesOf = (slices: typeof order.slices) =>
+      slices.flatMap((s) => s.segments.map((g) => `${g.departLocal}/${g.arriveLocal}`));
+    const shopped = timesOf(priced.slices);
+    const confirmed = timesOf(order.slices);
+    const scheduleDiffers = shopped.join(',') !== confirmed.join(',');
+
     const booking = await repo.insertBooking(ctx.conversationId, {
       kind: 'flight',
       provider: order.provider,
@@ -218,11 +227,11 @@ export const createFlightOrderTool = defineTool({
         passenger: `${input.passenger.givenName} ${input.passenger.familyName}`,
         hotelNights: stay.nights,
       } as unknown as Json,
-      // Sabre's response, plus the itinerary we actually sold, segment by segment.
-      // `details` is summarised into the prompt every turn, so the baseline cannot
-      // live there — but without a baseline a schedule change that leaves the
-      // status on HK is invisible, which is most of them. Rows booked before this
-      // key existed have no baseline and fall back to a status-only comparison.
+      // Sabre's response, plus the itinerary the order holds, segment by segment.
+      // Every later disruption check compares against this, and without it a
+      // schedule change that leaves the status on HK is invisible — which is most
+      // of them. It sits under `raw` because `details` is summarised into the
+      // prompt every turn and a segment-level itinerary there is noise.
       raw: { ...(order.raw as object), bookedSlices: order.slices } as unknown as Json,
     });
 
@@ -236,6 +245,16 @@ export const createFlightOrderTool = defineTool({
       bookingReference: booking.booking_reference,
       priceUSD: order.price.amount,
       stay: { checkIn: stay.checkIn, checkOut: stay.checkOut, nights: stay.nights },
+      confirmedItinerary: {
+        outbound: (booking.details as { outbound?: unknown }).outbound,
+        inbound: (booking.details as { inbound?: unknown }).inbound,
+      },
+      ...(scheduleDiffers
+        ? {
+            scheduleChangedOnConfirmation:
+              'The airline holds slightly different times than the ones quoted. The confirmed times above are the real ones — tell the patient what changed before moving on.',
+          }
+        : {}),
       nextStep: 'Book the hotel for those nights.',
     };
   },

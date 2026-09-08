@@ -5,6 +5,7 @@ import type {
   FlightOffer,
   FlightOrder,
   FlightSearch,
+  FlightSlice,
   Guest,
   HotelBooking,
   HotelRate,
@@ -13,6 +14,7 @@ import type {
   TravelProvider,
 } from '@/lib/providers/types';
 import { TtlCache } from '@/lib/providers/cache';
+import { reconcileSlices, type OrderFlight } from '@/lib/trip/disruption';
 import { ProviderError } from './errors';
 import { sabreFetch } from './http';
 import { mapFlightShopResponse, type FlightShopResponse } from './mappers';
@@ -314,12 +316,38 @@ export class SabreProvider implements TravelProvider {
       });
     }
 
+    // The sell succeeded, so what the order holds is now the truth about this trip.
+    // Flight Shop is cache-based and can be minutes off it, and those shopped times
+    // are what we would otherwise quote the patient and compare future checks
+    // against. One read settles both. It is deliberately not fatal: the booking
+    // exists either way, and the reference matters more than the polish.
+    let slices = offer.slices;
+    try {
+      const order = (await retrieveBooking(bookingReference)).raw as {
+        flights?: OrderFlight[];
+      };
+      slices = reconcileSlices(offer.slices, order.flights ?? []);
+      const times = (ss: FlightSlice[]) =>
+        ss.flatMap((s) => s.segments.map((g) => `${g.departLocal}/${g.arriveLocal}`)).join(',');
+      if (times(slices) !== times(offer.slices)) {
+        log.warn(
+          { bookingReference, shopped: times(offer.slices), held: times(slices) },
+          'the order holds different times than the shopped itinerary',
+        );
+      }
+    } catch (e) {
+      log.warn(
+        { bookingReference, err: (e as Error).message },
+        'could not read the order back after booking; keeping shopped times',
+      );
+    }
+
     return {
       id: response.booking?.bookingId ?? bookingReference,
       bookingReference,
       provider: this.name,
       offerId: offer.id,
-      slices: offer.slices,
+      slices,
       price: offer.price,
       passengers,
       raw: response,

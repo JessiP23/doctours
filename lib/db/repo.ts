@@ -233,6 +233,25 @@ export async function listBookingsForConversations(
 }
 
 /**
+ * Records the itinerary a booking holds, as the provider reports it.
+ *
+ * Written at booking time, and backfilled the first time an older booking is
+ * checked. It is the baseline every later disruption check compares against, kept
+ * under `raw` rather than `details` because `details` is summarised into the prompt
+ * on every turn and a segment-level itinerary there is noise.
+ */
+export async function setBookedItinerary(id: string, slices: Json): Promise<void> {
+  const { data, error } = await db().from('bookings').select('raw').eq('id', id).single();
+  if (error) fail('setBookedItinerary.read', error);
+  const raw = (data?.raw ?? {}) as Record<string, Json>;
+  const { error: writeError } = await db()
+    .from('bookings')
+    .update({ raw: { ...raw, bookedSlices: slices } })
+    .eq('id', id);
+  if (writeError) fail('setBookedItinerary', writeError);
+}
+
+/**
  * Marks a booking cancelled. The reason is kept in the words the patient was given,
  * so an operator reading the row later sees the same explanation the patient did.
  */

@@ -61,6 +61,40 @@ function label(f: OrderFlight): string {
   return `${f.airlineCode ?? '??'}${f.flightNumber ?? ''} ${f.fromAirportCode ?? '???'}→${f.toAirportCode ?? '???'}`;
 }
 
+function orderKey(f: OrderFlight): string {
+  return `${f.airlineCode}${f.flightNumber}|${f.fromAirportCode}|${f.toAirportCode}`;
+}
+
+/**
+ * Replaces the shopped times on a sold itinerary with the times the order holds.
+ *
+ * Flight Shop is cache-based, so its schedule can be minutes off what Sabre
+ * actually sells: the same QR246 was cached as landing 00:10 and held as landing
+ * 00:30. That gap is not a disruption, and comparing a live order against shopped
+ * times manufactures one on every check — while quoting shopped times tells the
+ * patient an arrival the airline never agreed to.
+ *
+ * The order is authoritative, so the itinerary keeps its structure (which slice,
+ * which segments, in which order) and takes its times from Get Booking. A segment
+ * the order does not mention is left exactly as sold, so the caller still sees it
+ * is missing rather than having it quietly rewritten.
+ */
+export function reconcileSlices(sold: FlightSlice[], live: OrderFlight[]): FlightSlice[] {
+  const byKey = new Map(live.map((f) => [orderKey(f), f]));
+  return sold.map((slice) => ({
+    ...slice,
+    segments: slice.segments.map((s) => {
+      const flight = byKey.get(`${s.carrier}${s.flightNumber}|${s.from.iata}|${s.to.iata}`);
+      if (!flight) return s;
+      return {
+        ...s,
+        departLocal: local(flight.departureDate, flight.departureTime),
+        arriveLocal: local(flight.arrivalDate, flight.arrivalTime),
+      };
+    }),
+  }));
+}
+
 /**
  * Compares the order as Sabre reports it now against the itinerary that was booked.
  *

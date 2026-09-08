@@ -3,7 +3,7 @@ import type { Json, TripEventRow } from '@/lib/db/types';
 import { log } from '@/lib/log';
 import { retrieveBooking } from '@/lib/providers/sabre';
 import type { FlightSlice } from '@/lib/providers/types';
-import { detectDisruption, type OrderFlight } from '@/lib/trip/disruption';
+import { detectDisruption, reconcileSlices, type OrderFlight } from '@/lib/trip/disruption';
 
 /**
  * Reads the live orders back from the provider and records anything that has
@@ -25,26 +25,10 @@ export interface HealthCheck {
   note?: string;
 }
 
-/**
- * The itinerary to compare the live order against.
- *
- * Preferred source is the booking row, which stores the slices we actually sold.
- * Rows written before that key existed fall back to the offer the booking was made
- * from — same flights, priced a few seconds earlier — so a trip booked last week is
- * still checkable instead of being written off as uncomparable.
- */
-async function bookedItinerary(
-  conversationId: string,
-  booking: { raw: unknown; offer_id: string | null },
-): Promise<FlightSlice[]> {
-  const raw = (booking.raw ?? {}) as { bookedSlices?: FlightSlice[]; slices?: FlightSlice[] };
-  const stored = raw.bookedSlices ?? raw.slices;
-  if (stored?.length) return stored;
-
-  if (!booking.offer_id) return [];
-  const offer = await repo.getOffer(conversationId, booking.offer_id);
-  const fromOffer = (offer?.raw ?? {}) as { slices?: FlightSlice[] };
-  return fromOffer.slices ?? [];
+/** The itinerary the booking row stores as sold, if it has one. */
+function storedBaseline(booking: { raw: unknown }): FlightSlice[] {
+  const raw = (booking.raw ?? {}) as { bookedSlices?: FlightSlice[] };
+  return raw.bookedSlices ?? [];
 }
 
 export async function checkFlightHealth(conversationId: string): Promise<HealthCheck> {
@@ -58,22 +42,36 @@ export async function checkFlightHealth(conversationId: string): Promise<HealthC
       note: 'No flight booked.',
     };
 
-  const booked = await bookedItinerary(conversationId, booking);
-
   const order = (await retrieveBooking(booking.booking_reference)).raw as {
     flights?: OrderFlight[];
   };
   const current = order.flights ?? [];
 
-  // Without a baseline the statuses still tell the truth about a cancellation, so
-  // the check runs either way and says which comparison it managed. What is lost
-  // is a schedule change that moved the times while leaving the status on HK, and
-  // a segment that vanished from the order entirely.
-  const partial = booked.length === 0;
+  // Trips booked before the row kept a baseline have only the offer, whose times
+  // come from Flight Shop's cache and can be minutes off what the order holds. That
+  // gap is not a disruption, so comparing against it would report one on every
+  // check. Instead the order itself becomes the baseline, once: structure from the
+  // offer, times from Sabre. Statuses are still read from the live order, so a
+  // segment already cancelled is caught on this same pass rather than baked in.
+  let booked = storedBaseline(booking);
+  let baselineEstablished = false;
+  if (booked.length === 0 && booking.offer_id) {
+    const offer = await repo.getOffer(conversationId, booking.offer_id);
+    const sold = ((offer?.raw ?? {}) as { slices?: FlightSlice[] }).slices ?? [];
+    if (sold.length > 0) {
+      booked = reconcileSlices(sold, current);
+      await repo.setBookedItinerary(booking.id, booked as unknown as Json);
+      baselineEstablished = true;
+    }
+  }
+
   const report = detectDisruption(booked, current);
-  const note = partial
-    ? 'Neither the booking row nor its offer held a comparable itinerary, so only per-segment statuses were checked; a schedule change that kept status HK would not be seen.'
-    : undefined;
+  const note =
+    booked.length === 0
+      ? 'This booking has no itinerary to compare against and no offer to rebuild one from, so only per-segment statuses were checked; a schedule change that kept status HK would not be seen.'
+      : baselineEstablished
+        ? 'No baseline was stored for this booking, so the live order was recorded as one. Statuses were still checked; time comparisons start from the next check.'
+        : undefined;
   if (report.healthy) {
     log.info(
       { conversationId, reference: booking.booking_reference },

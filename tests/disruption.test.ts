@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { FlightSlice } from '@/lib/providers/types';
-import { detectDisruption, type OrderFlight } from '@/lib/trip/disruption';
+import { detectDisruption, reconcileSlices, type OrderFlight } from '@/lib/trip/disruption';
 
 /**
  * Sabre's segment status is the only reliable signal that an airline has touched a
@@ -10,6 +10,7 @@ import { detectDisruption, type OrderFlight } from '@/lib/trip/disruption';
 const IST = { iata: 'IST', tz: 'Europe/Istanbul' };
 const JFK = { iata: 'JFK', tz: 'America/New_York' };
 const FRA = { iata: 'FRA', tz: 'Europe/Berlin' };
+const DOH = { iata: 'DOH', tz: 'Asia/Qatar' };
 
 const seg = (
   from: typeof JFK,
@@ -200,5 +201,90 @@ describe('detectDisruption', () => {
     expect(detectDisruption(booked, moved).findings[0]).toMatchObject({
       kind: 'flight_schedule_change',
     });
+  });
+});
+
+describe('reconcileSlices', () => {
+  /**
+   * These numbers are real. Flight Shop cached QR246 IST→DOH as landing 00:10 and
+   * QR703 DOH→JFK as leaving 01:55; the order Sabre actually held said 00:30 and
+   * 01:35. Comparing a live order against shopped times reported that as a schedule
+   * change on booking RYBKSB, twice, when nothing had changed.
+   */
+  const shopped: FlightSlice[] = [
+    {
+      segments: [seg(JFK, IST, 'TK', '4', '2026-10-11T12:50', '2026-10-12T05:30')],
+      stops: 0,
+      durationMin: 640,
+    },
+    {
+      segments: [
+        seg(IST, DOH, 'QR', '246', '2026-10-18T20:05', '2026-10-19T00:10'),
+        seg(DOH, JFK, 'QR', '703', '2026-10-19T01:55', '2026-10-19T08:50'),
+      ],
+      stops: 1,
+      durationMin: 855,
+    },
+  ];
+
+  const held: OrderFlight[] = [
+    {
+      airlineCode: 'TK',
+      flightNumber: 4,
+      fromAirportCode: 'JFK',
+      toAirportCode: 'IST',
+      departureDate: '2026-10-11',
+      departureTime: '12:50:00',
+      arrivalDate: '2026-10-12',
+      arrivalTime: '05:30:00',
+      flightStatusCode: 'HK',
+    },
+    {
+      airlineCode: 'QR',
+      flightNumber: 246,
+      fromAirportCode: 'IST',
+      toAirportCode: 'DOH',
+      departureDate: '2026-10-18',
+      departureTime: '20:05:00',
+      arrivalDate: '2026-10-19',
+      arrivalTime: '00:30:00',
+      flightStatusCode: 'HK',
+    },
+    {
+      airlineCode: 'QR',
+      flightNumber: 703,
+      fromAirportCode: 'DOH',
+      toAirportCode: 'JFK',
+      departureDate: '2026-10-19',
+      departureTime: '01:35:00',
+      arrivalDate: '2026-10-19',
+      arrivalTime: '08:50:00',
+      flightStatusCode: 'HK',
+    },
+  ];
+
+  it('takes its times from the order and keeps the itinerary structure', () => {
+    const reconciled = reconcileSlices(shopped, held);
+    expect(reconciled).toHaveLength(2);
+    expect(reconciled[1].segments.map((s) => [s.departLocal, s.arriveLocal])).toEqual([
+      ['2026-10-18T20:05', '2026-10-19T00:30'],
+      ['2026-10-19T01:35', '2026-10-19T08:50'],
+    ]);
+    expect(reconciled[1].stops).toBe(1);
+    expect(reconciled[0].segments[0].carrier).toBe('TK');
+  });
+
+  it('turns two false schedule changes into a healthy order', () => {
+    expect(detectDisruption(shopped, held).findings).toHaveLength(2);
+    expect(detectDisruption(reconcileSlices(shopped, held), held).healthy).toBe(true);
+  });
+
+  it('leaves a segment the order does not mention exactly as sold, so it still reads as missing', () => {
+    const withoutDoha = held.filter((f) => f.flightNumber !== 703);
+    const reconciled = reconcileSlices(shopped, withoutDoha);
+    expect(reconciled[1].segments[1].departLocal).toBe('2026-10-19T01:55');
+    expect(detectDisruption(reconciled, withoutDoha).findings).toEqual([
+      expect.objectContaining({ segment: 'QR703 DOH→JFK', status: 'MISSING' }),
+    ]);
   });
 });

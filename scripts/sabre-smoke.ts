@@ -15,6 +15,7 @@
  *   npm run sabre:smoke -- cancel <reference>                    cancel an order and verify it is gone
  *   npm run sabre:smoke -- check <conversationId>                re-read the order; record any disruption found
  *   npm run sabre:smoke -- disrupt <conversationId> <leg> [kind] inject a disruption so the flow can be driven
+ *   npm run sabre:smoke -- ack <conversationId>                  clear the open events on a trip
  *                                                                leg: outbound | return, kind: cancelled | delayed
  *   npm run sabre:smoke -- trips                                 list recent conversations with what they hold
  *
@@ -787,6 +788,28 @@ async function disrupt() {
   );
 }
 
+/**
+ * Clears the open events on a trip. Needed after a false detection, and useful for
+ * re-running a demo from a clean slate: the agent raises an event once, and it stays
+ * raised until it is acknowledged.
+ */
+async function ack() {
+  const [conversationId] = args;
+  if (!conversationId) throw new Error('usage: ack <conversationId>');
+  const open = await repo.listOpenTripEvents(conversationId);
+  await repo.acknowledgeTripEvents(
+    conversationId,
+    open.map((e) => e.id),
+  );
+  console.log(
+    JSON.stringify(
+      { ok: true, conversationId, acknowledged: open.map((e) => ({ id: e.id, kind: e.kind })) },
+      null,
+      2,
+    ),
+  );
+}
+
 /** Recent conversations and what they hold, so a conversationId is easy to find. */
 async function trips() {
   const rows = await repo.listRecentConversations(10);
@@ -814,6 +837,7 @@ const commands: Record<string, () => Promise<void>> = {
   cancel,
   check,
   disrupt,
+  ack,
   trips,
   auth,
   flights,
