@@ -318,3 +318,61 @@ describe('applyPreferences — patient wishes over the rule-valid set', () => {
     });
   });
 });
+
+describe('excludeCancelled', () => {
+  /**
+   * The sandbox never actually cancels a flight, so Flight Shop kept returning QR704
+   * on the 11th after the airline had cancelled it — and the agent offered the
+   * patient their cancelled flight as its own replacement.
+   */
+  const offer = (carrier: string, number: string, departLocal: string) =>
+    ({
+      id: `${carrier}${number}`,
+      provider: 'sabre',
+      price: { amount: 833, currency: 'USD' },
+      slices: [
+        {
+          segments: [
+            {
+              from: { iata: 'JFK', tz: 'America/New_York' },
+              to: { iata: 'IST', tz: 'Europe/Istanbul' },
+              departLocal,
+              arriveLocal: '2026-10-12T11:55',
+              carrier,
+              flightNumber: number,
+              cabin: 'economy' as const,
+              durationMin: 600,
+            },
+          ],
+          stops: 0,
+          durationMin: 600,
+        },
+      ],
+      expiresAt: null,
+      raw: {},
+    }) as unknown as import('@/lib/providers/types').FlightOffer;
+
+  it('drops an itinerary that still contains the cancelled flight', async () => {
+    const { excludeCancelled } = await import('@/lib/trip/select');
+    const offers = [offer('QR', '704', '2026-10-11T11:20'), offer('TK', '4', '2026-10-11T12:50')];
+    const kept = excludeCancelled(offers, [
+      { carrier: 'QR', flightNumber: '704', date: '2026-10-11' },
+    ]);
+    expect(kept.map((o) => o.id)).toEqual(['TK4']);
+  });
+
+  it('keeps the same flight number on a different day', async () => {
+    const { excludeCancelled } = await import('@/lib/trip/select');
+    const offers = [offer('QR', '704', '2026-10-10T11:20')];
+    const kept = excludeCancelled(offers, [
+      { carrier: 'QR', flightNumber: '704', date: '2026-10-11' },
+    ]);
+    expect(kept).toHaveLength(1);
+  });
+
+  it('is a no-op with nothing cancelled', async () => {
+    const { excludeCancelled } = await import('@/lib/trip/select');
+    const offers = [offer('QR', '704', '2026-10-11T11:20')];
+    expect(excludeCancelled(offers, [])).toBe(offers);
+  });
+});

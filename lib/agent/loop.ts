@@ -124,17 +124,62 @@ async function runTool(name: string, input: unknown, conversationId: string) {
   }
 }
 
+export interface TurnDeps {
+  client?: ModelClient;
+  model?: string;
+}
+
 export async function runTurn(
   conversationId: string,
   userText: string,
   rules: TripRules,
-  deps: { client?: ModelClient; model?: string } = {},
+  deps: TurnDeps = {},
+): Promise<TurnResult> {
+  return runLoop(conversationId, rules, { text: userText, kind: 'patient' }, deps);
+}
+
+/**
+ * The agent speaks first.
+ *
+ * When something happens to the trip without the patient asking — an airline
+ * cancels a flight — waiting for them to say something means they find out late,
+ * and possibly at the airport. This runs a turn with no patient message: the
+ * opener is the app's own, recorded as a system row so it never appears in the
+ * transcript as the patient's words. The prompt already puts untold changes first;
+ * this is what makes "first" mean now rather than next time they type.
+ *
+ * A no-op when there is nothing untold, so a stray trigger cannot make the agent
+ * speak for no reason.
+ */
+export const PROACTIVE_OPENER =
+  'Something about this trip has changed and the patient has not been told. They did not say anything; you are reaching out. Tell them what changed, what it means for the trip, and what you can do next — then wait for them.';
+
+export async function runProactiveTurn(
+  conversationId: string,
+  rules: TripRules,
+  deps: TurnDeps = {},
+): Promise<TurnResult | null> {
+  const open = await repo.listOpenTripEvents(conversationId);
+  if (open.length === 0) return null;
+  return runLoop(conversationId, rules, { text: PROACTIVE_OPENER, kind: 'system' }, deps);
+}
+
+async function runLoop(
+  conversationId: string,
+  rules: TripRules,
+  opener: { text: string; kind: 'patient' | 'system' },
+  deps: TurnDeps,
 ): Promise<TurnResult> {
   const client = deps.client ?? defaultClient();
   const model = deps.model ?? getEnv().ANTHROPIC_MODEL;
   const l = log.child({ conversationId });
 
-  await repo.appendMessage(conversationId, 'user', [{ type: 'text', text: userText }]);
+  await repo.appendMessage(
+    conversationId,
+    'user',
+    [{ type: 'text', text: opener.text }],
+    opener.kind,
+  );
   const history = await loadHistory(conversationId);
   const tools = anthropicTools();
   let referenceRetryUsed = false;
@@ -253,7 +298,12 @@ export async function runTurn(
                 ? `You told the patient "${promise.announced}" but you did not call a booking tool in this turn, so nothing was booked. Either call the booking tool now, or reply telling them plainly what you still need from them.`
                 : `You told the patient "${promise.announced}" but you did not call the tool that does it, so nothing was looked up and they are waiting on nothing. Call the tool now and reply with what it returns, or ask them the question you actually need answered.`;
             const nudgeBlocks = [...results, { type: 'text' as const, text: nudge }];
-            await repo.appendMessage(conversationId, 'user', nudgeBlocks as unknown as Json);
+            await repo.appendMessage(
+              conversationId,
+              'user',
+              nudgeBlocks as unknown as Json,
+              'system',
+            );
             history.push({ role: 'user', content: nudgeBlocks });
             continue;
           }
@@ -274,15 +324,20 @@ export async function runTurn(
               ...results,
               {
                 type: 'text' as const,
-                text: `Your reply never mentions the change to this trip (${raised.unraised.join(', ')}). The patient still believes nothing has happened. Reply again, leading with what changed, in your own words, before anything else.`,
+                text: `Your first bubble does not tell the patient about the change to this trip (${raised.unraised.join(', ')}). They must hear what happened before they see any options: name what was cancelled or moved, in plain words, in the first bubble — then what it means, then what you can do. Reply again.`,
               },
             ];
-            await repo.appendMessage(conversationId, 'user', nudgeBlocks as unknown as Json);
+            await repo.appendMessage(
+              conversationId,
+              'user',
+              nudgeBlocks as unknown as Json,
+              'system',
+            );
             history.push({ role: 'user', content: nudgeBlocks });
             continue;
           }
 
-          await repo.appendMessage(conversationId, 'user', results as unknown as Json);
+          await repo.appendMessage(conversationId, 'user', results as unknown as Json, 'system');
           // Told once is told: otherwise every later turn re-announces the same
           // cancellation and the conversation never moves on.
           if (openEvents.length > 0) {
@@ -310,7 +365,12 @@ export async function runTurn(
             : 'Nothing has been booked yet.'
         } Never state a reference that is not in the booked state above. Reply again without inventing one.`;
         const correctionBlocks = [...results, { type: 'text' as const, text: correction }];
-        await repo.appendMessage(conversationId, 'user', correctionBlocks as unknown as Json);
+        await repo.appendMessage(
+          conversationId,
+          'user',
+          correctionBlocks as unknown as Json,
+          'system',
+        );
 
         if (referenceRetryUsed) {
           return {
@@ -327,7 +387,7 @@ export async function runTurn(
         continue;
       }
 
-      await repo.appendMessage(conversationId, 'user', results as unknown as Json);
+      await repo.appendMessage(conversationId, 'user', results as unknown as Json, 'system');
       l.warn({ issues: parsed.error.issues }, 'reply rejected by schema, falling back');
       // Salvage whatever the model actually said before apologising for nothing.
       const raw = (normalizeReplyInput(reply.input).value as { bubbles?: unknown })?.bubbles;
@@ -352,7 +412,7 @@ export async function runTurn(
       });
     }
 
-    await repo.appendMessage(conversationId, 'user', content as unknown as Json);
+    await repo.appendMessage(conversationId, 'user', content as unknown as Json, 'system');
     history.push({ role: 'user', content });
   }
 

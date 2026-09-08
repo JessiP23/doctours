@@ -41,6 +41,10 @@ export interface SegmentFinding {
   status: string;
   statusName?: string;
   kind: DisruptionKind;
+  /** Structured identity, so a replacement search can leave this exact flight out. */
+  carrier?: string;
+  flightNumber?: string;
+  date?: string;
   /** Present for a schedule change: what we booked versus what the order says now. */
   was?: { departLocal: string; arriveLocal: string };
   now?: { departLocal: string; arriveLocal: string };
@@ -109,6 +113,8 @@ export function detectDisruption(booked: FlightSlice[], current: OrderFlight[]):
   const bookedSegments = booked.flatMap((slice, sliceIndex) =>
     slice.segments.map((s) => ({
       key: `${s.carrier}${s.flightNumber}|${s.from.iata}|${s.to.iata}`,
+      carrier: s.carrier,
+      flightNumber: s.flightNumber,
       leg: (sliceIndex === 0 ? 'outbound' : 'return') as 'outbound' | 'return',
       departLocal: s.departLocal,
       arriveLocal: s.arriveLocal,
@@ -133,6 +139,9 @@ export function detectDisruption(booked: FlightSlice[], current: OrderFlight[]):
         status,
         statusName: flight.flightStatusName,
         kind: 'flight_cancelled',
+        carrier: flight.airlineCode,
+        flightNumber: String(flight.flightNumber ?? ''),
+        date: flight.departureDate,
       });
       if (booking) legs.add(booking.leg);
       continue;
@@ -173,7 +182,14 @@ export function detectDisruption(booked: FlightSlice[], current: OrderFlight[]):
   // A segment that was booked and is no longer in the order at all is cancelled.
   for (const booking of bookedSegments) {
     if (seen.has(booking.key)) continue;
-    findings.push({ segment: booking.display, status: 'MISSING', kind: 'flight_cancelled' });
+    findings.push({
+      segment: booking.display,
+      status: 'MISSING',
+      kind: 'flight_cancelled',
+      carrier: booking.carrier,
+      flightNumber: booking.flightNumber,
+      date: booking.departLocal.slice(0, 10),
+    });
     legs.add(booking.leg);
   }
 

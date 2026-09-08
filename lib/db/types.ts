@@ -24,10 +24,14 @@ export type ConversationRow = {
   visitor_id: string | null;
 };
 
+/** 'patient' is what the person typed; 'system' is the app's own plumbing, hidden from the transcript. */
+export type MessageKind = 'patient' | 'system';
+
 export type MessageRow = {
   id: number;
   conversation_id: string;
   role: MessageRole;
+  kind: MessageKind;
   content: Json;
   created_at: string;
 };
@@ -108,7 +112,10 @@ export interface Database {
         Pick<ConversationRow, 'trip_rules'> &
           Partial<Pick<ConversationRow, 'id' | 'status' | 'visitor_id'>>
       >;
-      messages: Table<MessageRow, Pick<MessageRow, 'conversation_id' | 'role' | 'content'>>;
+      messages: Table<
+        MessageRow,
+        Pick<MessageRow, 'conversation_id' | 'role' | 'content'> & Partial<Pick<MessageRow, 'kind'>>
+      >;
       offers: Table<OfferRow, Omit<OfferRow, 'id' | 'created_at'> & Partial<Pick<OfferRow, 'id'>>>;
       bookings: Table<
         BookingRow,

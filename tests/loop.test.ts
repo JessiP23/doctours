@@ -4,16 +4,16 @@ import { z } from 'zod';
 
 // In-memory stand-in for the Supabase repository.
 const mem = {
-  messages: [] as { role: string; content: unknown }[],
+  messages: [] as { role: string; content: unknown; kind?: string }[],
   toolCalls: [] as { toolName: string; error: unknown }[],
   bookings: [] as { kind: string; status: string; booking_reference: string }[],
   openEvents: [] as { id: string; kind: string; detail: unknown }[],
   acknowledged: [] as string[],
 };
 vi.mock('@/lib/db/repo', () => ({
-  appendMessage: vi.fn(async (_c: string, role: string, content: unknown) => {
-    mem.messages.push({ role, content });
-    return { id: mem.messages.length, role, content };
+  appendMessage: vi.fn(async (_c: string, role: string, content: unknown, kind = 'patient') => {
+    mem.messages.push({ role, content, kind });
+    return { id: mem.messages.length, role, content, kind };
   }),
   listMessages: vi.fn(async () =>
     mem.messages.map((m, i) => ({ id: i + 1, role: m.role, content: m.content })),
@@ -31,7 +31,7 @@ vi.mock('@/lib/db/repo', () => ({
   }),
 }));
 
-import { runTurn, type ModelClient } from '@/lib/agent/loop';
+import { PROACTIVE_OPENER, runProactiveTurn, runTurn, type ModelClient } from '@/lib/agent/loop';
 import { registerTools } from '@/lib/agent/tools';
 import { defineTool } from '@/lib/agent/tools/define';
 import { TRIP_RULES } from '@/lib/trip/rules';
@@ -242,7 +242,7 @@ describe('runTurn', () => {
     expect(result.bubbles[0]).toMatch(/cancelled/i);
     expect(result.iterations).toBe(2);
     // The nudge names the kind so the model knows what it skipped.
-    expect(JSON.stringify(mem.messages)).toMatch(/never mentions the change/);
+    expect(JSON.stringify(mem.messages)).toMatch(/first bubble does not tell the patient/);
   });
 
   it('marks an event told once it has been raised, so the next turn does not repeat it', async () => {
@@ -315,5 +315,46 @@ describe('runTurn', () => {
     const client = scripted([msg([use('t1', 'reply', { bubbles: '', expectsInput: false })])]);
     const r = await runTurn('c1', 'x', TRIP_RULES, { client, model: 'test' });
     expect(r.bubbles[0]).toMatch(/garbled/i);
+  });
+
+  it('speaks first when something is untold, and records its own opener as system', async () => {
+    mem.openEvents = [{ id: 'e1', kind: 'flight_cancelled', detail: {} }];
+    const client = scripted([
+      msg([
+        use('t1', 'reply', {
+          bubbles: [
+            'Qatar has cancelled your flight out on the 11th.',
+            'I can look for another way to get you there — want me to?',
+          ],
+          expectsInput: true,
+        }),
+      ]),
+    ]);
+    const result = await runProactiveTurn('c1', TRIP_RULES, { client, model: 'test' });
+    expect(result?.bubbles[0]).toMatch(/cancelled/);
+    // The opener is the app's, not the patient's: never rendered as their words.
+    const opener = mem.messages[0];
+    expect(opener.role).toBe('user');
+    expect(opener.kind).toBe('system');
+    expect(JSON.stringify(opener.content)).toContain(PROACTIVE_OPENER.slice(0, 30));
+    expect(mem.acknowledged).toEqual(['e1']);
+  });
+
+  it('says nothing when there is nothing untold', async () => {
+    const client = scripted([]);
+    const result = await runProactiveTurn('c1', TRIP_RULES, { client, model: 'test' });
+    expect(result).toBeNull();
+    expect(mem.messages).toEqual([]);
+  });
+
+  it('records tool results and corrections as system rows, never as the patient', async () => {
+    const client = scripted([
+      msg([use('t1', 'echo', { value: 'ping' })]),
+      msg([use('t2', 'reply', { bubbles: ['pong'], expectsInput: true })]),
+    ]);
+    await runTurn('c1', 'echo ping', TRIP_RULES, { client, model: 'test' });
+    const userRows = mem.messages.filter((m) => m.role === 'user');
+    expect(userRows[0].kind).toBe('patient');
+    for (const row of userRows.slice(1)) expect(row.kind).toBe('system');
   });
 });

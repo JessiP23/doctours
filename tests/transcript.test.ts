@@ -61,3 +61,36 @@ describe('trip list status', () => {
     expect(statusOfForTests([booking('flight'), booking('hotel')])).toBe('fully booked');
   });
 });
+
+describe('what the patient never sees', () => {
+  it('hides system rows and tool plumbing even though they are user-role', async () => {
+    const { projectTranscript } = await import('@/lib/agent/conversation');
+    const items = projectTranscript([
+      {
+        id: 1,
+        role: 'user',
+        kind: 'patient',
+        content: [{ type: 'text', text: 'what time do I land?' }],
+        created_at: 't',
+      },
+      {
+        id: 2,
+        role: 'user',
+        kind: 'system',
+        content: [{ type: 'text', text: 'Something about this trip has changed…' }],
+        created_at: 't',
+      },
+      {
+        // Written before `kind` existed: told apart by the tool_result it carries.
+        id: 3,
+        role: 'user',
+        content: [
+          { type: 'tool_result', tool_use_id: 'x', content: '{}' },
+          { type: 'text', text: 'You told the patient "let me find" but…' },
+        ],
+        created_at: 't',
+      },
+    ]);
+    expect(items.map((i) => i.text)).toEqual(['what time do I land?']);
+  });
+});

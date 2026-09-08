@@ -148,6 +148,20 @@ describe('checkRaisedEvents', () => {
     ).toBe(true);
   });
 
+  it('fails a reply that buries the cancellation after the options', () => {
+    // Verbatim from a live run: the word appears, the news does not. The patient read
+    // two replacement flights before learning anything had gone wrong.
+    const check = checkRaisedEvents(
+      [
+        'Here are your replacement options, all on Qatar Airways:',
+        'Option 1: Leave JFK October 11 at 11:20 am … $833 total.',
+        'Both are the same price as your cancelled flight and work with your hotel dates.',
+      ],
+      ['flight_cancelled'],
+    );
+    expect(check.ok).toBe(false);
+  });
+
   it('fails a reply that answers the question and skips the cancellation', () => {
     const check = checkRaisedEvents(
       ['You land at 11:55 am local on the 12th.', 'Anything else?'],

@@ -10,10 +10,33 @@ import {
   distinctItineraries,
   outboundDate,
   returnDate,
+  excludeCancelled,
+  type CancelledFlight,
 } from '@/lib/trip/select';
 import { rulesFor } from './context';
 import { defineTool } from './define';
 import { persistFlightOffers, searchAllowedFlights } from './flight-offers';
+
+/**
+ * The flights the airline has cancelled on this trip, read from the open events so
+ * a replacement search leaves them out. Structured fields were added to the event
+ * detail for exactly this; an older event without them excludes nothing.
+ */
+async function cancelledFlightsFor(conversationId: string): Promise<CancelledFlight[]> {
+  const events = await repo.listOpenTripEvents(conversationId);
+  const out: CancelledFlight[] = [];
+  for (const event of events) {
+    if (event.kind !== 'flight_cancelled') continue;
+    const segments = ((event.detail ?? {}) as { segments?: unknown[] }).segments ?? [];
+    for (const s of segments) {
+      const seg = s as { carrier?: string; flightNumber?: string; date?: string };
+      if (seg.carrier && seg.flightNumber && seg.date) {
+        out.push({ carrier: seg.carrier, flightNumber: seg.flightNumber, date: seg.date });
+      }
+    }
+  }
+  return out;
+}
 
 /**
  * Flight search.
@@ -79,7 +102,7 @@ export const searchFlightsTool = defineTool({
       };
     }
     const {
-      offers: valid,
+      offers: found,
       rejected,
       failures,
     } = await searchAllowedFlights(rules, {
@@ -87,6 +110,13 @@ export const searchFlightsTool = defineTool({
       returnDate: input.returnOn,
     });
     const whyFilteredOut = [...new Set(rejected.map((r) => r.reason))].slice(0, 4);
+
+    // A flight the airline has cancelled is not an option, however the shop still
+    // lists it. The sandbox never actually cancels anything, so without this the
+    // agent offered the cancelled flight back as its own replacement.
+    const cancelled = await cancelledFlightsFor(ctx.conversationId);
+    const valid = excludeCancelled(found, cancelled);
+    const excludedCancelled = found.length - valid.length;
 
     if (valid.length === 0) {
       return {
@@ -97,6 +127,7 @@ export const searchFlightsTool = defineTool({
             ? 'Flights came back but none satisfy the trip rules.'
             : 'No flights came back for those dates.',
         whyFilteredOut,
+        ...(excludedCancelled > 0 ? { excludedCancelled } : {}),
         ...(failures.length > 0 ? { searchFailures: failures } : {}),
       };
     }
@@ -168,6 +199,12 @@ export const searchFlightsTool = defineTool({
       ),
       filteredOut: rejected.length,
       whyFilteredOut,
+      ...(excludedCancelled > 0
+        ? {
+            excludedCancelled,
+            excludedCancelledNote: `${excludedCancelled} option(s) still contained a flight the airline cancelled and were left out — never offer the cancelled flight as its own replacement.`,
+          }
+        : {}),
       ...(gone > 0 ? { droppedAtRepricing: gone } : {}),
       offersExpireAt: expiresAt,
       offerValidMinutes: expiresAt

@@ -148,11 +148,15 @@ export interface EventCheck {
 }
 
 export function checkRaisedEvents(bubbles: string[], eventKinds: string[]): EventCheck {
-  const text = bubbles.join(' ');
+  // The first bubble, not the whole reply. "Here are your replacement options …
+  // same price as your cancelled flight" mentions the word and buries the news; the
+  // patient reads options before they know anything went wrong. Raising it means
+  // leading with it.
+  const lead = bubbles[0] ?? '';
   const unraised = [...new Set(eventKinds)].filter((kind) => {
     const pattern = RAISED[kind];
     // An unknown kind has no words to look for, so it cannot be judged here.
-    return pattern ? !pattern.test(text) : false;
+    return pattern ? !pattern.test(lead) : false;
   });
   return { ok: unraised.length === 0, unraised };
 }

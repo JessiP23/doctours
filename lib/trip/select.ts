@@ -154,3 +154,35 @@ export function describeChoices(offers: FlightOffer[]) {
     cheapestUSD: offers.length ? Math.min(...offers.map((o) => o.price.amount)) : null,
   };
 }
+
+/** A flight the airline has cancelled: carrier, number, and the local departure date. */
+export interface CancelledFlight {
+  carrier: string;
+  flightNumber: string;
+  /** YYYY-MM-DD, local to the departure airport. */
+  date: string;
+}
+
+/**
+ * Drops every itinerary that still contains a flight the airline cancelled.
+ *
+ * The sandbox does not actually cancel anything, so Flight Shop keeps returning the
+ * same QR704 on the 11th after the airline has said it will not fly — and the agent
+ * offered the cancelled flight back to the patient as its own replacement. This is
+ * matched on carrier, number and departure date, so the same flight number on a
+ * different day is still a legitimate option.
+ */
+export function excludeCancelled(
+  offers: FlightOffer[],
+  cancelled: CancelledFlight[],
+): FlightOffer[] {
+  if (cancelled.length === 0) return offers;
+  const gone = new Set(cancelled.map((c) => `${c.carrier}${c.flightNumber}|${c.date}`));
+  return offers.filter((offer) =>
+    offer.slices.every((slice) =>
+      slice.segments.every(
+        (s) => !gone.has(`${s.carrier}${s.flightNumber}|${s.departLocal.slice(0, 10)}`),
+      ),
+    ),
+  );
+}

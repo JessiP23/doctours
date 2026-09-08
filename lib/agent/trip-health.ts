@@ -145,6 +145,9 @@ export async function simulateFlightDisruption(
         status: kind === 'flight_cancelled' ? 'HX' : 'SC',
         statusName: kind === 'flight_cancelled' ? 'Cancelled by carrier' : 'Schedule change',
         kind,
+        carrier: s.carrier,
+        flightNumber: s.flightNumber,
+        date: s.departLocal.slice(0, 10),
         was: { departLocal: s.departLocal, arriveLocal: s.arriveLocal },
       }))
     : [

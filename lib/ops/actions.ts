@@ -1,6 +1,8 @@
 import 'server-only';
 import * as repo from '@/lib/db/repo';
 import { log } from '@/lib/log';
+import { runProactiveTurn } from '@/lib/agent/loop';
+import type { TripRules } from '@/lib/trip/rules';
 import {
   checkFlightHealth,
   simulateFlightDisruption,
@@ -67,6 +69,32 @@ export async function runOpsAction(action: OpsAction, conversationId: string) {
   const result = await OPS_ACTIONS[action].run(conversationId);
   log.info({ conversationId, action }, 'operator action');
   return result;
+}
+
+/**
+ * After an operator has done something to a trip, the agent tells the patient —
+ * without waiting for them to type. Runs the same loop a patient message would, so
+ * every guard applies, and is a no-op when there is nothing untold.
+ */
+export async function tellThePatient(conversationId: string): Promise<void> {
+  const conversation = await repo.getConversation(conversationId);
+  if (!conversation) return;
+  try {
+    const result = await runProactiveTurn(
+      conversationId,
+      conversation.trip_rules as unknown as TripRules,
+    );
+    if (result) {
+      log.info({ conversationId, bubbles: result.bubbles.length }, 'patient told proactively');
+    }
+  } catch (e) {
+    // The event is still open, so the agent raises it on the patient's next message
+    // instead. Nothing is lost; it is just not instant.
+    log.error(
+      { conversationId, err: e instanceof Error ? e.message : String(e) },
+      'proactive turn failed; will be raised on the next message',
+    );
+  }
 }
 
 /** What the console shows for each recent trip. */

@@ -72,17 +72,19 @@ In the console, on that trip, click **Airline cancels the outbound** (or from a 
 **Pass:** each real segment is named — `QR704 JFK→DOH`, `QR239 DOH→IST` — with the times
 the order holds. `"QR outbound flight"` with no number means the baseline is missing.
 
-Now, in that conversation, type something with nothing to do with the cancellation:
+Now switch to the chat tab and **do not type anything.** Within a few seconds the
+typing indicator appears, and then the agent speaks on its own.
 
-6. **"what time do I land?"**
+6. **Wait.**
 
-**Pass:** the first bubble is the cancellation. It names what was cancelled, says what it
+**Pass:** the first bubble is the cancellation, unprompted. It names what was cancelled, says what it
 means for the trip (the Istanbul arrival deadline, the hotel nights that were derived
 from that flight), and offers a next step. Answering the landing question is optional
 and comes after.
 
-**Fail:** the landing time comes first; the cancellation is mentioned in passing at the
-end; or it is not mentioned at all. The loop nudges the model once when a reply skips an
+**Fail:** nothing appears within about thirty seconds (the dev log will say why); or the
+first bubble is options rather than the news; or the cancellation is mentioned only in
+passing at the end. If you type before it speaks, the same rules apply to its reply. The loop nudges the model once when a reply skips an
 open event, so a fail here means both attempts skipped it — worth reporting.
 
 **Fail, worse:** it says it has rebooked you, moved the hotel, or quotes a new reference.
@@ -93,8 +95,8 @@ without a reference can slip through, and that is the thing to watch for.
 7. **"ok what now?"**
 
 **Pass:** it offers to look for another flight, and searching is real — options come back
-with live prices. It should be clear that the cancelled flight is still on the booking
-until something is done about it.
+with live prices. **The cancelled flight must not be among them:** the sandbox still
+lists it, and the search leaves it out by carrier, number and date.
 
 8. **"yes, book that one"**
 

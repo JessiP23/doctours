@@ -1,5 +1,6 @@
 import {
   getOrCreateConversation,
+  hasPendingUpdate,
   loadTranscript,
   switchConversation,
 } from '@/lib/agent/conversation';
@@ -7,11 +8,18 @@ import {
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/** GET /api/conversation → the open trip and its transcript. Hydrates the chat. */
+/**
+ * GET /api/conversation → the open trip, its transcript, and whether an update is
+ * on its way. Hydrates the chat, and is polled while the chat is idle so a message
+ * the agent sends on its own — a cancellation it just learned about — appears
+ * without the patient having to say something first.
+ */
 export async function GET() {
   const conversation = await getOrCreateConversation();
-  const messages = conversation.isNew ? [] : await loadTranscript(conversation.id);
-  return Response.json({ conversationId: conversation.id, messages });
+  const [messages, pendingUpdate] = conversation.isNew
+    ? [[], false]
+    : await Promise.all([loadTranscript(conversation.id), hasPendingUpdate(conversation.id)]);
+  return Response.json({ conversationId: conversation.id, messages, pendingUpdate });
 }
 
 /** PUT /api/conversation { conversationId } → opens one of this browser's other trips. */

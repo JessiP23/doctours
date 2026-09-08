@@ -29,7 +29,7 @@ function summarizeEvents(events: TripState['openEvents']): string[] {
     ``,
     `UNTOLD CHANGES TO THIS TRIP — raise these before anything else, in your own words:`,
     ...events.map((e) => `  - [${e.kind}] ${JSON.stringify(e.detail)}`),
-    `The patient does not know about these yet. Say what happened plainly, say what it means for the rest of the trip, and offer the next step. Do not wait to be asked, and do not bury it after answering something else.`,
+    `The patient does not know about these yet. Your FIRST bubble says what happened, naming the flights or the room — "Qatar has cancelled your flight out on the 11th, QR704 to Doha and the connection to Istanbul." Then what it means for the rest of the trip. Then what you can do about it. Never open with options or with an answer to something else: a patient who reads replacement flights before learning their flight is gone has been told nothing. A cancelled flight is never offered back as its own replacement.`,
   ];
 }
 

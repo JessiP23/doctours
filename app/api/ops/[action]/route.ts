@@ -1,8 +1,20 @@
+import { after } from 'next/server';
 import { opsAuthorised, opsEnabled } from '@/lib/ops/auth';
-import { isOpsAction, runOpsAction } from '@/lib/ops/actions';
+import { isOpsAction, runOpsAction, tellThePatient } from '@/lib/ops/actions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
+/** Actions after which the agent should reach out, rather than wait to be asked. */
+const TELLS_THE_PATIENT = new Set([
+  'cancel-outbound',
+  'cancel-return',
+  'delay-outbound',
+  'delay-return',
+  'hotel-cancelled',
+  'check',
+]);
 
 /**
  * POST /api/ops/<action> — one operator action on one trip, then back to the console.
@@ -27,6 +39,9 @@ export async function POST(request: Request, ctx: { params: Promise<{ action: st
   const back = new URL('/ops', request.url);
   try {
     const result = await runOpsAction(action, conversationId);
+    // The console answers at once; the agent's turn runs after the response so the
+    // operator is not held for twenty seconds, and the chat shows it thinking.
+    if (TELLS_THE_PATIENT.has(action)) after(() => tellThePatient(conversationId));
     back.searchParams.set('did', action);
     back.searchParams.set('on', conversationId.slice(0, 8));
     back.searchParams.set('result', JSON.stringify(result).slice(0, 400));

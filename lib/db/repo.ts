@@ -5,6 +5,7 @@ import type {
   BookingRow,
   ConversationRow,
   Json,
+  MessageKind,
   MessageRole,
   MessageRow,
   OfferKind,
@@ -109,10 +110,11 @@ export async function appendMessage(
   conversationId: string,
   role: MessageRole,
   content: Json,
+  kind: MessageKind = 'patient',
 ): Promise<MessageRow> {
   const { data, error } = await db()
     .from('messages')
-    .insert({ conversation_id: conversationId, role, content })
+    .insert({ conversation_id: conversationId, role, content, kind })
     .select()
     .single();
   if (error) fail('appendMessage', error);

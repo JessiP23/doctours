@@ -120,7 +120,15 @@ describe('detectDisruption', () => {
   it('treats a segment that vanished from the order as cancelled', () => {
     const report = detectDisruption(booked, [order([{}, {}])[1]]);
     expect(report.findings).toEqual([
-      { segment: 'TK4 JFK→IST', status: 'MISSING', kind: 'flight_cancelled' },
+      {
+        segment: 'TK4 JFK→IST',
+        status: 'MISSING',
+        kind: 'flight_cancelled',
+        // Carried so a replacement search can leave this exact flight out.
+        carrier: 'TK',
+        flightNumber: '4',
+        date: '2026-10-11',
+      },
     ]);
     expect(report.legs).toEqual(['outbound']);
   });

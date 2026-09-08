@@ -39,6 +39,25 @@ export function Chat() {
    * greeting, which is the duplicate-key warning React raised.
    */
   const reveal = useRef(0);
+  /**
+   * Transcript items already on screen, by server id. The agent can now speak
+   * without being spoken to — an airline cancellation reaches the patient the moment
+   * it is known, not the next time they type — so the chat polls while idle and
+   * reveals only what it has not shown. Locally-sent bubbles carry local ids, so
+   * after every turn the server's view is re-read and marked seen without redrawing.
+   */
+  const seen = useRef<Set<string>>(new Set());
+  const polling = useRef(false);
+
+  const markAllSeen = useCallback(async () => {
+    try {
+      const res = await fetch('/api/conversation', { cache: 'no-store' });
+      const data = (await res.json()) as { messages: Message[] };
+      for (const m of data.messages) seen.current.add(m.id);
+    } catch {
+      /* best effort; the next poll will reconcile */
+    }
+  }, []);
 
   const opening = (animate = false): Message[] =>
     OPENING_BUBBLES.map((text, i) => ({
@@ -67,6 +86,7 @@ export function Chat() {
         const data = (await res.json()) as { messages: Message[] };
         if (cancelled) return;
         if (data.messages.length > 0) {
+          for (const m of data.messages) seen.current.add(m.id);
           setMessages([...opening(), ...data.messages]);
         } else {
           const run = ++reveal.current;
@@ -103,6 +123,42 @@ export function Chat() {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, typing]);
 
+  // While idle, listen for the agent speaking first.
+  useEffect(() => {
+    if (!hydrated) return;
+    const tick = async () => {
+      if (busy || polling.current || document.hidden) return;
+      polling.current = true;
+      try {
+        const res = await fetch('/api/conversation', { cache: 'no-store' });
+        const data = (await res.json()) as { messages: Message[]; pendingUpdate: boolean };
+        const fresh = data.messages.filter((m) => !seen.current.has(m.id));
+        // Anything the patient typed elsewhere is recorded, not replayed.
+        for (const m of fresh.filter((m) => m.role === 'user')) seen.current.add(m.id);
+        const spoken = fresh.filter((m) => m.role === 'assistant');
+        if (spoken.length > 0) {
+          for (const [i, m] of spoken.entries()) {
+            setTyping(true);
+            await sleep(i === 0 ? 600 : revealDelay(m.text));
+            seen.current.add(m.id);
+            setTyping(false);
+            setMessages((prev) => [...prev, { ...m, animate: true }]);
+          }
+          void refreshTrips();
+        } else {
+          // Something is untold and the agent has not spoken yet: it is thinking.
+          setTyping(data.pendingUpdate);
+        }
+      } catch {
+        /* transient; try again next tick */
+      } finally {
+        polling.current = false;
+      }
+    };
+    const id = window.setInterval(() => void tick(), 4000);
+    return () => window.clearInterval(id);
+  }, [hydrated, busy, refreshTrips]);
+
   const send = useCallback(async () => {
     const text = input.trim();
     if (!text || busy) return;
@@ -126,6 +182,7 @@ export function Chat() {
         ]);
       }
       void refreshTrips();
+      void markAllSeen();
     } catch {
       setMessages((m) => [
         ...m,
@@ -141,7 +198,7 @@ export function Chat() {
       setBusy(false);
       inputRef.current?.focus();
     }
-  }, [input, busy, refreshTrips]);
+  }, [input, busy, refreshTrips, markAllSeen]);
 
   const startNewTrip = useCallback(async () => {
     if (busy) return;
@@ -151,6 +208,7 @@ export function Chat() {
     setTyping(false);
     try {
       await fetch('/api/conversations', { method: 'POST' });
+      seen.current = new Set();
       setMessages(opening(true));
       void refreshTrips();
     } finally {
@@ -174,6 +232,7 @@ export function Chat() {
         });
         if (!res.ok) return;
         const data = (await res.json()) as { messages: Message[] };
+        seen.current = new Set(data.messages.map((m) => m.id));
         setMessages([...opening(), ...data.messages]);
         void refreshTrips();
       } finally {

@@ -139,12 +139,24 @@ type Block = { type: string; text?: string; name?: string; input?: { bubbles?: u
 
 /** Projects raw stored blocks into what a human should see. Tool plumbing is hidden. */
 export function projectTranscript(
-  rows: { id: number; role: 'user' | 'assistant'; content: unknown; created_at: string }[],
+  rows: {
+    id: number;
+    role: 'user' | 'assistant';
+    kind?: 'patient' | 'system';
+    content: unknown;
+    created_at: string;
+  }[],
 ): TranscriptItem[] {
   const out: TranscriptItem[] = [];
   for (const row of rows) {
     const blocks = Array.isArray(row.content) ? (row.content as Block[]) : [];
     if (row.role === 'user') {
+      // Only the patient's own words. Tool results, corrections to the model and the
+      // app's proactive openers are user-role rows too, and must never read as
+      // something the patient typed. Rows written before `kind` existed are told
+      // apart by the tool_result blocks they carry.
+      const isSystem = row.kind === 'system' || blocks.some((b) => b.type === 'tool_result');
+      if (isSystem) continue;
       for (const [i, b] of blocks.entries()) {
         if (b.type === 'text' && b.text?.trim()) {
           out.push({ id: `${row.id}-${i}`, role: 'user', text: b.text, at: row.created_at });
@@ -177,4 +189,15 @@ export function projectTranscript(
 export async function loadTranscript(conversationId: string): Promise<TranscriptItem[]> {
   const rows = await repo.listMessages(conversationId);
   return projectTranscript(rows);
+}
+
+/**
+ * Whether something has happened to this trip that the patient has not been told.
+ * The chat polls this while idle: true means the agent is about to speak, or is
+ * speaking, without being asked — so the client shows it thinking rather than
+ * nothing, and reveals the new bubbles when they land.
+ */
+export async function hasPendingUpdate(conversationId: string): Promise<boolean> {
+  const open = await repo.listOpenTripEvents(conversationId);
+  return open.length > 0;
 }
