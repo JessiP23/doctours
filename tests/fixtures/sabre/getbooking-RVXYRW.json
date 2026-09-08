@@ -1,0 +1,84 @@
+{
+  "response": {
+    "bookingId": "RVXYRW",
+    "isCancelable": true,
+    "isTicketed": false,
+    "creationDetails": {
+      "creationUserSine": "AWV",
+      "creationDate": "2026-09-07",
+      "creationTime": "16:47",
+      "userWorkPcc": "REDACTED_PCC",
+      "userHomePcc": "REDACTED_PCC",
+      "primeHostId": "1S",
+      "lastUpdateDate": "2026-09-07",
+      "lastUpdateTime": "20:12",
+      "numberOfUpdates": 2
+    },
+    "contactInfo": {
+      "emails": [
+        "JESSI316866@GMAIL.COM"
+      ],
+      "phones": [
+        "64638745532"
+      ]
+    },
+    "travelers": [
+      {
+        "givenName": "MARCO",
+        "surname": "JUNIOR",
+        "type": "ADULT",
+        "passengerCode": "ADT",
+        "nameAssociationId": "1"
+      }
+    ],
+    "remarks": [
+      {
+        "type": "FORM_OF_PAYMENT",
+        "text": "*VI4XXXXXXXXXXX1111¥12/28"
+      }
+    ],
+    "payments": {
+      "formsOfPayment": [
+        {
+          "cardTypeCode": "VI",
+          "cardNumber": "4XXXXXXXXXXX1111",
+          "expiryDate": "2028-12",
+          "cardHolder": {
+            "givenName": "Doctours",
+            "surname": "Travel",
+            "email": "jessi316866@gmail.com",
+            "phone": "+64638745532",
+            "address": {
+              "street": "1 Medical Tourism Way",
+              "city": "New York",
+              "stateProvince": "NY",
+              "postalCode": "10001",
+              "countryCode": "US"
+            }
+          },
+          "useType": "Unknown",
+          "tripType": "Unknown",
+          "useTypes": [
+            "Unknown"
+          ],
+          "tripTypes": [
+            "Unknown"
+          ],
+          "type": "PAYMENTCARD",
+          "itemId": "3"
+        }
+      ]
+    },
+    "otherServices": [
+      {
+        "serviceMessage": "HHL HI IST 12OCT /CX-75343429",
+        "chainCode": "HI"
+      }
+    ],
+    "timestamp": "2026-09-08T01:12:28",
+    "bookingSignature": "e53f9b1673a5aeb73a0a114773ced07527f69d1561eda64fd94d17c4c171865cc71732223d996009fedc72a1cf0a840be356cbe36d951aaab8b50e7298b5a5d4",
+    "request": {
+      "confirmationId": "RVXYRW"
+    }
+  }
+}

@@ -64,6 +64,23 @@ export type BookingRow = {
   updated_at: string;
 };
 
+export type TripEventKind =
+  'flight_cancelled' | 'flight_schedule_change' | 'hotel_cancelled' | 'operator_note';
+
+export type TripEventSource = 'provider' | 'operator' | 'simulated';
+
+/** Something that happened to the trip without the patient asking. */
+export type TripEventRow = {
+  id: string;
+  conversation_id: string;
+  booking_id: string | null;
+  kind: TripEventKind;
+  detail: Json;
+  source: TripEventSource;
+  created_at: string;
+  acknowledged_at: string | null;
+};
+
 export type ToolCallRow = {
   id: number;
   conversation_id: string | null;
@@ -110,6 +127,11 @@ export interface Database {
           >
       >;
       tool_calls: Table<ToolCallRow, Omit<ToolCallRow, 'id' | 'created_at'>>;
+      trip_events: Table<
+        TripEventRow,
+        Omit<TripEventRow, 'id' | 'created_at' | 'acknowledged_at' | 'source'> &
+          Partial<Pick<TripEventRow, 'id' | 'source' | 'acknowledged_at'>>
+      >;
     };
     Views: { [_ in never]: never };
     Functions: { [_ in never]: never };

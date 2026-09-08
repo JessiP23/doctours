@@ -10,6 +10,9 @@ import type {
   OfferKind,
   OfferRow,
   ToolCallRow,
+  TripEventKind,
+  TripEventRow,
+  TripEventSource,
 } from './types';
 
 /**
@@ -81,6 +84,17 @@ export async function getConversationForVisitor(
 export async function getConversation(id: string): Promise<ConversationRow | null> {
   const { data, error } = await db().from('conversations').select().eq('id', id).maybeSingle();
   if (error) fail('getConversation', error);
+  return data;
+}
+
+/** Recent conversations, so a script can find a trip without a database client. */
+export async function listRecentConversations(limit = 10): Promise<ConversationRow[]> {
+  const { data, error } = await db()
+    .from('conversations')
+    .select()
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) fail('listRecentConversations', error);
   return data;
 }
 
@@ -294,6 +308,59 @@ export async function getLiveBooking(
     .maybeSingle();
   if (error) fail('getLiveBooking', error);
   return data;
+}
+
+// ---- trip events -----------------------------------------------------------
+
+export interface NewTripEvent {
+  bookingId: string | null;
+  kind: TripEventKind;
+  detail: Json;
+  source: TripEventSource;
+}
+
+export async function insertTripEvents(
+  conversationId: string,
+  events: NewTripEvent[],
+): Promise<TripEventRow[]> {
+  if (events.length === 0) return [];
+  const { data, error } = await db()
+    .from('trip_events')
+    .insert(
+      events.map((e) => ({
+        conversation_id: conversationId,
+        booking_id: e.bookingId,
+        kind: e.kind,
+        detail: e.detail,
+        source: e.source,
+      })),
+    )
+    .select();
+  if (error) fail('insertTripEvents', error);
+  return data;
+}
+
+/** What has happened that the patient has not been told about yet. */
+export async function listOpenTripEvents(conversationId: string): Promise<TripEventRow[]> {
+  const { data, error } = await db()
+    .from('trip_events')
+    .select()
+    .eq('conversation_id', conversationId)
+    .is('acknowledged_at', null)
+    .order('created_at', { ascending: true });
+  if (error) fail('listOpenTripEvents', error);
+  return data;
+}
+
+/** Marks events as told-and-dealt-with, so they stop being raised every turn. */
+export async function acknowledgeTripEvents(conversationId: string, ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const { error } = await db()
+    .from('trip_events')
+    .update({ acknowledged_at: new Date().toISOString() })
+    .eq('conversation_id', conversationId)
+    .in('id', ids);
+  if (error) fail('acknowledgeTripEvents', error);
 }
 
 // ---- tool calls ------------------------------------------------------------

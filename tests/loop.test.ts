@@ -7,6 +7,7 @@ const mem = {
   messages: [] as { role: string; content: unknown }[],
   toolCalls: [] as { toolName: string; error: unknown }[],
   bookings: [] as { kind: string; status: string; booking_reference: string }[],
+  openEvents: [] as { id: string; kind: string; detail: unknown }[],
 };
 vi.mock('@/lib/db/repo', () => ({
   appendMessage: vi.fn(async (_c: string, role: string, content: unknown) => {
@@ -18,6 +19,7 @@ vi.mock('@/lib/db/repo', () => ({
   ),
   listBookings: vi.fn(async () => mem.bookings),
   listRecentOffers: vi.fn(async () => []),
+  listOpenTripEvents: vi.fn(async () => mem.openEvents),
   recordToolCall: vi.fn(async (_c: string, t: { toolName: string; error: unknown }) => {
     mem.toolCalls.push(t);
     return t;
@@ -80,6 +82,7 @@ beforeEach(() => {
   mem.messages = [];
   mem.toolCalls = [];
   mem.bookings = [];
+  mem.openEvents = [];
 });
 
 describe('runTurn', () => {

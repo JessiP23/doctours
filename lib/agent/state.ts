@@ -1,4 +1,4 @@
-import type { BookingRow, OfferRow } from '@/lib/db/types';
+import type { BookingRow, OfferRow, TripEventRow } from '@/lib/db/types';
 import type { TripRules } from '@/lib/trip/rules';
 
 /**
@@ -10,16 +10,20 @@ export interface TripState {
   rules: TripRules;
   bookings: { flight: BookingRow | null; hotel: BookingRow | null };
   offers: { flights: OfferRow[]; hotelRates: OfferRow[] };
+  /** Things that happened to the trip that the patient has not been told about. */
+  openEvents: TripEventRow[];
 }
 
 export function buildTripState(
   rules: TripRules,
   bookings: BookingRow[],
   offers: OfferRow[],
+  openEvents: TripEventRow[] = [],
 ): TripState {
   const live = bookings.filter((b) => b.status === 'confirmed');
   return {
     rules,
+    openEvents,
     bookings: {
       flight: live.find((b) => b.kind === 'flight') ?? null,
       hotel: live.find((b) => b.kind === 'hotel') ?? null,

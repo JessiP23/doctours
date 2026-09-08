@@ -1,0 +1,32 @@
+{
+  "response": {
+    "timestamp": "2026-09-08T01:12:04",
+    "request": {
+      "confirmationId": "RVXYRW",
+      "retrieveBooking": true,
+      "errorHandlingPolicy": "ALLOW_PARTIAL_CANCEL",
+      "cancelAll": true,
+      "targetPcc": "REDACTED_PCC",
+      "voidNonElectronicTickets": false,
+      "refundDocumentsType": "Tickets"
+    },
+    "booking": {
+      "bookingId": "RVXYRW",
+      "travelers": [
+        {
+          "givenName": "MARCO",
+          "surname": "JUNIOR",
+          "type": "ADULT",
+          "passengerCode": "ADT",
+          "nameAssociationId": "1"
+        }
+      ],
+      "otherServices": [
+        {
+          "serviceMessage": "HHL HI IST 12OCT /CX-75343429",
+          "chainCode": "HI"
+        }
+      ]
+    }
+  }
+}

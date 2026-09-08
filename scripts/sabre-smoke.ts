@@ -13,6 +13,10 @@
  *                                                                records references in docs/BOOKINGS.md
  *   npm run sabre:smoke -- lookup <reference>                    Get Booking: prove a reference is a real order
  *   npm run sabre:smoke -- cancel <reference>                    cancel an order and verify it is gone
+ *   npm run sabre:smoke -- check <conversationId>                re-read the order; record any disruption found
+ *   npm run sabre:smoke -- disrupt <conversationId> <leg> [kind] inject a disruption so the flow can be driven
+ *                                                                leg: outbound | return, kind: cancelled | delayed
+ *   npm run sabre:smoke -- trips                                 list recent conversations with what they hold
  *
  * Raw responses are written to tests/fixtures/sabre/<name>.json so mappers can be
  * written and unit-tested against real payloads.
@@ -22,6 +26,8 @@ import path from 'node:path';
 import { appendFile } from 'node:fs/promises';
 import { getEnv, paymentCard } from '@/lib/env';
 import { SabreProvider, retrieveBooking, unconfirmedFlightsOf } from '@/lib/providers/sabre';
+import { checkFlightHealth, simulateFlightDisruption } from '@/lib/agent/trip-health';
+import * as repo from '@/lib/db/repo';
 import { excludeRefused, isCodeshare, type RefusedFlight } from '@/lib/trip/select';
 import { partitionOffers } from '@/lib/trip/validate';
 import { deriveStay } from '@/lib/trip/nights';
@@ -733,10 +739,82 @@ async function cancel() {
   if (!result.cancelled) process.exitCode = 1;
 }
 
+/**
+ * Re-reads the live order and records anything that changed since booking. This is
+ * the real detection path: Sabre reports a status per segment, and HK is the only
+ * one that means the seat is still held.
+ */
+async function check() {
+  const [conversationId] = args;
+  if (!conversationId) throw new Error('usage: check <conversationId>');
+  const result = await checkFlightHealth(conversationId);
+  console.log(JSON.stringify({ ok: true, ...result }, null, 2));
+  if (!result.healthy) {
+    console.log(
+      '\nA disruption was recorded. Say anything in that conversation and the agent will raise it.',
+    );
+  }
+}
+
+/**
+ * Injects a disruption. CERT has no way to make an airline cancel a flight, so this
+ * writes the same event the detector would write — the agent then behaves exactly as
+ * it would for a real one, which is what makes the demo honest rather than scripted.
+ */
+async function disrupt() {
+  const [conversationId, leg = 'outbound', kind = 'cancelled'] = args;
+  if (!conversationId)
+    throw new Error('usage: disrupt <conversationId> <outbound|return> [cancelled|delayed]');
+  if (leg !== 'outbound' && leg !== 'return') throw new Error('leg must be outbound or return');
+  const eventKind = kind === 'delayed' ? 'flight_schedule_change' : 'flight_cancelled';
+
+  const events = await simulateFlightDisruption(conversationId, leg, eventKind);
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        conversationId,
+        leg,
+        kind: eventKind,
+        events: events.map((e) => ({ id: e.id, kind: e.kind, detail: e.detail })),
+      },
+      null,
+      2,
+    ),
+  );
+  console.log(
+    '\nOpen that conversation and send any message. The agent should raise this before anything else.',
+  );
+}
+
+/** Recent conversations and what they hold, so a conversationId is easy to find. */
+async function trips() {
+  const rows = await repo.listRecentConversations(10);
+  const withBookings = await Promise.all(
+    rows.map(async (c) => {
+      const bookings = await repo.listBookingHistory(c.id);
+      const events = await repo.listOpenTripEvents(c.id);
+      return {
+        conversationId: c.id,
+        started: c.created_at,
+        holds: bookings
+          .filter((b) => b.status === 'confirmed')
+          .map((b) => `${b.kind} ${b.booking_reference}`),
+        history: bookings.filter((b) => b.status !== 'confirmed').length,
+        openEvents: events.map((e) => e.kind),
+      };
+    }),
+  );
+  console.log(JSON.stringify({ ok: true, trips: withBookings }, null, 2));
+}
+
 const commands: Record<string, () => Promise<void>> = {
   e2e,
   lookup,
   cancel,
+  check,
+  disrupt,
+  trips,
   auth,
   flights,
   'hotels-geo': hotelsGeo,

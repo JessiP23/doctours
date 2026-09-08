@@ -19,6 +19,20 @@ function summarizeBooking(
   return `${kind}: BOOKED, reference ${row.booking_reference}. Details: ${JSON.stringify(row.details)}`;
 }
 
+/**
+ * Anything that happened to the trip without the patient asking. Put first in the
+ * prompt: a cancelled flight outranks whatever the patient typed.
+ */
+function summarizeEvents(events: TripState['openEvents']): string[] {
+  if (events.length === 0) return [];
+  return [
+    ``,
+    `UNTOLD CHANGES TO THIS TRIP — raise these before anything else, in your own words:`,
+    ...events.map((e) => `  - [${e.kind}] ${JSON.stringify(e.detail)}`),
+    `The patient does not know about these yet. Say what happened plainly, say what it means for the rest of the trip, and offer the next step. Do not wait to be asked, and do not bury it after answering something else.`,
+  ];
+}
+
 function summarizeOffers(
   rows: { id: string; summary: unknown; expires_at: string | null }[],
   label: string,
@@ -41,6 +55,8 @@ export function buildSystemPrompt(state: TripState, now = new Date()): string {
     `THE TRIP`,
     `Round trip ${r.origin} → ${r.destination} → ${r.origin} for ${r.adults} adult. Procedure ${fmtLocal(r.procedureAtLocal, r.destinationTz)} (${r.destination} local). They must be on the ground in ${r.destination} by ${fmtLocal(r.mustArriveByLocal, r.destinationTz)} local, and cannot leave ${r.destination} before ${fmtLocal(r.earliestReturnDepartureLocal, r.destinationTz)} local. ${r.cabin} class, ${r.checkedBags} checked bags, all prices in ${r.currency}. Hotel: ${r.hotel.name}, ${r.hotel.city} (check-in from ${r.hotel.checkInTime}); every patient stays there, cheapest available room, nights derived from the flights actually booked.`,
     `These constraints are enforced by the tools: flights that break them are filtered out before you see them, and booking re-checks them. You don't need to double-check times yourself, but do explain them plainly if asked.`,
+    ``,
+    ...summarizeEvents(state.openEvents),
     ``,
     `LIVE STATE (source of truth, refreshed every turn)`,
     summarizeBooking(state.bookings.flight, 'Flight'),
