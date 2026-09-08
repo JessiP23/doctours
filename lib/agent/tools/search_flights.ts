@@ -65,6 +65,19 @@ export const searchFlightsTool = defineTool({
   }),
   handler: async (input, ctx) => {
     const rules = await rulesFor(ctx.conversationId);
+
+    // A price for one person shown to two is the wrong price, and asking afterwards
+    // is asking too late. The prompt says to establish this first; a prompt is a
+    // hope, so the search refuses until it is established. Nothing was searched, so
+    // nothing was wasted.
+    if (!rules.travellersConfirmed) {
+      return {
+        options: [],
+        reason: 'PARTY_SIZE_UNKNOWN',
+        message:
+          'Before searching, ask how many people are travelling — the patient alone, or someone with them. Then call set_party_size and search again. Prices and room occupancy both depend on it, so a search now would quote the wrong trip.',
+      };
+    }
     const {
       offers: valid,
       rejected,

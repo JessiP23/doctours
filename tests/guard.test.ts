@@ -175,3 +175,20 @@ describe('checkRaisedEvents', () => {
     expect(checkRaisedEvents(['Anything else?'], ['hotel_closed']).ok).toBe(true);
   });
 });
+
+describe('checkReferences over a trip that has history', () => {
+  /**
+   * A cancelled booking is still a real booking. "Your room RHESBH is cancelled"
+   * was blocked as a fabrication because the guard only knew the confirmed ones,
+   * and the model had to be corrected before it could tell the truth.
+   */
+  it('accepts a reference that exists but is no longer live', () => {
+    expect(checkReferences(['Your room RHESBH is cancelled.'], ['RHESBH']).ok).toBe(true);
+  });
+
+  it('still blocks one that never existed', () => {
+    const check = checkReferences(['Your room XYZ123 is cancelled.'], ['RHESBH']);
+    expect(check.ok).toBe(false);
+    expect(check.violations).toEqual(['XYZ123']);
+  });
+});

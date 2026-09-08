@@ -130,3 +130,33 @@ describe('bookings match the party', () => {
     expect(result.message).toMatch(/Every traveller goes on the room/);
   });
 });
+
+describe('a search cannot run before the party is known', () => {
+  /**
+   * The prompt told the agent to ask first and it went straight to searching, so a
+   * price for one person was presented to someone who might not be travelling
+   * alone. A prompt is a hope; this is the constraint.
+   */
+  it('refuses to search while the traveller count is only the default', async () => {
+    const { searchFlightsTool } = await import('@/lib/agent/tools/search_flights');
+    mem.rules = { ...TRIP_RULES };
+    const result = (await searchFlightsTool.handler({ rankBy: 'price' }, ctx)) as {
+      reason?: string;
+      options: unknown[];
+      message?: string;
+    };
+    expect(result.reason).toBe('PARTY_SIZE_UNKNOWN');
+    expect(result.options).toEqual([]);
+    expect(result.message).toMatch(/set_party_size/);
+  });
+
+  it('lets a search through once it has been established', async () => {
+    const { searchFlightsTool } = await import('@/lib/agent/tools/search_flights');
+    mem.rules = { ...TRIP_RULES, travellersConfirmed: true };
+    // It gets past the gate; the search itself is not exercised here.
+    const result = (await searchFlightsTool
+      .handler({ rankBy: 'price' }, ctx)
+      .catch((e: Error) => ({ threw: e.message }))) as { reason?: string };
+    expect(result.reason).not.toBe('PARTY_SIZE_UNKNOWN');
+  });
+});

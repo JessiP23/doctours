@@ -197,7 +197,8 @@ export async function runTurn(
 
     for (const t of others) {
       const r = await runTool(t.name, t.input, conversationId);
-      if (t.name.startsWith('create_') && r.ok) bookedThisTurn = true;
+      if ((t.name.startsWith('create_') || t.name.startsWith('rebook_')) && r.ok)
+        bookedThisTurn = true;
       if (t.name.startsWith('search_') || t.name.startsWith('get_')) searchedThisTurn = true;
       if (!r.ok) {
         const key = `${t.name}:${(r.error as { code?: string }).code ?? 'error'}`;
@@ -225,9 +226,11 @@ export async function runTurn(
 
       if (parsed.success) {
         const bubbles = humanizeBubbles(parsed.data.bubbles);
-        const knownReferences = bookings
-          .filter((b) => b.status === 'confirmed')
-          .map((b) => b.booking_reference);
+        // Every reference this trip has ever held, not only the live ones. A
+        // cancelled booking is still a real booking, and "your room RHESBH is
+        // cancelled" was being blocked as a fabrication — the guard exists to stop
+        // invented locators, not to stop the agent talking about what it undid.
+        const knownReferences = bookings.map((b) => b.booking_reference);
         const guard = checkReferences(bubbles, knownReferences);
 
         if (guard.ok) {
