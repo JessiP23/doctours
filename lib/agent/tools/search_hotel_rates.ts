@@ -4,7 +4,7 @@ import * as repo from '@/lib/db/repo';
 import type { Json } from '@/lib/db/types';
 import { travelProvider } from '@/lib/providers/sabre';
 import { deriveStay } from '@/lib/trip/nights';
-import type { FlightOffer } from '@/lib/providers/types';
+import type { FlightOffer, FlightSlice } from '@/lib/providers/types';
 import { rulesFor } from './context';
 import { defineTool } from './define';
 import { describeProperty } from './property';
@@ -54,16 +54,28 @@ export const searchHotelRatesTool = defineTool({
             'Book the flight first — the hotel nights follow from it. Or pass explicit dates.',
         };
       }
-      const offerRow = flight.offer_id
-        ? await repo.getOffer(ctx.conversationId, flight.offer_id)
-        : null;
-      if (offerRow) {
-        const offer = offerRow.raw as unknown as FlightOffer;
-        const stay = deriveStay(offer.slices[0], offer.slices[1]);
+      // The itinerary the order holds, not the one that was shopped: the nights
+      // follow the times Sabre actually sells, and a reconciled arrival can fall on
+      // a different day than the cache said.
+      const booked = ((flight.raw ?? {}) as { bookedSlices?: FlightSlice[] }).bookedSlices;
+      const offerRow =
+        booked && booked.length >= 2
+          ? null
+          : flight.offer_id
+            ? await repo.getOffer(ctx.conversationId, flight.offer_id)
+            : null;
+      const slices =
+        booked && booked.length >= 2
+          ? booked
+          : offerRow
+            ? (offerRow.raw as unknown as FlightOffer).slices
+            : null;
+      if (slices) {
+        const stay = deriveStay(slices[0], slices[1]);
         checkIn = stay.checkIn;
         checkOut = stay.checkOut;
-        arriveLocal = offer.slices[0].segments.at(-1)?.arriveLocal;
-        arrivalAirport = offer.slices[0].segments.at(-1)?.to.iata;
+        arriveLocal = slices[0].segments.at(-1)?.arriveLocal;
+        arrivalAirport = slices[0].segments.at(-1)?.to.iata;
       } else {
         const details = flight.details as { hotelNights?: number } | null;
         return {

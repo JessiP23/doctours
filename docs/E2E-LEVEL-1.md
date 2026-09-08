@@ -6,13 +6,13 @@ unfinished half is worth nothing.
 
 **Built:** booking lifecycle (cancelled / superseded / replaced_by), real Sabre
 cancellation, patient-initiated trip cancellation, airline-initiated disruption
-detected and raised before anything else, and the traveller count — established
-rather than assumed, one to four people, enforced through both booking tools.
+detected and raised before anything else, rebooking a flight and realigning the
+hotel to it, and the traveller count — established rather than assumed, one to four
+people, enforced through both booking tools.
 
-**Not built yet:** rebooking the cancelled leg, realigning the hotel to new flight
-dates, procedure rescheduling, extra nights and early check-in, alternative hotels,
-cheapest-whole-trip ranking. Section E is how you check the agent is honest
-about not having them, which is the requirement until they exist.
+**Not built yet:** procedure rescheduling, extra nights and early check-in,
+alternative hotels, cheapest-whole-trip ranking. Section E is how you check the
+agent is honest about not having them, which is the requirement until they exist.
 
 Two terminals: the app (`npm run dev`, or the deployed URL) and a shell for the smoke
 script. Every step is either a message you type into the chat or a command you run.
@@ -92,13 +92,39 @@ without a reference can slip through, and that is the thing to watch for.
 with live prices. It should be clear that the cancelled flight is still on the booking
 until something is done about it.
 
-**Known gap:** if it tries to book a replacement, `create_flight_order` returns
-`ALREADY_BOOKED` and it has to tell you so. The honest path — cancel the dead flight,
-then book the replacement, then move the hotel — is roadmap commit 6. If the agent walks
-that path itself with `cancel_trip` and a fresh booking, note it: that is the flow
-working by reasoning rather than by tooling.
+8. **"yes, book that one"**
 
-8. **Send another message — "and my hotel?"**
+**Pass:** it rebooks. You get a new reference, and it says what replaced what. Verify
+both with Sabre — the new one holds flights, the old one holds nothing:
+
+```
+npm run sabre:smoke -- lookup <new reference>
+npm run sabre:smoke -- lookup <old reference>
+```
+
+**Pass:** it did not ask for your passport again — the details were reused from the
+booking it replaced.
+
+**Then, if the replacement lands on a different day:** it must say the hotel no longer
+covers the new flights, search rooms for the new dates, tell you the new total and the
+cancellation terms, and only move the room once you agree. **Fail:** it says the trip is
+sorted while the room still starts on the old date.
+
+**Fail, at any point:** it claims the old order is cancelled when the tool reported it
+could not be released. The correct wording is that the new flights are confirmed and
+the old booking is still being released.
+
+Check the chain in the database — this is what `superseded` exists for:
+
+```sql
+select kind, booking_reference, status, replaced_by, change_reason
+from bookings order by created_at;
+```
+
+**Pass:** the old rows are `superseded`, not `cancelled`, each pointing at the booking
+that replaced it, with the reason in the words you were given.
+
+9. **Send another message — "and my hotel?"**
 
 **Pass:** it does not re-announce the cancellation. It was raised once and marked told.
 Repeating it every turn was the bug fixed alongside this doc.

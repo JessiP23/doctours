@@ -233,6 +233,41 @@ export async function listBookingsForConversations(
 }
 
 /**
+ * Swaps one live booking for its replacement.
+ *
+ * Only one booking of a kind may be 'confirmed' at a time, which is exactly the
+ * guarantee that makes a rebooking awkward: the old row has to step aside before
+ * the new one can exist. So the old row is retired first, the replacement is
+ * inserted, and only then is the link written back — and if the insert fails the
+ * old row is restored, because a trip whose booking is marked superseded with
+ * nothing replacing it is worse than one that never moved.
+ *
+ * The provider order is sold before this is called and the old one cancelled
+ * after, so a failure here never loses a seat, only a row's status.
+ */
+export async function replaceBooking(
+  conversationId: string,
+  oldId: string,
+  reason: string,
+  replacement: NewBooking,
+): Promise<BookingRow> {
+  await supersedeBookingRow(oldId, oldId, reason);
+  let inserted: BookingRow;
+  try {
+    inserted = await insertBooking(conversationId, replacement);
+  } catch (e) {
+    const { error } = await db()
+      .from('bookings')
+      .update({ status: 'confirmed', replaced_by: null, cancelled_at: null, change_reason: null })
+      .eq('id', oldId);
+    if (error) fail('replaceBooking.restore', error);
+    throw e;
+  }
+  await supersedeBookingRow(oldId, inserted.id, reason);
+  return inserted;
+}
+
+/**
  * Replaces the conversation's snapshot of the trip rules.
  *
  * The snapshot is the authority every tool reads, which is what makes a detail

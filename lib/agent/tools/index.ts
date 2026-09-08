@@ -7,6 +7,8 @@ import { createFlightOrderTool } from './create_flight_order';
 import { searchHotelRatesTool } from './search_hotel_rates';
 import { createHotelBookingTool } from './create_hotel_booking';
 import { cancelTripTool } from './cancel_trip';
+import { rebookFlightTool } from './rebook_flight';
+import { rebookHotelTool } from './rebook_hotel';
 import { setPartySizeTool } from './set_party_size';
 
 /**
@@ -20,6 +22,8 @@ const registry: ToolDefinition[] = [
   createFlightOrderTool,
   searchHotelRatesTool,
   createHotelBookingTool,
+  rebookFlightTool,
+  rebookHotelTool,
   cancelTripTool,
   replyTool,
 ];

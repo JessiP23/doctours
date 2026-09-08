@@ -1,21 +1,17 @@
 import { z } from 'zod';
 import { log } from '@/lib/log';
 import * as repo from '@/lib/db/repo';
-import type { Json } from '@/lib/db/types';
-import { travelProvider } from '@/lib/providers/sabre';
-import type { FlightSlice, HotelRate } from '@/lib/providers/types';
-import { isProviderError } from '@/lib/providers/sabre/errors';
 import { rulesFor } from './context';
-import { MAX_TRAVELLERS } from './set_party_size';
 import { defineTool } from './define';
-import { describeProperty } from './property';
+import { guestSchema, hotelBookingRow, sellHotelRate } from './hotel-booking';
 import { loadBookableOffer } from './search_flights';
+import { MAX_TRAVELLERS } from './set_party_size';
 
 /**
  * Books the room.
  *
- * Same guard chain as the flight: the rate must exist in this conversation, no
- * room may already be booked, and Hotel Price Check must still honour the rate —
+ * Same guard chain as the flight: the guest list must match the traveller count,
+ * no room may already be booked, and Hotel Price Check must still honour the rate —
  * which is also what produces the booking key, so an expired rate cannot book.
  */
 export const createHotelBookingTool = defineTool({
@@ -25,14 +21,7 @@ export const createHotelBookingTool = defineTool({
   schema: z.object({
     rateId: z.string().describe('rateId from search_hotel_rates'),
     guests: z
-      .array(
-        z.object({
-          givenName: z.string().min(1),
-          familyName: z.string().min(1),
-          email: z.email(),
-          phone: z.string().min(5),
-        }),
-      )
+      .array(guestSchema)
       .min(1)
       .max(MAX_TRAVELLERS)
       .describe('One entry per traveller staying in the room, the patient first'),
@@ -55,70 +44,37 @@ export const createHotelBookingTool = defineTool({
       return {
         booked: false,
         reason: 'ALREADY_BOOKED',
-        message: 'A room is already booked for this trip.',
+        message:
+          'A room is already booked for this trip. To move it to different nights or a different room, use rebook_hotel — it replaces this booking rather than adding a second one.',
         bookingReference: existing.booking_reference,
       };
     }
 
     const { row } = await loadBookableOffer(ctx.conversationId, input.rateId, 'hotel_rate');
-    const rate = row.raw as unknown as HotelRate;
+    const sale = await sellHotelRate(row, input.guests);
+    if (!sale.sold) return { booked: false, ...sale.failure };
 
-    let booking;
-    try {
-      booking = await travelProvider().createHotelBooking(rate, input.guests);
-    } catch (e) {
-      if (isProviderError(e) && (e.code === 'OFFER_EXPIRED' || e.code === 'NO_AVAILABILITY')) {
-        return {
-          booked: false,
-          reason: 'RATE_UNAVAILABLE',
-          message:
-            'The hotel no longer holds that rate. Search the rooms again and pick from what is available now.',
-        };
-      }
-      throw e;
-    }
-
-    // Kept on the booking so "where is it, how far from where I land" is answerable
-    // for the rest of the trip without another provider call.
-    const flight = await repo.getLiveBooking(ctx.conversationId, 'flight');
-    const flightSlices = ((flight?.raw ?? {}) as { bookedSlices?: FlightSlice[] }).bookedSlices;
-    const arrivalAirport = flightSlices?.[0]?.segments.at(-1)?.to.iata;
-    const property = await describeProperty(rate.location ?? null, arrivalAirport);
-
-    const saved = await repo.insertBooking(ctx.conversationId, {
-      kind: 'hotel',
-      provider: booking.provider,
-      providerOrderId: booking.id,
-      bookingReference: booking.bookingReference,
-      offerId: row.id,
-      details: {
-        hotel: booking.propertyName,
-        room: booking.roomName,
-        checkIn: booking.checkIn,
-        checkOut: booking.checkOut,
-        nights: rate.nights,
-        totalUSD: booking.total.amount,
-        refundable: rate.refundable,
-        cancelBy: rate.cancelBy,
-        guests: input.guests.map((g) => `${g.givenName} ${g.familyName}`),
-        ...(property ? { property } : {}),
-      } as unknown as Json,
-      raw: booking.raw as Json,
-    });
+    const { row: newRow, property } = await hotelBookingRow(
+      ctx.conversationId,
+      row,
+      sale,
+      input.guests,
+    );
+    const saved = await repo.insertBooking(ctx.conversationId, newRow);
 
     log.info(
-      { conversationId: ctx.conversationId, bookingReference: booking.bookingReference },
+      { conversationId: ctx.conversationId, bookingReference: sale.booking.bookingReference },
       'hotel booked with Sabre',
     );
 
     return {
       booked: true,
       bookingReference: saved.booking_reference,
-      hotel: booking.propertyName,
-      room: booking.roomName,
-      checkIn: booking.checkIn,
-      checkOut: booking.checkOut,
-      totalUSD: booking.total.amount,
+      hotel: sale.booking.propertyName,
+      room: sale.booking.roomName,
+      checkIn: sale.booking.checkIn,
+      checkOut: sale.booking.checkOut,
+      totalUSD: sale.booking.total.amount,
       ...(property ? { property } : {}),
     };
   },
