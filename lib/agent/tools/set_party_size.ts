@@ -30,6 +30,11 @@ export const setPartySizeTool = defineTool({
       .min(1)
       .max(MAX_TRAVELLERS)
       .describe('Total people travelling, including the patient'),
+    theyToldMe: z
+      .literal(true)
+      .describe(
+        'Only true if the patient has actually said how many people are travelling, in this conversation. Never an assumption, and never a number you picked to get a search to run — if they have not said, ask them.',
+      ),
   }),
   handler: async (input, ctx) => {
     const rules = await rulesFor(ctx.conversationId);

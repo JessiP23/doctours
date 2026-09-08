@@ -82,11 +82,11 @@ describe('the tool set the model is given', () => {
 
   it('will not let the model choose the traveller count out of range', () => {
     const schema = getTool('set_party_size')!.schema;
-    expect(schema.safeParse({ travellers: 0 }).success).toBe(false);
-    expect(schema.safeParse({ travellers: 1 }).success).toBe(true);
-    expect(schema.safeParse({ travellers: 4 }).success).toBe(true);
-    expect(schema.safeParse({ travellers: 5 }).success).toBe(false);
-    expect(schema.safeParse({ travellers: 2.5 }).success).toBe(false);
+    expect(schema.safeParse({ travellers: 0, theyToldMe: true }).success).toBe(false);
+    expect(schema.safeParse({ travellers: 1, theyToldMe: true }).success).toBe(true);
+    expect(schema.safeParse({ travellers: 4, theyToldMe: true }).success).toBe(true);
+    expect(schema.safeParse({ travellers: 5, theyToldMe: true }).success).toBe(false);
+    expect(schema.safeParse({ travellers: 2.5, theyToldMe: true }).success).toBe(false);
   });
 
   it('rejects a malformed date of birth and a bad email', () => {

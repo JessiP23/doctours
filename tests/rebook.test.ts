@@ -37,6 +37,7 @@ const mem = {
   events: [] as string[],
   sellFails: false,
   cancelFails: false,
+  recordFails: false,
 };
 
 const slice = (from: string, to: string, depart: string, arrive: string) => ({
@@ -89,8 +90,8 @@ vi.mock('@/lib/db/repo', () => ({
   }),
   replaceBooking: vi.fn(
     async (c: string, oldId: string, reason: string, replacement: Record<string, unknown>) => {
+      if (mem.recordFails) throw new Error('db.linkReplacement: boom');
       const repo = await import('@/lib/db/repo');
-      await repo.supersedeBookingRow(oldId, oldId, reason);
       const inserted = await repo.insertBooking(c, replacement as never);
       await repo.supersedeBookingRow(oldId, inserted.id, reason);
       return inserted;
@@ -179,6 +180,7 @@ beforeEach(() => {
   mem.events = [];
   mem.sellFails = false;
   mem.cancelFails = false;
+  mem.recordFails = false;
 });
 
 describe('rebook_flight', () => {
@@ -275,6 +277,28 @@ describe('rebook_flight', () => {
     expect(result.reason).toBe('TRAVELLER_DETAILS_UNAVAILABLE');
     expect(result.message).toContain('ROLD11');
     expect(mem.events).toEqual([]);
+  });
+
+  it('never loses a reference it has already sold', async () => {
+    // A status precondition on the wrong step once threw here, after a real flight
+    // had been sold: two live orders, no record of the second, and the tool
+    // reporting only a database error. The seat exists, so the reference does too.
+    mem.rows.push(bookedFlight());
+    mem.recordFails = true;
+    const result = (await rebookFlightTool.handler(args, ctx)) as {
+      rebooked: boolean;
+      reason?: string;
+      soldReference?: string;
+      stillBooked?: string;
+      message?: string;
+    };
+    expect(result.rebooked).toBe(false);
+    expect(result.reason).toBe('SOLD_BUT_NOT_RECORDED');
+    expect(result.soldReference).toBe('RNEW11');
+    expect(result.stillBooked).toBe('ROLD11');
+    expect(result.message).toMatch(/both bookings are live/i);
+    // Nothing is cancelled on this path: an operator sorts it out, not a retry.
+    expect(mem.events.some((e) => e.startsWith('cancel'))).toBe(false);
   });
 
   it('cannot be called while merely discussing a change', () => {

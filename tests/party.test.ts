@@ -52,7 +52,7 @@ beforeEach(() => {
 
 describe('set_party_size', () => {
   it('records the count on the trip so every later search obeys it', async () => {
-    const result = (await setPartySizeTool.handler({ travellers: 2 }, ctx)) as {
+    const result = (await setPartySizeTool.handler({ travellers: 2, theyToldMe: true }, ctx)) as {
       travellers: number;
       changed: boolean;
     };
@@ -65,7 +65,7 @@ describe('set_party_size', () => {
     // The default is one traveller. Until someone asks, that is an assumption, and
     // the prompt has to be able to tell the difference.
     expect(mem.rules.travellersConfirmed).toBeUndefined();
-    const result = (await setPartySizeTool.handler({ travellers: 1 }, ctx)) as {
+    const result = (await setPartySizeTool.handler({ travellers: 1, theyToldMe: true }, ctx)) as {
       changed: boolean;
       confirmed?: boolean;
     };
@@ -77,7 +77,7 @@ describe('set_party_size', () => {
 
   it('refuses to change the count once something is booked, and says why', async () => {
     mem.bookings.push({ kind: 'flight', status: 'confirmed', booking_reference: 'RFTEWX' });
-    const result = (await setPartySizeTool.handler({ travellers: 3 }, ctx)) as {
+    const result = (await setPartySizeTool.handler({ travellers: 3, theyToldMe: true }, ctx)) as {
       reason?: string;
       message: string;
       travellers: number;
@@ -92,8 +92,22 @@ describe('set_party_size', () => {
 
   it('will not accept a count outside what can be booked', () => {
     for (const travellers of [0, 5, 2.5, -1]) {
-      expect(setPartySizeTool.schema.safeParse({ travellers }).success).toBe(false);
+      expect(setPartySizeTool.schema.safeParse({ travellers, theyToldMe: true }).success).toBe(
+        false,
+      );
     }
+  });
+
+  it('cannot be set without the patient having said so', () => {
+    // The model reached for a number to get a search past its gate. The count is
+    // something the patient states, and the schema now says so out loud.
+    expect(setPartySizeTool.schema.safeParse({ travellers: 1 }).success).toBe(false);
+    expect(setPartySizeTool.schema.safeParse({ travellers: 1, theyToldMe: false }).success).toBe(
+      false,
+    );
+    expect(setPartySizeTool.schema.safeParse({ travellers: 1, theyToldMe: true }).success).toBe(
+      true,
+    );
   });
 });
 

@@ -92,12 +92,31 @@ export const rebookFlightTool = defineTool({
     }
 
     const { order, stay, scheduleDiffers } = sale.result;
-    const booking = await repo.replaceBooking(
-      ctx.conversationId,
-      old.id,
-      input.reason,
-      flightBookingRow(row, sale.result, passengers),
-    );
+    // The seat is sold. From here nothing may throw: an exception would lose a real
+    // reference the patient is already entitled to, and leave two live orders with
+    // no record of the second. It happened once — a status precondition on the
+    // wrong step — so the failure is reported instead.
+    let booking;
+    try {
+      booking = await repo.replaceBooking(
+        ctx.conversationId,
+        old.id,
+        input.reason,
+        flightBookingRow(row, sale.result, passengers),
+      );
+    } catch (e) {
+      log.error(
+        { conversationId: ctx.conversationId, sold: order.bookingReference, err: String(e) },
+        'flight sold but the booking could not be recorded',
+      );
+      return {
+        rebooked: false,
+        reason: 'SOLD_BUT_NOT_RECORDED',
+        soldReference: order.bookingReference,
+        stillBooked: old.booking_reference,
+        message: `The replacement flight WAS booked with the airline as ${order.bookingReference}, but this trip's records could not be updated, so both bookings are live right now. Tell the patient both references and that someone is sorting it out. Do not cancel anything and do not try again.`,
+      };
+    }
 
     // Now, and only now, release the old order with the airline.
     let oldCancelled = false;

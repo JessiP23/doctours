@@ -251,20 +251,51 @@ export async function replaceBooking(
   reason: string,
   replacement: NewBooking,
 ): Promise<BookingRow> {
-  await supersedeBookingRow(oldId, oldId, reason);
+  await retireBooking(oldId, reason);
   let inserted: BookingRow;
   try {
     inserted = await insertBooking(conversationId, replacement);
   } catch (e) {
-    const { error } = await db()
-      .from('bookings')
-      .update({ status: 'confirmed', replaced_by: null, cancelled_at: null, change_reason: null })
-      .eq('id', oldId);
-    if (error) fail('replaceBooking.restore', error);
+    await restoreBooking(oldId);
     throw e;
   }
-  await supersedeBookingRow(oldId, inserted.id, reason);
+  await linkReplacement(oldId, inserted.id);
   return inserted;
+}
+
+/** Step aside: the row stops being live so its replacement can be inserted. */
+async function retireBooking(id: string, reason: string): Promise<void> {
+  const { error } = await db()
+    .from('bookings')
+    .update({
+      status: 'superseded',
+      cancelled_at: new Date().toISOString(),
+      change_reason: reason,
+    })
+    .eq('id', id)
+    .eq('status', 'confirmed');
+  if (error) fail('retireBooking', error);
+}
+
+/**
+ * Points a retired row at what replaced it. Deliberately without a status
+ * precondition: the row is already superseded by the time this runs, and the
+ * `.eq('status', 'confirmed')` that belongs on the retiring step matched nothing
+ * here — which threw *after* a flight had been sold, leaving a live order with no
+ * row and the patient mid-rebooking.
+ */
+async function linkReplacement(oldId: string, newId: string): Promise<void> {
+  const { error } = await db().from('bookings').update({ replaced_by: newId }).eq('id', oldId);
+  if (error) fail('linkReplacement', error);
+}
+
+/** Puts a retired row back, when its replacement could not be recorded after all. */
+async function restoreBooking(id: string): Promise<void> {
+  const { error } = await db()
+    .from('bookings')
+    .update({ status: 'confirmed', replaced_by: null, cancelled_at: null, change_reason: null })
+    .eq('id', id);
+  if (error) fail('restoreBooking', error);
 }
 
 /**

@@ -75,7 +75,7 @@ export const searchFlightsTool = defineTool({
         options: [],
         reason: 'PARTY_SIZE_UNKNOWN',
         message:
-          'Before searching, ask how many people are travelling — the patient alone, or someone with them. Then call set_party_size and search again. Prices and room occupancy both depend on it, so a search now would quote the wrong trip.',
+          'The patient has not said how many people are travelling. The greeting already asked them; if they have not answered, ask again in your reply and wait. Do not assume one to get this search to run — prices and room occupancy both depend on it, so a search now would quote the wrong trip. Once they answer, call set_party_size and search again.',
       };
     }
     const {

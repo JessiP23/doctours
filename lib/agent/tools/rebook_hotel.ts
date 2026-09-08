@@ -89,7 +89,27 @@ export const rebookHotelTool = defineTool({
       sale,
       input.guests,
     );
-    const booking = await repo.replaceBooking(ctx.conversationId, old.id, input.reason, newRow);
+    // The room is sold. Nothing past this point may throw and lose the reference.
+    let booking;
+    try {
+      booking = await repo.replaceBooking(ctx.conversationId, old.id, input.reason, newRow);
+    } catch (e) {
+      log.error(
+        {
+          conversationId: ctx.conversationId,
+          sold: sale.booking.bookingReference,
+          err: String(e),
+        },
+        'room sold but the booking could not be recorded',
+      );
+      return {
+        rebooked: false,
+        reason: 'SOLD_BUT_NOT_RECORDED',
+        soldReference: sale.booking.bookingReference,
+        stillBooked: old.booking_reference,
+        message: `The replacement room WAS booked with the hotel as ${sale.booking.bookingReference}, but this trip's records could not be updated, so both reservations are live right now. Tell the patient both references and that someone is sorting it out. Do not cancel anything and do not try again.`,
+      };
+    }
 
     let oldReleased = false;
     let cancelDetail: string | undefined;

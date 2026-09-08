@@ -83,7 +83,7 @@ const BOOKING_PHRASE =
   /\b(booking (it|that|this|them)|i'?m booking|i'?ll book (it|that|this|them)|let me book|i'?ll go ahead and book|placing (the|your) booking|confirming (it|that) now|i'?ll get (that|it) booked)\b/i;
 
 const RETRIEVAL_PHRASE =
-  /\b(?:(?:let me|i'?ll|i'?m going to|i am going to)\s+(?:go\s+)?(?:pull up|pull|find|check|look up|look for|look at|search|grab|fetch)|(?:pulling|checking|looking|searching|fetching)\s+(?:that|those|these|it|them|up)|one moment while i)\b/i;
+  /\b(?:(?:let me|i'?ll|i'?m going to|i am going to)\s+(?:go\s+)?(?:pull up|pull|find|check|look up|look for|look at|search|see what|get you|get the|get a|grab|fetch)|(?:pulling|checking|looking|searching|fetching|getting)\s+(?:that|those|these|it|them|up|you)|one moment while i)\b/i;
 
 export interface PromiseCheck {
   ok: boolean;
@@ -93,9 +93,15 @@ export interface PromiseCheck {
 }
 
 export interface TurnActivity {
-  /** A create_* tool succeeded. */
+  /** A create_* or rebook_* tool succeeded. */
   bookedThisTurn: boolean;
-  /** A search_* or get_* tool was called, whether or not it succeeded. */
+  /**
+   * A search_* tool was called, whether or not it succeeded.
+   *
+   * Reading the trip's own state does not count. "Let me get the hotel rate" was
+   * treated as kept because `get_trip_state` had run, and the patient was left
+   * waiting on a search that never happened.
+   */
   searchedThisTurn: boolean;
   expectsInput: boolean;
 }

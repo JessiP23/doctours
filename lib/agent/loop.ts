@@ -199,7 +199,8 @@ export async function runTurn(
       const r = await runTool(t.name, t.input, conversationId);
       if ((t.name.startsWith('create_') || t.name.startsWith('rebook_')) && r.ok)
         bookedThisTurn = true;
-      if (t.name.startsWith('search_') || t.name.startsWith('get_')) searchedThisTurn = true;
+      // Only a real lookup counts. get_trip_state reads what we already know.
+      if (t.name.startsWith('search_')) searchedThisTurn = true;
       if (!r.ok) {
         const key = `${t.name}:${(r.error as { code?: string }).code ?? 'error'}`;
         const count = (failureCounts.get(key) ?? 0) + 1;

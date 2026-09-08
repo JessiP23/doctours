@@ -192,3 +192,37 @@ describe('checkReferences over a trip that has history', () => {
     expect(check.violations).toEqual(['XYZ123']);
   });
 });
+
+describe('promises the last run let through', () => {
+  const noWork = { bookedThisTurn: false, searchedThisTurn: false, expectsInput: false };
+
+  it('catches "let me get" the way it catches "let me pull up"', () => {
+    for (const bubble of [
+      'Now let me get the hotel rate for 6 nights.',
+      "I'll get you the room options for those dates.",
+      'Let me see what rooms are available.',
+      'Getting those for you now.',
+    ]) {
+      expect(checkAnnouncedActions([bubble], noWork).ok, bubble).toBe(false);
+    }
+  });
+
+  it('is satisfied by a real search', () => {
+    expect(
+      checkAnnouncedActions(['Now let me get the hotel rate for 6 nights.'], {
+        ...noWork,
+        searchedThisTurn: true,
+      }).ok,
+    ).toBe(true);
+  });
+
+  it('still lets ordinary sentences through', () => {
+    for (const bubble of [
+      'Let me know if you need anything else.',
+      'Get in touch with the airline for seat selection.',
+      "I'll get back to you if anything changes.",
+    ]) {
+      expect(checkAnnouncedActions([bubble], noWork).ok, bubble).toBe(true);
+    }
+  });
+});
