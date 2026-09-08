@@ -377,6 +377,22 @@ export function buildGetBookingRequest(confirmationId: string) {
   return { confirmationId };
 }
 
+/**
+ * Cancel Booking. `retrieveBooking` returns the order afterwards so the result can
+ * be checked rather than trusted, and ALLOW_PARTIAL_CANCEL means a two-item order
+ * reports what it managed rather than failing opaquely — the caller then says
+ * exactly which half is still live.
+ */
+export function buildCancelBookingRequest(args: { confirmationId: string; pcc: string }) {
+  return {
+    confirmationId: args.confirmationId,
+    targetPcc: args.pcc,
+    retrieveBooking: true,
+    cancelAll: true,
+    errorHandlingPolicy: 'ALLOW_PARTIAL_CANCEL',
+  };
+}
+
 /** Agentic-ready Hotel Search (beta): flat JSON, searches around an airport code. */
 export function buildHotelSearchBetaRequest(
   stay: Pick<HotelSearch, 'checkIn' | 'checkOut' | 'adults'>,

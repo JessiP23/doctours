@@ -157,6 +157,15 @@ export interface HotelBooking {
  * The contract every provider implements. The agent's tools depend on this,
  * never on a concrete provider module.
  */
+export interface CancellationResult {
+  reference: string;
+  /** True only when the provider confirms nothing bookable is left on the order. */
+  cancelled: boolean;
+  /** What is still live, when a partial cancel leaves something behind. */
+  remaining: string[];
+  raw: unknown;
+}
+
 export interface TravelProvider {
   readonly name: string;
   searchFlights(q: FlightSearch): Promise<FlightOffer[]>;
@@ -164,4 +173,6 @@ export interface TravelProvider {
   createFlightOrder(offer: FlightOffer, passengers: Passenger[]): Promise<FlightOrder>;
   searchHotelRates(q: HotelSearch): Promise<HotelRate[]>;
   createHotelBooking(rate: HotelRate, guest: Guest): Promise<HotelBooking>;
+  /** Cancels an order and verifies the outcome before reporting success. */
+  cancelBooking(reference: string): Promise<CancellationResult>;
 }

@@ -12,6 +12,7 @@
  *                                                                book flight, then rooms → price check → book hotel;
  *                                                                records references in docs/BOOKINGS.md
  *   npm run sabre:smoke -- lookup <reference>                    Get Booking: prove a reference is a real order
+ *   npm run sabre:smoke -- cancel <reference>                    cancel an order and verify it is gone
  *
  * Raw responses are written to tests/fixtures/sabre/<name>.json so mappers can be
  * written and unit-tested against real payloads.
@@ -698,9 +699,44 @@ async function lookup() {
   );
 }
 
+/** Cancels an order and proves the outcome with Get Booking. */
+async function cancel() {
+  const [reference] = args;
+  if (!reference) throw new Error('usage: cancel <reference>');
+  const provider = new SabreProvider();
+
+  const before = await retrieveBooking(reference).catch(() => null);
+  const beforeCounts = before
+    ? (() => {
+        const b = before.raw as { flights?: unknown[]; hotels?: unknown[] };
+        return { flights: b.flights?.length ?? 0, hotels: b.hotels?.length ?? 0 };
+      })()
+    : null;
+
+  const { result, requests } = await withProviderTrace(() => provider.cancelBooking(reference));
+  const file = await saveFixture(`cancel-${reference}`, { response: result.raw });
+  console.log(
+    JSON.stringify(
+      {
+        ok: result.cancelled,
+        reference,
+        before: beforeCounts,
+        cancelled: result.cancelled,
+        remaining: result.remaining,
+        file,
+        requests,
+      },
+      null,
+      2,
+    ),
+  );
+  if (!result.cancelled) process.exitCode = 1;
+}
+
 const commands: Record<string, () => Promise<void>> = {
   e2e,
   lookup,
+  cancel,
   auth,
   flights,
   'hotels-geo': hotelsGeo,

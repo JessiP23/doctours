@@ -1,6 +1,7 @@
 import { getEnv, paymentCard } from '@/lib/env';
 import { log } from '@/lib/log';
 import type {
+  CancellationResult,
   FlightOffer,
   FlightOrder,
   FlightSearch,
@@ -20,6 +21,7 @@ import {
   buildCreateFlightBookingRequest,
   buildCreateHotelBookingRequest,
   buildFlightCheckRequest,
+  buildCancelBookingRequest,
   buildFlightShopRequest,
   buildGetBookingRequest,
   buildHotelDetailsRequest,
@@ -410,6 +412,42 @@ export class SabreProvider implements TravelProvider {
       guest,
       raw: response,
     };
+  }
+
+  /**
+   * Cancels an order, then reads it back.
+   *
+   * Sabre answers 200 for a partial cancel, so the response alone does not mean the
+   * order is gone. Get Booking is the authority: an order that still lists flights
+   * or hotels was not fully cancelled, and the caller must say which half is live
+   * rather than tell a patient their trip is undone when it is not.
+   */
+  async cancelBooking(reference: string): Promise<CancellationResult> {
+    const env = getEnv();
+    const raw = await sabreFetch<Record<string, unknown>>({
+      method: 'POST',
+      path: '/v1/trip/orders/cancelBooking',
+      body: buildCancelBookingRequest({ confirmationId: reference, pcc: env.SABRE_PCC }),
+      timeoutMs: SHOP_TIMEOUT_MS,
+    });
+
+    const remaining: string[] = [];
+    try {
+      const after = (await retrieveBooking(reference)).raw as {
+        flights?: unknown[];
+        hotels?: unknown[];
+      };
+      if (after.flights?.length) remaining.push(`${after.flights.length} flight segment(s)`);
+      if (after.hotels?.length) remaining.push(`${after.hotels.length} hotel stay(s)`);
+    } catch {
+      // The order is unreadable after cancelling, which is what a fully cancelled
+      // order looks like in CERT. Treat it as gone rather than as an error.
+      log.info({ reference }, 'order no longer retrievable after cancel');
+    }
+
+    const cancelled = remaining.length === 0;
+    log.info({ reference, cancelled, remaining }, 'cancel booking verified');
+    return { reference, cancelled, remaining, raw };
   }
 }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildCancelBookingRequest,
   buildCreateFlightBookingRequest,
   buildCreateHotelBookingRequest,
   buildFlightCheckRequest,
@@ -244,5 +245,19 @@ describe('Create Booking waits for asynchronous confirmation', () => {
     // looks like while the partner airline is still answering.
     expect(body.flightDetails.haltOnFlightStatusCodes).not.toContain('NN');
     expect(body.flightDetails.haltOnFlightStatusCodes).toContain('UC');
+  });
+});
+
+describe('buildCancelBookingRequest', () => {
+  it('asks for the order back so the outcome can be verified, and allows a partial cancel', () => {
+    const body = buildCancelBookingRequest({ confirmationId: 'RSZVBJ', pcc: 'ABCD' });
+    expect(body).toEqual({
+      confirmationId: 'RSZVBJ',
+      targetPcc: 'ABCD',
+      retrieveBooking: true,
+      cancelAll: true,
+      // A two-item order reports what it managed rather than failing opaquely.
+      errorHandlingPolicy: 'ALLOW_PARTIAL_CANCEL',
+    });
   });
 });
