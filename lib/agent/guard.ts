@@ -116,3 +116,36 @@ export function checkAnnouncedActions(bubbles: string[], activity: TurnActivity)
   }
   return clean;
 }
+
+/**
+ * Did the reply actually raise the change the patient was never told about?
+ *
+ * An airline cancellation outranks whatever the patient typed, and the prompt puts
+ * it first for that reason — but a model that decides to answer the question instead
+ * leaves a patient believing they still have a flight. The check is deliberately
+ * shallow: it asks whether the words for that kind of change appear anywhere in the
+ * bubbles, not whether the explanation is good. Missing it is a false negative that
+ * costs one retry; passing it wrongly is not something a regex can prevent.
+ */
+const RAISED: Record<string, RegExp> = {
+  flight_cancelled:
+    /\b(cancel(?:led|ed|s|ling)?|dropped|no longer (?:flying|operating|running))\b/i,
+  flight_schedule_change:
+    /\b(schedul\w*|time[sd]?|moved|shifted|changed|earlier|later|delay\w*)\b/i,
+};
+
+export interface EventCheck {
+  ok: boolean;
+  /** Event kinds the reply never mentioned. */
+  unraised: string[];
+}
+
+export function checkRaisedEvents(bubbles: string[], eventKinds: string[]): EventCheck {
+  const text = bubbles.join(' ');
+  const unraised = [...new Set(eventKinds)].filter((kind) => {
+    const pattern = RAISED[kind];
+    // An unknown kind has no words to look for, so it cannot be judged here.
+    return pattern ? !pattern.test(text) : false;
+  });
+  return { ok: unraised.length === 0, unraised };
+}

@@ -8,6 +8,7 @@ const mem = {
   toolCalls: [] as { toolName: string; error: unknown }[],
   bookings: [] as { kind: string; status: string; booking_reference: string }[],
   openEvents: [] as { id: string; kind: string; detail: unknown }[],
+  acknowledged: [] as string[],
 };
 vi.mock('@/lib/db/repo', () => ({
   appendMessage: vi.fn(async (_c: string, role: string, content: unknown) => {
@@ -20,6 +21,10 @@ vi.mock('@/lib/db/repo', () => ({
   listBookings: vi.fn(async () => mem.bookings),
   listRecentOffers: vi.fn(async () => []),
   listOpenTripEvents: vi.fn(async () => mem.openEvents),
+  acknowledgeTripEvents: vi.fn(async (_c: string, ids: string[]) => {
+    mem.acknowledged.push(...ids);
+    mem.openEvents = mem.openEvents.filter((e) => !ids.includes(e.id));
+  }),
   recordToolCall: vi.fn(async (_c: string, t: { toolName: string; error: unknown }) => {
     mem.toolCalls.push(t);
     return t;
@@ -83,6 +88,7 @@ beforeEach(() => {
   mem.toolCalls = [];
   mem.bookings = [];
   mem.openEvents = [];
+  mem.acknowledged = [];
 });
 
 describe('runTurn', () => {
@@ -207,5 +213,63 @@ describe('runTurn', () => {
     expect(system).toContain('Flight: not booked yet.');
     expect(system).toContain('Next thing to sort out: flight');
     expect(system).toContain('Monday 12 October at 8:00 PM');
+  });
+
+  it('will not deliver a reply that ignores a cancellation the patient was never told about', async () => {
+    mem.openEvents = [{ id: 'e1', kind: 'flight_cancelled', detail: {} }];
+    const client = scripted([
+      msg([
+        use('t1', 'reply', {
+          bubbles: ['You land at 11:55 am local on the 12th.'],
+          expectsInput: true,
+        }),
+      ]),
+      msg([
+        use('t2', 'reply', {
+          bubbles: [
+            'Before that — Qatar cancelled your outbound flight.',
+            'You were due to land 11:55 am on the 12th. I am finding you another way in.',
+          ],
+          expectsInput: true,
+        }),
+      ]),
+    ]);
+
+    const result = await runTurn('c1', 'what time do I land?', TRIP_RULES, {
+      client,
+      model: 'test',
+    });
+    expect(result.bubbles[0]).toMatch(/cancelled/i);
+    expect(result.iterations).toBe(2);
+    // The nudge names the kind so the model knows what it skipped.
+    expect(JSON.stringify(mem.messages)).toMatch(/never mentions the change/);
+  });
+
+  it('marks an event told once it has been raised, so the next turn does not repeat it', async () => {
+    mem.openEvents = [{ id: 'e1', kind: 'flight_cancelled', detail: {} }];
+    const client = scripted([
+      msg([
+        use('t1', 'reply', {
+          bubbles: ['Qatar cancelled your outbound flight, so I need to get you rebooked.'],
+          expectsInput: true,
+        }),
+      ]),
+    ]);
+
+    await runTurn('c1', 'hi', TRIP_RULES, { client, model: 'test' });
+    expect(mem.acknowledged).toEqual(['e1']);
+    expect(mem.openEvents).toEqual([]);
+  });
+
+  it('delivers normally when there is nothing untold', async () => {
+    const client = scripted([
+      msg([use('t1', 'reply', { bubbles: ['You land at 11:55 am.'], expectsInput: true })]),
+    ]);
+    const result = await runTurn('c1', 'what time do I land?', TRIP_RULES, {
+      client,
+      model: 'test',
+    });
+    expect(result.iterations).toBe(1);
+    expect(mem.acknowledged).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkAnnouncedActions, checkReferences } from '@/lib/agent/guard';
+import { checkAnnouncedActions, checkReferences, checkRaisedEvents } from '@/lib/agent/guard';
 
 describe('checkReferences', () => {
   it('passes a reference that matches a real booking', () => {
@@ -129,5 +129,49 @@ describe('checkAnnouncedActions', () => {
     ]) {
       expect(checkAnnouncedActions([phrase], idle).kind, phrase).toBe('retrieval');
     }
+  });
+});
+
+describe('checkRaisedEvents', () => {
+  /**
+   * An airline cancellation outranks whatever the patient typed. The check is
+   * shallow by design — it asks whether the words appear at all, not whether the
+   * explanation is good — because the failure it exists to stop is the reply that
+   * answers the question and never mentions the cancellation.
+   */
+  it('passes a reply that names the cancellation', () => {
+    expect(
+      checkRaisedEvents(
+        ['Qatar cancelled your outbound flight.', 'Let me find you another way in.'],
+        ['flight_cancelled'],
+      ).ok,
+    ).toBe(true);
+  });
+
+  it('fails a reply that answers the question and skips the cancellation', () => {
+    const check = checkRaisedEvents(
+      ['You land at 11:55 am local on the 12th.', 'Anything else?'],
+      ['flight_cancelled'],
+    );
+    expect(check.ok).toBe(false);
+    expect(check.unraised).toEqual(['flight_cancelled']);
+  });
+
+  it('accepts the words a schedule change is actually described with', () => {
+    for (const bubble of [
+      'Your return times moved by twenty minutes.',
+      'Qatar shifted the Doha connection earlier.',
+      'There is a schedule change on the way home.',
+    ]) {
+      expect(checkRaisedEvents([bubble], ['flight_schedule_change']).ok).toBe(true);
+    }
+  });
+
+  it('is silent when there is nothing untold', () => {
+    expect(checkRaisedEvents(['You land at 11:55 am.'], []).ok).toBe(true);
+  });
+
+  it('does not judge a kind it has no words for', () => {
+    expect(checkRaisedEvents(['Anything else?'], ['hotel_closed']).ok).toBe(true);
   });
 });

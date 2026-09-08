@@ -8,7 +8,7 @@ import { isProviderError } from '@/lib/providers/sabre/errors';
 import { humanizeBubbles, textToBubbles } from '@/lib/text/humanize';
 import type { TripRules } from '@/lib/trip/rules';
 import { anthropicTools, getTool } from './tools';
-import { checkAnnouncedActions, checkReferences } from './guard';
+import { checkAnnouncedActions, checkRaisedEvents, checkReferences } from './guard';
 import { REPLY_TOOL_NAME, replySchema } from './tools/reply';
 import { buildTripState } from './state';
 import { buildSystemPrompt } from './system';
@@ -139,6 +139,7 @@ export async function runTurn(
   const tools = anthropicTools();
   let referenceRetryUsed = false;
   let promiseNudgeUsed = false;
+  let eventNudgeUsed = false;
   /** How often each tool has failed the same way this turn, to stop retry storms. */
   const failureCounts = new Map<string, number>();
 
@@ -248,7 +249,43 @@ export async function runTurn(
             continue;
           }
 
+          // A change the patient was never told about has to actually be told. If the
+          // reply skipped it, say so once and let the model answer again.
+          const raised = checkRaisedEvents(
+            bubbles,
+            openEvents.map((e) => e.kind),
+          );
+          if (!raised.ok && !eventNudgeUsed) {
+            eventNudgeUsed = true;
+            l.warn(
+              { unraised: raised.unraised, iteration: i },
+              'reply did not raise an open event',
+            );
+            const nudgeBlocks = [
+              ...results,
+              {
+                type: 'text' as const,
+                text: `Your reply never mentions the change to this trip (${raised.unraised.join(', ')}). The patient still believes nothing has happened. Reply again, leading with what changed, in your own words, before anything else.`,
+              },
+            ];
+            await repo.appendMessage(conversationId, 'user', nudgeBlocks as unknown as Json);
+            history.push({ role: 'user', content: nudgeBlocks });
+            continue;
+          }
+
           await repo.appendMessage(conversationId, 'user', results as unknown as Json);
+          // Told once is told: otherwise every later turn re-announces the same
+          // cancellation and the conversation never moves on.
+          if (openEvents.length > 0) {
+            await repo.acknowledgeTripEvents(
+              conversationId,
+              openEvents.map((e) => e.id),
+            );
+            l.info(
+              { raised: openEvents.map((e) => e.kind) },
+              'open events raised with the patient',
+            );
+          }
           return { bubbles, expectsInput: parsed.data.expectsInput, iterations: i };
         }
 
