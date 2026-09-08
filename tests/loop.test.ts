@@ -272,4 +272,48 @@ describe('runTurn', () => {
     expect(result.iterations).toBe(1);
     expect(mem.acknowledged).toEqual([]);
   });
+
+  it('delivers a reply the model sent as a stringified array instead of apologising', async () => {
+    // Straight from a dev log: bubbles arrived as a JSON string, the schema rejected
+    // it, and the patient was told "Sorry, I garbled that" twice in a row while a
+    // perfectly good answer sat in the tool call.
+    const client = scripted([
+      msg([
+        use('t1', 'reply', {
+          bubbles:
+            '["Three options, cheapest first.","Turkish 4 leaves JFK 12:50 pm and lands 5:30 am on the 12th, non-stop, $742.","Want that one?"]',
+          expectsInput: true,
+        }),
+      ]),
+    ]);
+    const r = await runTurn('c1', 'what flights are available?', TRIP_RULES, {
+      client,
+      model: 'test',
+    });
+    expect(r.bubbles).toHaveLength(3);
+    expect(r.bubbles[0]).toBe('Three options, cheapest first.');
+    expect(r.bubbles.join(' ')).not.toMatch(/garbled/i);
+  });
+
+  it('splits a reply sent as loose prose into bubbles', async () => {
+    const client = scripted([
+      msg([
+        use('t1', 'reply', {
+          bubbles:
+            'Turkish 4 leaves JFK at 12:50 pm and lands in Istanbul 5:30 am on the 12th for $742. Qatar via Doha is $698 but gets in later. Want me to hold one?',
+          expectsInput: 'true',
+        }),
+      ]),
+    ]);
+    const r = await runTurn('c1', 'options?', TRIP_RULES, { client, model: 'test' });
+    expect(r.bubbles.length).toBeGreaterThan(1);
+    expect(r.expectsInput).toBe(true);
+    expect(r.bubbles.join(' ')).toMatch(/Turkish 4/);
+  });
+
+  it('still apologises when the reply carries nothing to say', async () => {
+    const client = scripted([msg([use('t1', 'reply', { bubbles: '', expectsInput: false })])]);
+    const r = await runTurn('c1', 'x', TRIP_RULES, { client, model: 'test' });
+    expect(r.bubbles[0]).toMatch(/garbled/i);
+  });
 });

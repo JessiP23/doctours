@@ -9,7 +9,7 @@ import { humanizeBubbles, textToBubbles } from '@/lib/text/humanize';
 import type { TripRules } from '@/lib/trip/rules';
 import { anthropicTools, getTool } from './tools';
 import { checkAnnouncedActions, checkRaisedEvents, checkReferences } from './guard';
-import { REPLY_TOOL_NAME, replySchema } from './tools/reply';
+import { REPLY_TOOL_NAME, normalizeReplyInput, parseReplyInput } from './tools/reply';
 import { buildTripState } from './state';
 import { buildSystemPrompt } from './system';
 
@@ -214,7 +214,12 @@ export async function runTurn(
     }
 
     if (reply) {
-      const parsed = replySchema.safeParse(reply.input);
+      const parsed = parseReplyInput(reply.input);
+      if (parsed.coerced.length > 0) {
+        // Visible rather than silent: a model that keeps sending the wrong shape is
+        // worth knowing about, even though the reply still reaches the patient.
+        l.warn({ coerced: parsed.coerced, iteration: i }, 'repaired the shape of a reply');
+      }
       // Close the tool_use so history stays valid for the next turn.
       results.push({ type: 'tool_result', tool_use_id: reply.id, content: 'delivered' });
 
@@ -320,9 +325,11 @@ export async function runTurn(
 
       await repo.appendMessage(conversationId, 'user', results as unknown as Json);
       l.warn({ issues: parsed.error.issues }, 'reply rejected by schema, falling back');
-      const raw = (reply.input as { bubbles?: unknown })?.bubbles;
-      const bubbles = Array.isArray(raw)
-        ? humanizeBubbles(raw.map(String))
+      // Salvage whatever the model actually said before apologising for nothing.
+      const raw = (normalizeReplyInput(reply.input).value as { bubbles?: unknown })?.bubbles;
+      const salvaged = Array.isArray(raw) ? humanizeBubbles(raw.map(String)) : [];
+      const bubbles = salvaged.length
+        ? salvaged
         : ['Sorry, I garbled that. Could you say it again?'];
       return { bubbles, expectsInput: true, iterations: i };
     }

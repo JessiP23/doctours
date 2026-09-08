@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_BUBBLES, MAX_BUBBLE_CHARS } from '@/lib/text/humanize';
+import { MAX_BUBBLES, MAX_BUBBLE_CHARS, textToBubbles } from '@/lib/text/humanize';
 import { defineTool } from './define';
 
 /**
@@ -31,6 +31,56 @@ export const replySchema = z.object({
 });
 
 export type ReplyInput = z.infer<typeof replySchema>;
+
+/**
+ * The model is told `bubbles` is an array of strings and mostly sends one. Now and
+ * then it sends the array as a JSON string, or just sends the prose. That is a
+ * usable reply in the wrong wrapper, and throwing it away cost a patient a real
+ * answer — the app said "Sorry, I garbled that" while a perfectly good sentence sat
+ * in the tool call.
+ *
+ * So the tool schema stays strict (it is what the model reads, and an array is what
+ * we want it to send) and parsing is tolerant: unwrap a stringified array, treat
+ * loose prose as text to split, accept "true"/"false" for the boolean.
+ */
+export function normalizeReplyInput(input: unknown): { value: unknown; coerced: string[] } {
+  if (typeof input !== 'object' || input === null) return { value: input, coerced: [] };
+  const raw = { ...(input as Record<string, unknown>) };
+  const coerced: string[] = [];
+
+  if (typeof raw.bubbles === 'string') {
+    const text = raw.bubbles.trim();
+    let unwrapped: string[] | null = null;
+    if (text.startsWith('[')) {
+      try {
+        const parsed: unknown = JSON.parse(text);
+        if (Array.isArray(parsed) && parsed.every((b) => typeof b === 'string')) {
+          unwrapped = parsed as string[];
+        }
+      } catch {
+        // Not JSON after all; fall through and treat it as prose.
+      }
+    }
+    raw.bubbles = unwrapped ?? textToBubbles(raw.bubbles);
+    coerced.push(unwrapped ? 'bubbles: stringified array' : 'bubbles: prose split into bubbles');
+  }
+
+  if (typeof raw.expectsInput === 'string') {
+    const flag = raw.expectsInput.trim().toLowerCase();
+    if (flag === 'true' || flag === 'false') {
+      raw.expectsInput = flag === 'true';
+      coerced.push('expectsInput: string');
+    }
+  }
+
+  return { value: raw, coerced };
+}
+
+/** Validates a reply tool call, repairing the shapes the model gets wrong. */
+export function parseReplyInput(input: unknown) {
+  const { value, coerced } = normalizeReplyInput(input);
+  return { ...replySchema.safeParse(value), coerced };
+}
 
 export const replyTool = defineTool({
   name: REPLY_TOOL_NAME,

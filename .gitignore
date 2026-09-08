@@ -42,3 +42,6 @@ next-env.d.ts
 
 # local test-sync bundle (not part of the project)
 .tmp-sync.tgz
+
+# Files the Claude desktop app drops into the folder when it delivers a document.
+Claude outputs/
