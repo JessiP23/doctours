@@ -76,3 +76,31 @@ export function compareStay(
   }
   return { coverage: 'covers', nightsBefore, nightsAfter };
 }
+
+/** Landing this many hours or more before check-in time is worth a word — and a price. */
+export const EARLY_ARRIVAL_HOURS = 2;
+
+export interface EarlyArrival {
+  arriveLocal: string;
+  checkInFrom: string;
+  hoursEarly: number;
+}
+
+/**
+ * Whether a flight lands well before the room is ready. Null when it does not, or
+ * when the hotel has not said when check-in is — no arithmetic on a guess.
+ */
+export function earlyArrivalFor(
+  arriveLocal: string | undefined,
+  checkIn: string,
+  checkInFrom: string | null | undefined,
+  zone: string,
+): EarlyArrival | null {
+  if (!arriveLocal || !checkInFrom) return null;
+  const arrival = DateTime.fromISO(arriveLocal, { zone });
+  const ready = DateTime.fromISO(`${checkIn}T${checkInFrom}`, { zone });
+  if (!arrival.isValid || !ready.isValid) return null;
+  const hoursEarly = ready.diff(arrival, 'hours').hours;
+  if (hoursEarly < EARLY_ARRIVAL_HOURS) return null;
+  return { arriveLocal, checkInFrom, hoursEarly: Math.round(hoursEarly * 10) / 10 };
+}

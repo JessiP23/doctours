@@ -4,7 +4,7 @@ import * as repo from '@/lib/db/repo';
 import type { Json } from '@/lib/db/types';
 import { travelProvider } from '@/lib/providers/sabre';
 import { isProviderError } from '@/lib/providers/sabre/errors';
-import { deriveStay } from '@/lib/trip/nights';
+import { deriveStay, earlyArrivalFor } from '@/lib/trip/nights';
 import type { HotelRate } from '@/lib/providers/types';
 import type { FlightOffer, FlightSlice } from '@/lib/providers/types';
 import { rulesFor } from './context';
@@ -19,8 +19,6 @@ import { describeProperty } from './property';
  * override for the cases the conversation genuinely needs them.
  */
 const MAX_SHOWN = 4;
-/** Landing this many hours or more before check-in time is worth a word — and a price. */
-const EARLY_ARRIVAL_HOURS = 2;
 
 export function noRoomsIsAnAnswer(e: unknown): HotelRate[] {
   if (isProviderError(e) && e.code === 'NO_AVAILABILITY') return [];
@@ -169,15 +167,7 @@ export const searchHotelRatesTool = defineTool({
     // that is the patient's problem to know about now, not at the desk — and the
     // night before is priced in the same breath, so "can I get in early?" has a
     // real answer with a real number.
-    let earlyArrival: { arriveLocal: string; checkInFrom: string; hoursEarly: number } | undefined;
-    if (arriveLocal && checkInFrom) {
-      const arrival = DateTime.fromISO(arriveLocal, { zone: rules.destinationTz });
-      const ready = DateTime.fromISO(`${checkIn}T${checkInFrom}`, { zone: rules.destinationTz });
-      const hoursEarly = ready.diff(arrival, 'hours').hours;
-      if (hoursEarly >= EARLY_ARRIVAL_HOURS) {
-        earlyArrival = { arriveLocal, checkInFrom, hoursEarly: Math.round(hoursEarly * 10) / 10 };
-      }
-    }
+    const earlyArrival = earlyArrivalFor(arriveLocal, checkIn, checkInFrom, rules.destinationTz);
 
     const nightBefore = earlyArrival
       ? (DateTime.fromISO(checkIn).minus({ days: 1 }).toISODate() as string)

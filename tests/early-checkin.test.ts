@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TRIP_RULES, type TripRules } from '@/lib/trip/rules';
 import type { FlightSlice, HotelRate } from '@/lib/providers/types';
-import { compareStay } from '@/lib/trip/nights';
+import { compareStay, earlyArrivalFor } from '@/lib/trip/nights';
 import { buildCreateHotelBookingRequest } from '@/lib/providers/sabre/requests';
 
 /**
@@ -206,6 +206,27 @@ describe('compareStay', () => {
     expect(compareStay({ checkIn: '2026-10-11', checkOut: '2026-10-16' }, flights).coverage).toBe(
       'gap',
     );
+  });
+});
+
+describe('earlyArrivalFor', () => {
+  it('reports a landing two or more hours before check-in, and nothing otherwise', () => {
+    expect(earlyArrivalFor('2026-10-12T11:55', '2026-10-12', '14:00', 'Europe/Istanbul')).toEqual({
+      arriveLocal: '2026-10-12T11:55',
+      checkInFrom: '14:00',
+      hoursEarly: 2.1,
+    });
+    expect(
+      earlyArrivalFor('2026-10-12T13:00', '2026-10-12', '14:00', 'Europe/Istanbul'),
+    ).toBeNull();
+    expect(
+      earlyArrivalFor('2026-10-12T19:40', '2026-10-12', '14:00', 'Europe/Istanbul'),
+    ).toBeNull();
+  });
+
+  it('does no arithmetic when the hotel has not said when check-in is', () => {
+    expect(earlyArrivalFor('2026-10-12T05:30', '2026-10-12', null, 'Europe/Istanbul')).toBeNull();
+    expect(earlyArrivalFor(undefined, '2026-10-12', '14:00', 'Europe/Istanbul')).toBeNull();
   });
 });
 

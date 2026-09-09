@@ -4,6 +4,7 @@ import * as repo from '@/lib/db/repo';
 import { log } from '@/lib/log';
 import { travelProvider } from '@/lib/providers/sabre';
 import type { FlightOffer, HotelRate } from '@/lib/providers/types';
+import { earlyArrivalFor } from '@/lib/trip/nights';
 import { applyPreferences, distinctItineraries, excludeCancelled } from '@/lib/trip/select';
 import {
   cheapestPerStay,
@@ -135,22 +136,39 @@ export const compareTripTotalsTool = defineTool({
       rankedBy: 'flight + cheapest room for the nights the flight implies',
       hotel: rules.hotel.name,
       travellers: rules.adults,
-      options: ranked.map((t, i) => ({
-        rank: i + 1,
-        offerId: flightRows[i].id,
-        rateId: t.room ? (rateIdFor.get(t.room.id) ?? null) : null,
-        flightUSD: t.flightUSD,
-        hotelUSD: t.hotelUSD,
-        totalUSD: t.totalUSD,
-        nights: t.stay.nights,
-        checkIn: t.stay.checkIn,
-        checkOut: t.stay.checkOut,
-        room: t.room ? { name: t.room.roomName, refundable: t.room.refundable } : null,
-        ...(t.totalUSD === null
-          ? { note: 'The hotel had no room for these nights, so this option has no total.' }
-          : {}),
-        flight: summarizeFlightOffer(t.offer),
-      })),
+      options: ranked.map((t, i) => {
+        // The same fact search_hotel_rates would report, so a patient booking
+        // straight from the comparison still hears that they land before the room
+        // is ready — this path never runs that search.
+        const earlyArrival = earlyArrivalFor(
+          t.offer.slices[0].segments.at(-1)?.arriveLocal,
+          t.stay.checkIn,
+          t.room?.policies?.checkInTime ?? rules.hotel.checkInTime,
+          rules.destinationTz,
+        );
+        return {
+          rank: i + 1,
+          offerId: flightRows[i].id,
+          rateId: t.room ? (rateIdFor.get(t.room.id) ?? null) : null,
+          flightUSD: t.flightUSD,
+          hotelUSD: t.hotelUSD,
+          totalUSD: t.totalUSD,
+          nights: t.stay.nights,
+          checkIn: t.stay.checkIn,
+          checkOut: t.stay.checkOut,
+          room: t.room ? { name: t.room.roomName, refundable: t.room.refundable } : null,
+          ...(t.totalUSD === null
+            ? { note: 'The hotel had no room for these nights, so this option has no total.' }
+            : {}),
+          ...(earlyArrival
+            ? {
+                earlyArrival,
+                earlyArrivalNote: `Lands ${earlyArrival.hoursEarly} hours before check-in (${earlyArrival.checkInFrom}). Say so when presenting it; if they want the room on landing, search_hotel_rates prices the night before.`,
+              }
+            : {}),
+          flight: summarizeFlightOffer(t.offer),
+        };
+      }),
       tradeoff: tradeoff.summary,
       cheapestFlightIsCheapestTrip: tradeoff.sameOption,
       extraCostOfCheapestFlightUSD: tradeoff.savingsUSD,

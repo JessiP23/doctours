@@ -230,6 +230,20 @@ describe('compare_trip_totals', () => {
     }
   });
 
+  it('says when an option lands before the room is ready, since no room search runs on this path', async () => {
+    const result = (await compareTripTotalsTool.handler({}, ctx)) as {
+      options: { nights: number; earlyArrival?: { hoursEarly: number; checkInFrom: string } }[];
+    };
+    // f-normal lands 05:30 on the 12th; check-in is the rule's 15:00 (the fixture rate
+    // states no policy). f-early lands 19:40 the evening before, after check-in.
+    expect(result.options[0].earlyArrival).toEqual({
+      arriveLocal: '2026-10-12T05:30',
+      checkInFrom: '15:00',
+      hoursEarly: 9.5,
+    });
+    expect(result.options[1].earlyArrival).toBeUndefined();
+  });
+
   it('shows an option without a total when the hotel has nothing for its nights', async () => {
     mem.noRoomFor = '2026-10-11';
     const result = (await compareTripTotalsTool.handler({}, ctx)) as {
