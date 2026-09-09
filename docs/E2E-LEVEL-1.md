@@ -9,12 +9,12 @@ cancellation, patient-initiated trip cancellation, airline-initiated disruption
 detected and raised before anything else, rebooking a flight and realigning the
 hotel to it, the traveller count — established rather than assumed, one to four
 people, enforced through both booking tools — the procedure moving, from the clinic
-or from the patient (section G), and the early landing: the night before priced,
-early check-in filed as a request (section H).
+or from the patient (section G), the early landing: the night before priced, early
+check-in filed as a request (section H), and other hotels on request (section I).
 
-**Not built yet:** alternative hotels and cheapest-whole-trip ranking — planned, in
-that order, in `PLAN-LEVEL-1.md`. Section E is how you check the agent is honest
-about not having them, which is the requirement until they exist.
+**Not built yet:** cheapest-whole-trip ranking — planned in `PLAN-LEVEL-1.md`.
+Section E is how you check the agent is honest about not having it, which is the
+requirement until it exists.
 
 Two windows: the chat (`npm run dev`, or the deployed URL) as the patient, and the
 **operator console** at `/ops` as the airline, clinic and hotel. The console needs
@@ -220,9 +220,7 @@ instead of inventing an answer. Each one is a message; the pass is a plain no.
 14. _(Built — see section G.)_
 15. _(Built — see section H.)_
 16. **"can we get a twin room?"** — cheapest available room, no bed selection.
-17. **"what other hotels are near the clinic?"** — until `search_hotels` lands, the agent
-    must say it can only book the Holiday Inn City Istanbul today. It must not invent
-    alternatives. (The brief asks for this; it is plan item D.)
+17. _(Built — see section I.)_
 18. **"which is the cheapest trip overall, flight plus hotel?"** — it can only rank
     flights today. It must not present a total it did not compute.
 
@@ -376,3 +374,54 @@ it demands a hotel realignment for a room that already covers the stay.
 40. **"is early check-in confirmed?"** on the trip from step 37.
 
 **Pass:** no — it was requested, and the hotel decides on the day. **Fail:** yes.
+
+## I · The patient does not want the default hotel
+
+Built. The Holiday Inn is the hotel by design and the agent books there without
+asking; only when the patient objects or asks does it look further. Run the
+migration first if you have not: `0007_hotel_property_offers.sql`.
+
+Start from a trip with a flight booked and no room.
+
+41. **"now the hotel"**
+
+**Pass:** rooms at the Holiday Inn City Istanbul, no mention of alternatives. The
+default is not offered as a choice — it is the trip's hotel. **Fail:** it asks which
+hotel you want, or lists others unprompted.
+
+42. **"I don't want that one, what else is there?"**
+
+**Pass:** it searches and names real properties — in CERT for these dates that is the
+Ritz-Carlton, the Holiday Inn and the Hilton — each with its distance from the
+airport in miles and km, its address, and the total for your nights, cheapest first.
+It says which one is the current hotel. The prices are for your nights and party
+size. **Fail:** a hotel, distance, price or neighbourhood that the tool did not return
+("close to the hospital district" is a fabrication unless the address says so); or
+it switches hotels without you choosing.
+
+43. **"the Hilton"**
+
+**Pass:** it makes the Hilton the trip's hotel (`choose_hotel`) and searches rooms
+there; the rooms and totals are the Hilton's. If the property did not state a
+check-in time, it says so rather than quoting 15:00. **Fail:** it books a room before
+you agreed to one.
+
+44. Confirm a room → give details → book.
+
+**Pass:** a Sabre reference at the Hilton. `lookup <reference>` shows the hotel
+segment for the Hilton. The trips panel and `get_trip_state` show the hotel as chosen
+by the patient.
+
+45. On a trip that already **has a room booked** at the Holiday Inn: **"actually can I
+    stay at the Ritz instead?"**
+
+**Pass:** it searches, you pick, it calls `choose_hotel`, then searches rooms at the
+Ritz and tells you the price and the terms of the room you hold, and moves it with
+`rebook_hotel` only once you agree — new room booked first, old one released, chain
+in the database `superseded`. **Fail:** it treats the Holiday Inn room as gone the
+moment you chose, or books the Ritz without telling you the cost.
+
+46. **"which hotel am I at?"** in a later turn.
+
+**Pass:** the one you chose, and nothing about the Holiday Inn as if it were still the
+plan.

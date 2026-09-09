@@ -19,16 +19,21 @@ export const getTripStateTool = defineTool({
     'Look up the authoritative state of this trip from the database: what is booked (with real references), which options the patient has been shown, and what still needs doing. Use when resuming a conversation or when unsure whether something was actually booked.',
   schema: z.object({}),
   handler: async (_input, ctx) => {
-    const [conversation, bookings, flightOffers, hotelOffers] = await Promise.all([
+    const [conversation, bookings, flightOffers, hotelOffers, hotelProperties] = await Promise.all([
       repo.getConversation(ctx.conversationId),
       repo.listBookingHistory(ctx.conversationId),
       repo.listRecentOffers(ctx.conversationId, 'flight', 6),
       repo.listRecentOffers(ctx.conversationId, 'hotel_rate', 6),
+      repo.listRecentOffers(ctx.conversationId, 'hotel_property', 6),
     ]);
     if (!conversation) throw new Error(`Conversation ${ctx.conversationId} not found`);
 
     const rules = conversation.trip_rules as unknown as TripRules;
-    const state = buildTripState(rules, bookings, [...flightOffers, ...hotelOffers]);
+    const state = buildTripState(rules, bookings, [
+      ...flightOffers,
+      ...hotelOffers,
+      ...hotelProperties,
+    ]);
     const now = DateTime.now();
     const describeOffer = (o: (typeof flightOffers)[number]) => ({
       offerId: o.id,
@@ -48,7 +53,7 @@ export const getTripStateTool = defineTool({
         travellers: rules.adults,
         travellersConfirmed: rules.travellersConfirmed ?? false,
         currency: rules.currency,
-        hotel: rules.hotel.name,
+        hotel: `${rules.hotel.name}${rules.hotel.isDefault === false ? ' (chosen by the patient)' : ' (default)'}`,
       },
       booked: {
         flight: state.bookings.flight
@@ -67,6 +72,7 @@ export const getTripStateTool = defineTool({
       optionsShown: {
         flights: state.offers.flights.map(describeOffer),
         rooms: state.offers.hotelRates.map(describeOffer),
+        hotels: state.offers.hotels.map(describeOffer),
       },
       // History, so the agent can answer "what happened to my original flight?"
       // without ever mistaking a dead booking for a live one.

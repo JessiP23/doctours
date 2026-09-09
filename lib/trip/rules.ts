@@ -14,8 +14,11 @@ export interface HotelRule {
   providerPropertyId: string;
   name: string;
   city: string;
-  checkInTime: string; // HH:mm local
-  checkOutTime: string; // HH:mm local
+  /** HH:mm local, when the property states it; null means "the hotel has not said". */
+  checkInTime: string | null;
+  checkOutTime: string | null;
+  /** True for the hotel Doctours pins by default; false once the patient chose another. */
+  isDefault?: boolean;
 }
 
 export interface TripRules {
@@ -76,5 +79,6 @@ export const TRIP_RULES: TripRules = {
     city: 'Istanbul',
     checkInTime: '15:00',
     checkOutTime: '12:00',
+    isDefault: true,
   },
 };

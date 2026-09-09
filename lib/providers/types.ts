@@ -104,6 +104,39 @@ export interface HotelSearch {
   currency: string;
 }
 
+/** Properties near a point, for a patient who does not want the default hotel. */
+export interface HotelAreaSearch {
+  /** IATA code of the airport to search around — where the patient lands. */
+  nearAirport: string;
+  checkIn: string; // YYYY-MM-DD
+  checkOut: string; // YYYY-MM-DD
+  adults: number;
+  currency: string;
+  radiusMiles?: number;
+}
+
+/**
+ * A property the provider returned for an area search, with the cheapest rate it
+ * quoted for the stay. Nothing here is filled in from anywhere but the response.
+ */
+export interface HotelProperty {
+  /** Provider property id — what a room search at this hotel takes. */
+  id: string;
+  provider: string;
+  name: string;
+  chain: string | null;
+  /** Provider's own star-style rating, as a string exactly as sent. */
+  rating: string | null;
+  location: PropertyLocation | null;
+  /** Distance from the airport searched around, as the provider reports it. */
+  distanceFromAirport: { miles: number; direction: string | null } | null;
+  /** The cheapest rate quoted for the stay: what "from $X" means. */
+  leadRate: { total: Money; nightly: Money | null; nights: number } | null;
+  /** Check-in / check-out times as the property states them, when it does. */
+  policies: { checkInTime: string | null; checkOutTime: string | null } | null;
+  raw: unknown;
+}
+
 export interface HotelRate {
   /** Provider rate key. Long and opaque; the model only ever sees our own offer id. */
   id: string;
@@ -134,6 +167,8 @@ export interface HotelRate {
   expiresAt: string | null;
   /** The property's address and coordinates, when the provider reports them. */
   location: PropertyLocation | null;
+  /** Check-in / check-out times as the property states them, when it does. */
+  policies: { checkInTime: string | null; checkOutTime: string | null } | null;
   raw: unknown;
 }
 
@@ -205,6 +240,7 @@ export interface TravelProvider {
   priceFlightOffer(offer: FlightOffer): Promise<FlightOffer>;
   createFlightOrder(offer: FlightOffer, passengers: Passenger[]): Promise<FlightOrder>;
   searchHotelRates(q: HotelSearch): Promise<HotelRate[]>;
+  searchHotels(q: HotelAreaSearch): Promise<HotelProperty[]>;
   createHotelBooking(
     rate: HotelRate,
     guests: Guest[],

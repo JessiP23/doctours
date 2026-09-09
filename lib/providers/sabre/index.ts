@@ -8,8 +8,10 @@ import type {
   FlightSlice,
   GeoPoint,
   Guest,
+  HotelAreaSearch,
   HotelBooking,
   HotelBookingOptions,
+  HotelProperty,
   HotelRate,
   HotelSearch,
   Passenger,
@@ -20,7 +22,13 @@ import { reconcileSlices, type OrderFlight } from '@/lib/trip/disruption';
 import { ProviderError } from './errors';
 import { sabreFetch } from './http';
 import { mapFlightShopResponse, type FlightShopResponse } from './mappers';
-import { cheapestFirst, mapHotelDetailsResponse, type HotelDetailsResponse } from './hotel-mappers';
+import {
+  cheapestFirst,
+  mapHotelAvailResponse,
+  mapHotelDetailsResponse,
+  type HotelAvailResponse,
+  type HotelDetailsResponse,
+} from './hotel-mappers';
 import {
   buildCreateFlightBookingRequest,
   buildHotelAvailRequest,
@@ -377,6 +385,38 @@ export class SabreProvider implements TravelProvider {
     return cheapestFirst(rates);
   }
 
+  /**
+   * Properties around the arrival airport that quote a rate for the stay.
+   *
+   * The geo search is the one Get Hotel Avail shape that returns Istanbul
+   * inventory in CERT: airport as the reference point, thirty miles, and rate
+   * sources 100 and 113 — the probe with source 100 alone came back empty. Sabre
+   * sorts by average nightly rate, so the list is already cheapest first.
+   */
+  async searchHotels(q: HotelAreaSearch): Promise<HotelProperty[]> {
+    const env = getEnv();
+    const response = await sabreFetch<HotelAvailResponse>({
+      method: 'POST',
+      path: '/v5/get/hotelavail',
+      body: buildHotelAvailRequest(
+        env.SABRE_PCC,
+        q,
+        {
+          refPointCode: q.nearAirport.trim().toUpperCase(),
+          radiusMiles: q.radiusMiles ?? AREA_SEARCH_RADIUS_MILES,
+          pageSize: AREA_SEARCH_PAGE_SIZE,
+        },
+        { rateSource: AREA_SEARCH_RATE_SOURCES },
+      ),
+      timeoutMs: SHOP_TIMEOUT_MS,
+    });
+    const { properties, unpriced } = mapHotelAvailResponse(response, q, this.name);
+    if (unpriced > 0) {
+      log.info({ near: q.nearAirport, unpriced }, 'properties without a quoted rate left out');
+    }
+    return properties;
+  }
+
   async createHotelBooking(
     rate: HotelRate,
     guests: Guest[],
@@ -501,6 +541,11 @@ export class SabreProvider implements TravelProvider {
  * in this integration that turns an IATA code into a position.
  */
 const airportPointCache = new Map<string, GeoPoint | null>();
+
+/** Area search parameters that the CERT probe showed return Istanbul inventory. */
+const AREA_SEARCH_RADIUS_MILES = 30;
+const AREA_SEARCH_PAGE_SIZE = 40;
+const AREA_SEARCH_RATE_SOURCES = '100,113';
 
 /**
  * Where an airport is, as Sabre resolves it. Works for any IATA code the GDS

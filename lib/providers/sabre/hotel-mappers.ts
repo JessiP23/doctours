@@ -1,4 +1,4 @@
-import type { HotelRate, Money, PropertyLocation } from '@/lib/providers/types';
+import type { HotelProperty, HotelRate, Money, PropertyLocation } from '@/lib/providers/types';
 import { nightsBetween } from '@/lib/trip/nights';
 
 /**
@@ -23,8 +23,9 @@ function toArray<T>(value: T | T[] | undefined | null): T[] {
 }
 
 interface SabreLocationInfo {
-  Latitude?: number;
-  Longitude?: number;
+  /** A number on Get Hotel Details, a string on Get Hotel Avail — both are read. */
+  Latitude?: number | string;
+  Longitude?: number | string;
   Address?: {
     AddressLine1?: string;
     AddressLine2?: string;
@@ -49,9 +50,14 @@ function mapLocation(location: SabreLocationInfo | undefined): PropertyLocation 
   const lines = [address?.AddressLine1, address?.AddressLine2].filter(
     (l): l is string => typeof l === 'string' && l.trim().length > 0,
   );
+  const lat = Number(location.Latitude);
+  const lng = Number(location.Longitude);
   const coords =
-    typeof location.Latitude === 'number' && typeof location.Longitude === 'number'
-      ? { latitude: location.Latitude, longitude: location.Longitude }
+    location.Latitude !== undefined &&
+    location.Longitude !== undefined &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng)
+      ? { latitude: lat, longitude: lng }
       : null;
   if (lines.length === 0 && !coords && !location.Contact?.Phone) return null;
   return {
@@ -114,11 +120,36 @@ interface SabreRoomSet {
   Room?: SabreRoom | SabreRoom[];
 }
 
+interface SabrePolicies {
+  Policy?: { Text?: { Type?: string; value?: string } }[];
+}
+
+/**
+ * Check-in and check-out as the property files them ("1400" → "14:00"). Only what is
+ * stated: a hotel that says nothing gets null, not a guess.
+ */
+function policiesOf(
+  policies: SabrePolicies | undefined,
+): { checkInTime: string | null; checkOutTime: string | null } | null {
+  if (!policies) return null;
+  const read = (type: string) => {
+    const raw = toArray(policies.Policy).find((p) => p.Text?.Type === type)?.Text?.value;
+    const m = raw?.match(/^(\d{2})(\d{2})$/);
+    return m ? `${m[1]}:${m[2]}` : null;
+  };
+  const checkInTime = read('CheckIn');
+  const checkOutTime = read('CheckOut');
+  return checkInTime || checkOutTime ? { checkInTime, checkOutTime } : null;
+}
+
 export interface HotelDetailsResponse {
   GetHotelDetailsRS?: {
     HotelDetailsInfo?: {
       HotelInfo?: { HotelCode?: string; HotelName?: string };
-      HotelDescriptiveInfo?: { LocationInfo?: SabreLocationInfo };
+      HotelDescriptiveInfo?: {
+        LocationInfo?: SabreLocationInfo;
+        PropertyInfo?: { Policies?: SabrePolicies };
+      };
       HotelRateInfo?: { RoomSets?: { RoomSet?: SabreRoomSet | SabreRoomSet[] } };
     };
   };
@@ -161,6 +192,7 @@ export function mapHotelDetailsResponse(
   const propertyId = info?.HotelInfo?.HotelCode ?? fallback.propertyId;
   const propertyName = info?.HotelInfo?.HotelName ?? 'the hotel';
   const location = mapLocation(info?.HotelDescriptiveInfo?.LocationInfo);
+  const policies = policiesOf(info?.HotelDescriptiveInfo?.PropertyInfo?.Policies);
 
   const rates: HotelRate[] = [];
   const skipped: { room: string; reason: string }[] = [];
@@ -194,6 +226,7 @@ export function mapHotelDetailsResponse(
             propertyId,
             propertyName,
             location,
+            policies,
             roomName: room.RoomType ?? roomName,
             roomDescription:
               room.RoomDescription?.Text?.[0] ?? plan.RatePlanDescription?.Text?.[0] ?? null,
@@ -232,4 +265,85 @@ export function cheapestFirst(rates: HotelRate[]): HotelRate[] {
   return [...rates].sort(
     (a, b) => a.total.amount - b.total.amount || a.nightly.amount - b.nightly.amount,
   );
+}
+
+/**
+ * Sabre Get Hotel Avail (POST /v5/get/hotelavail) with a geo search → properties.
+ *
+ * Shape:
+ *   HotelAvailInfos.HotelAvailInfo[]
+ *     .HotelInfo          name, code, chain, rating, Distance from the reference
+ *                         point (the airport searched around), LocationInfo
+ *     .HotelRateInfo      the cheapest rate quoted for the stay (BestOnly)
+ *
+ * A property without a quoted rate is not something the patient can book, so it is
+ * skipped and counted rather than shown as "price unknown".
+ */
+export interface HotelAvailResponse {
+  GetHotelAvailRS?: {
+    HotelAvailInfos?: {
+      SearchLatitude?: number;
+      SearchLongitude?: number;
+      HotelAvailInfo?: SabreHotelAvailInfo | SabreHotelAvailInfo[];
+    };
+  };
+}
+
+interface SabreHotelAvailInfo {
+  HotelInfo?: {
+    HotelCode?: string;
+    HotelName?: string;
+    ChainName?: string;
+    BrandName?: string;
+    Distance?: number | string;
+    Direction?: string;
+    UOM?: string;
+    SabreRating?: string;
+    LocationInfo?: SabreLocationInfo;
+    PropertyInfo?: { Policies?: SabrePolicies };
+  };
+  HotelRateInfo?: {
+    RateInfos?: { ConvertedRateInfo?: SabreRateInfo | SabreRateInfo[] };
+  };
+}
+
+export function mapHotelAvailResponse(
+  response: HotelAvailResponse,
+  stay: { checkIn: string; checkOut: string },
+  provider = 'sabre',
+): { properties: HotelProperty[]; unpriced: number } {
+  const properties: HotelProperty[] = [];
+  let unpriced = 0;
+  for (const entry of toArray(response.GetHotelAvailRS?.HotelAvailInfos?.HotelAvailInfo)) {
+    const info = entry.HotelInfo;
+    if (!info?.HotelCode || !info.HotelName) continue;
+    const rate = toArray(entry.HotelRateInfo?.RateInfos?.ConvertedRateInfo)[0];
+    const total = money(rate?.AmountAfterTax ?? rate?.ApproxTotalPrice, rate?.CurrencyCode);
+    if (!total) {
+      unpriced += 1;
+      continue;
+    }
+    const nights = nightsBetween(rate?.StartDate ?? stay.checkIn, rate?.EndDate ?? stay.checkOut);
+    const miles = Number(info.Distance);
+    const distanceKnown = info.Distance !== undefined && Number.isFinite(miles);
+    properties.push({
+      id: info.HotelCode,
+      provider,
+      name: info.HotelName,
+      chain: info.ChainName ?? info.BrandName ?? null,
+      rating: info.SabreRating ?? null,
+      location: mapLocation(info.LocationInfo),
+      distanceFromAirport: distanceKnown
+        ? {
+            // Sabre reports the UOM it was asked for; the request asks for miles.
+            miles: info.UOM === 'KM' ? Number((miles / 1.609344).toFixed(2)) : miles,
+            direction: info.Direction ?? null,
+          }
+        : null,
+      leadRate: { total, nightly: money(rate?.AverageNightlyRate, rate?.CurrencyCode), nights },
+      policies: policiesOf(info.PropertyInfo?.Policies),
+      raw: entry,
+    });
+  }
+  return { properties, unpriced };
 }

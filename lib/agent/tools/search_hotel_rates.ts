@@ -149,30 +149,6 @@ export const searchHotelRatesTool = defineTool({
       derivedFrom = 'the flight you booked';
     }
 
-    // The room is not ready until check-in time; if the flight lands well before it,
-    // that is the patient's problem to know about now, not at the desk — and the
-    // night before is priced in the same breath, so "can I get in early?" has a
-    // real answer with a real number.
-    let earlyArrival: { arriveLocal: string; checkInFrom: string; hoursEarly: number } | undefined;
-    if (arriveLocal) {
-      const arrival = DateTime.fromISO(arriveLocal, { zone: rules.destinationTz });
-      const ready = DateTime.fromISO(`${checkIn}T${rules.hotel.checkInTime}`, {
-        zone: rules.destinationTz,
-      });
-      const hoursEarly = ready.diff(arrival, 'hours').hours;
-      if (hoursEarly >= EARLY_ARRIVAL_HOURS) {
-        earlyArrival = {
-          arriveLocal,
-          checkInFrom: rules.hotel.checkInTime,
-          hoursEarly: Math.round(hoursEarly * 10) / 10,
-        };
-      }
-    }
-
-    const nightBefore = earlyArrival
-      ? (DateTime.fromISO(checkIn).minus({ days: 1 }).toISODate() as string)
-      : null;
-
     const search = (from: string) =>
       travelProvider().searchHotelRates({
         propertyId: rules.hotel.providerPropertyId,
@@ -182,13 +158,34 @@ export const searchHotelRatesTool = defineTool({
         currency: rules.currency,
       });
 
-    // Both stays are priced concurrently; the extra night is optional, so its search
-    // failing to find anything is an answer ("no room from the night before"), not
-    // an error.
-    const [rates, extraRates] = await Promise.all([
-      search(checkIn),
-      nightBefore ? search(nightBefore).catch(noRoomsIsAnAnswer) : Promise.resolve(null),
-    ]);
+    const rates = await search(checkIn);
+
+    // When the room is ready: what the property itself states, and only failing
+    // that what the trip rules assume. A hotel the patient chose may have told us
+    // nothing, in which case no early-arrival arithmetic is done on a guess.
+    const checkInFrom = rates[0]?.policies?.checkInTime ?? rules.hotel.checkInTime;
+
+    // The room is not ready until check-in time; if the flight lands well before it,
+    // that is the patient's problem to know about now, not at the desk — and the
+    // night before is priced in the same breath, so "can I get in early?" has a
+    // real answer with a real number.
+    let earlyArrival: { arriveLocal: string; checkInFrom: string; hoursEarly: number } | undefined;
+    if (arriveLocal && checkInFrom) {
+      const arrival = DateTime.fromISO(arriveLocal, { zone: rules.destinationTz });
+      const ready = DateTime.fromISO(`${checkIn}T${checkInFrom}`, { zone: rules.destinationTz });
+      const hoursEarly = ready.diff(arrival, 'hours').hours;
+      if (hoursEarly >= EARLY_ARRIVAL_HOURS) {
+        earlyArrival = { arriveLocal, checkInFrom, hoursEarly: Math.round(hoursEarly * 10) / 10 };
+      }
+    }
+
+    const nightBefore = earlyArrival
+      ? (DateTime.fromISO(checkIn).minus({ days: 1 }).toISODate() as string)
+      : null;
+
+    // The extra night is optional, so its search finding nothing is an answer ("no
+    // room from the night before"), not an error.
+    const extraRates = nightBefore ? await search(nightBefore).catch(noRoomsIsAnAnswer) : null;
 
     const shown = pickRooms(rates, rules.adults);
     const tooSmall = rates.length - shown.fits;
@@ -231,7 +228,7 @@ export const searchHotelRatesTool = defineTool({
                     checkIn: nightBefore,
                     checkOut,
                     rooms: extraRows.map((row) => ({ rateId: row.id, ...(row.summary as object) })),
-                    note: `Booking from ${nightBefore} means the room is theirs the moment they land, instead of waiting until ${rules.hotel.checkInTime}. It is an ordinary paid night on the same terms as the rest of the stay, and these rateIds book it directly. The alternative is an early check-in request on the normal dates (earlyCheckIn on the booking), which costs nothing and the hotel may not honour.`,
+                    note: `Booking from ${nightBefore} means the room is theirs the moment they land, instead of waiting until ${checkInFrom ?? 'check-in time'}. It is an ordinary paid night on the same terms as the rest of the stay, and these rateIds book it directly. The alternative is an early check-in request on the normal dates (earlyCheckIn on the booking), which costs nothing and the hotel may not honour.`,
                   }
                 : {
                     checkIn: nightBefore,
@@ -243,7 +240,7 @@ export const searchHotelRatesTool = defineTool({
         : {}),
       nights: rows[0] ? (rows[0].summary as { nights?: number }).nights : undefined,
       datesFrom: derivedFrom,
-      checkInFrom: rules.hotel.checkInTime,
+      checkInFrom,
       rooms: rows.map((row) => ({ rateId: row.id, ...(row.summary as object) })),
       note: 'Cheapest first. Totals include taxes. The rate is re-confirmed with the hotel when booking.',
     };

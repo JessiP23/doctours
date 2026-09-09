@@ -6,7 +6,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type ConversationStatus = 'open' | 'completed' | 'cancelled';
 export type MessageRole = 'user' | 'assistant';
-export type OfferKind = 'flight' | 'hotel_rate';
+export type OfferKind = 'flight' | 'hotel_rate' | 'hotel_property';
 export type BookingKind = 'flight' | 'hotel';
 /**
  * A booking is confirmed until it is either cancelled outright or superseded by a

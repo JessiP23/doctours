@@ -9,7 +9,7 @@ import type { TripRules } from '@/lib/trip/rules';
 export interface TripState {
   rules: TripRules;
   bookings: { flight: BookingRow | null; hotel: BookingRow | null };
-  offers: { flights: OfferRow[]; hotelRates: OfferRow[] };
+  offers: { flights: OfferRow[]; hotelRates: OfferRow[]; hotels: OfferRow[] };
   /** Things that happened to the trip that the patient has not been told about. */
   openEvents: TripEventRow[];
 }
@@ -31,6 +31,7 @@ export function buildTripState(
     offers: {
       flights: offers.filter((o) => o.kind === 'flight'),
       hotelRates: offers.filter((o) => o.kind === 'hotel_rate'),
+      hotels: offers.filter((o) => o.kind === 'hotel_property'),
     },
   };
 }

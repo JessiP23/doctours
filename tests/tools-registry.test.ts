@@ -9,6 +9,8 @@ describe('the tool set the model is given', () => {
       'set_procedure_date',
       'search_flights',
       'create_flight_order',
+      'search_hotels',
+      'choose_hotel',
       'search_hotel_rates',
       'create_hotel_booking',
       'rebook_flight',

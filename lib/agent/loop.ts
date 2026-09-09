@@ -193,13 +193,19 @@ async function runLoop(
   const failureCounts = new Map<string, number>();
 
   for (let i = 1; i <= MAX_ITERATIONS; i++) {
-    const [bookings, flightOffers, hotelOffers, openEvents] = await Promise.all([
+    const [bookings, flightOffers, hotelOffers, hotelProperties, openEvents] = await Promise.all([
       repo.listBookings(conversationId),
       repo.listRecentOffers(conversationId, 'flight', 6),
       repo.listRecentOffers(conversationId, 'hotel_rate', 6),
+      repo.listRecentOffers(conversationId, 'hotel_property', 6),
       repo.listOpenTripEvents(conversationId),
     ]);
-    const state = buildTripState(rules, bookings, [...flightOffers, ...hotelOffers], openEvents);
+    const state = buildTripState(
+      rules,
+      bookings,
+      [...flightOffers, ...hotelOffers, ...hotelProperties],
+      openEvents,
+    );
     const system = buildSystemPrompt(state);
 
     const response = await client.create({

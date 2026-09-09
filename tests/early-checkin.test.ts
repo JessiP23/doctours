@@ -86,6 +86,7 @@ function rate(checkIn: string, checkOut: string, nights: number): HotelRate {
     availableQuantity: null,
     expiresAt: null,
     location: null,
+    policies: null,
     raw: {},
   };
 }
