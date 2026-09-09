@@ -1,5 +1,6 @@
 import { opsAuthorised, opsEnabled } from '@/lib/ops/auth';
-import { listTripsForOps, OPS_ACTIONS, type OpsAction } from '@/lib/ops/actions';
+import { listTripsForOps, OPS_ACTIONS, opsFields, type OpsAction } from '@/lib/ops/actions';
+import { DateTime } from 'luxon';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,8 @@ export default async function OpsPage({
       <p className="mb-6 max-w-3xl text-sm text-neutral-400">
         Every button writes what a real airline, clinic or hotel notice would write, and nothing
         else — no booking is touched and Sabre is not called, except <em>Re-read</em>, which only
-        reads. The patient sees the result the next time they say anything in the chat.
+        reads. <em>Clinic moves the procedure</em> also recomputes the trip&apos;s dates from the
+        new one. The agent tells the patient within a few seconds, without being asked.
       </p>
 
       {trips.length === 0 ? (
@@ -80,6 +82,7 @@ export default async function OpsPage({
                 </div>
                 <span className="text-xs text-neutral-400">
                   {t.travellers} traveller{t.travellers === 1 ? '' : 's'}
+                  {t.procedureAtLocal ? ` · procedure ${t.procedureAtLocal.replace('T', ' ')}` : ''}
                 </span>
               </div>
 
@@ -106,8 +109,24 @@ export default async function OpsPage({
 
               <div className="flex flex-wrap gap-2">
                 {(Object.keys(OPS_ACTIONS) as OpsAction[]).map((action) => (
-                  <form key={action} action={`/api/ops/${action}`} method="post">
+                  <form
+                    key={action}
+                    action={`/api/ops/${action}`}
+                    method="post"
+                    className="flex items-center gap-1"
+                  >
                     <input type="hidden" name="conversationId" value={t.id} />
+                    {opsFields(action).map((f) => (
+                      <input
+                        key={f.name}
+                        name={f.name}
+                        type={f.type}
+                        aria-label={f.label}
+                        required
+                        defaultValue={defaultFor(f.name, t.procedureAtLocal)}
+                        className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm text-neutral-100"
+                      />
+                    ))}
                     <button
                       className={
                         action === 'ack' || action === 'check'
@@ -135,7 +154,19 @@ function disabledFor(
 ): boolean {
   if (action === 'hotel-cancelled') return !t.hotel;
   if (action === 'ack') return t.openEvents.length === 0;
+  // The clinic can move a procedure whether or not anything is booked yet.
+  if (action === 'procedure-moved') return false;
   return !t.flight;
+}
+
+/**
+ * A sensible starting value for an action's input, so the demo is one click. The
+ * procedure defaults to a week after the current date at the same time of day —
+ * far enough that every booked flight stops fitting.
+ */
+function defaultFor(field: string, procedureAtLocal: string | null): string | undefined {
+  if (field !== 'procedureAtLocal' || !procedureAtLocal) return undefined;
+  return DateTime.fromISO(procedureAtLocal).plus({ weeks: 1 }).toFormat("yyyy-LL-dd'T'HH:mm");
 }
 
 function Held({

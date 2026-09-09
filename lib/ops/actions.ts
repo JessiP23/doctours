@@ -8,6 +8,7 @@ import {
   simulateFlightDisruption,
   simulateHotelCancellation,
 } from '@/lib/agent/trip-health';
+import { moveProcedure } from '@/lib/agent/procedure';
 
 /**
  * What an operator can do to a trip.
@@ -21,6 +22,27 @@ import {
  * The CLI's `ops <action> <conversationId>` runs the same list, so the two cannot
  * drift apart.
  */
+export type OpsParams = Record<string, string>;
+
+/** A field an action needs from the operator, rendered as an input beside its button. */
+export interface OpsField {
+  name: string;
+  label: string;
+  type: 'datetime-local';
+}
+
+interface OpsActionDef {
+  label: string;
+  fields?: readonly OpsField[];
+  run: (id: string, params: OpsParams) => Promise<unknown>;
+}
+
+function required(params: OpsParams, name: string): string {
+  const value = params[name]?.trim();
+  if (!value) throw new Error(`${name} is required`);
+  return value;
+}
+
 export const OPS_ACTIONS = {
   'cancel-outbound': {
     label: 'Airline cancels the outbound',
@@ -42,6 +64,20 @@ export const OPS_ACTIONS = {
     label: 'Hotel cancels the reservation',
     run: (id: string) => simulateHotelCancellation(id),
   },
+  'procedure-moved': {
+    label: 'Clinic moves the procedure to',
+    fields: [
+      { name: 'procedureAtLocal', label: 'New date and time (local)', type: 'datetime-local' },
+    ],
+    run: async (id: string, params: OpsParams) => {
+      const { move, event } = await moveProcedure(
+        id,
+        required(params, 'procedureAtLocal'),
+        'simulated',
+      );
+      return { was: move.was, now: move.now, flight: move.flight, eventId: event?.id ?? null };
+    },
+  },
   check: {
     label: 'Re-read the flight from Sabre',
     run: (id: string) => checkFlightHealth(id),
@@ -57,7 +93,7 @@ export const OPS_ACTIONS = {
       return { acknowledged: open.length };
     },
   },
-} as const;
+} as const satisfies Record<string, OpsActionDef>;
 
 export type OpsAction = keyof typeof OPS_ACTIONS;
 
@@ -65,9 +101,18 @@ export function isOpsAction(value: string): value is OpsAction {
   return value in OPS_ACTIONS;
 }
 
-export async function runOpsAction(action: OpsAction, conversationId: string) {
-  const result = await OPS_ACTIONS[action].run(conversationId);
-  log.info({ conversationId, action }, 'operator action');
+/** The inputs an action asks the operator for, if any. */
+export function opsFields(action: OpsAction): readonly OpsField[] {
+  return (OPS_ACTIONS[action] as OpsActionDef).fields ?? [];
+}
+
+export async function runOpsAction(
+  action: OpsAction,
+  conversationId: string,
+  params: OpsParams = {},
+) {
+  const result = await (OPS_ACTIONS[action] as OpsActionDef).run(conversationId, params);
+  log.info({ conversationId, action, params }, 'operator action');
   return result;
 }
 
@@ -107,10 +152,12 @@ export async function listTripsForOps(limit = 8) {
         repo.listOpenTripEvents(c.id),
       ]);
       const live = history.filter((b) => b.status === 'confirmed');
+      const rules = c.trip_rules as { adults?: number; procedureAtLocal?: string };
       return {
         id: c.id,
         started: c.created_at,
-        travellers: (c.trip_rules as { adults?: number }).adults ?? 1,
+        travellers: rules.adults ?? 1,
+        procedureAtLocal: rules.procedureAtLocal ?? null,
         flight: live.find((b) => b.kind === 'flight') ?? null,
         hotel: live.find((b) => b.kind === 'hotel') ?? null,
         history: history.filter((b) => b.status !== 'confirmed'),

@@ -194,6 +194,19 @@ describe('checkRaisedEvents', () => {
     ).toBe(false);
   });
 
+  it('knows the words a moved procedure is described with', () => {
+    for (const bubble of [
+      'The clinic has moved your procedure to Tuesday 20 October at 8:00 am.',
+      'Your procedure has been rescheduled — it is now on the 20th.',
+      'Your appointment is now on 20 October, a week later than planned.',
+    ]) {
+      expect(checkRaisedEvents([bubble], ['procedure_moved']).ok).toBe(true);
+    }
+    expect(checkRaisedEvents(['You land at 5:30 am on the 12th.'], ['procedure_moved']).ok).toBe(
+      false,
+    );
+  });
+
   it('does not judge a kind it has no words for', () => {
     expect(checkRaisedEvents(['Anything else?'], ['hotel_closed']).ok).toBe(true);
   });

@@ -30,19 +30,19 @@ world, simulated, because the sandbox cannot cancel a flight for us."
 
 ## The nine questions
 
-| #   | The brief asks                                                                           | Trigger  | Status                                                                                                                                   | Left to build                                                                                                               |
-| --- | ---------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Outbound cancelled → arrives a different day → hotel dates wrong. Fix both.              | Operator | **Done, verified live.** Console cancels it, the agent speaks first, rebooks, leaves the cancelled flight out, and moves the room.       | Nothing.                                                                                                                    |
-| 2   | Return cancelled → stuck longer → needs more nights.                                     | Operator | **Done.** Same path; the realignment moves the checkout.                                                                                 | One live run with _Airline cancels the return_.                                                                             |
-| 3   | Lands before check-in. Get in early? Arrives a full day early — pay for the extra night. | Patient  | **Half.** Early landing is flagged when rooms are shown. No early check-in request, no extra night.                                      | Extra night via `rebook_hotel` with an earlier check-in; early check-in as a request on the reservation.                    |
-| 4   | Procedure moved → whole trip needs new dates. Rebook flights and hotel together.         | Operator | **Not built.** Rules are constants derived by hand.                                                                                      | Derive rules from the procedure date; `procedure_moved` event; the agent walks search → `rebook_flight` → `rebook_hotel`.   |
-| 5   | Patient cancels entirely. Undo both.                                                     | Patient  | **Built.** Hotel first, verified with Sabre, cost stated first, `confirmed` required.                                                    | Nothing.                                                                                                                    |
-| 6   | Brings someone. Husband and wife want one bed, sisters want two. Book the right room.    | Patient  | **Built.** Count established by the greeting, prices for everyone, bed setups are separate options, everyone on the ticket and the room. | Nothing.                                                                                                                    |
-| 7   | Doesn't want the default hotel. Search others, book one instead.                         | Patient  | **Not built.** One property, pinned.                                                                                                     | `search_hotels` by geo around the arrival airport; the chosen property becomes this trip's hotel; rooms and booking follow. |
-| 8   | Money is tight. Flight and hotel prices trade off. Bring the total down.                 | Patient  | **Not built.** Flights rank by price alone.                                                                                              | `compare_trip_totals`: hotel total for each distinct stay a flight implies, ranked by flight + hotel.                       |
-| 9   | Hates connections. Fewest stops even if it costs more.                                   | Patient  | **Built.** `rankBy: fewest_stops`, `maxStops: 0`.                                                                                        | Nothing.                                                                                                                    |
+| #   | The brief asks                                                                           | Trigger  | Status                                                                                                                                                                        | Left to build                                                                                                               |
+| --- | ---------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Outbound cancelled → arrives a different day → hotel dates wrong. Fix both.              | Operator | **Done, verified live.** Console cancels it, the agent speaks first, rebooks, leaves the cancelled flight out, and moves the room.                                            | Nothing.                                                                                                                    |
+| 2   | Return cancelled → stuck longer → needs more nights.                                     | Operator | **Done.** Same path; the realignment moves the checkout.                                                                                                                      | One live run with _Airline cancels the return_.                                                                             |
+| 3   | Lands before check-in. Get in early? Arrives a full day early — pay for the extra night. | Patient  | **Half.** Early landing is flagged when rooms are shown. No early check-in request, no extra night.                                                                           | Extra night via `rebook_hotel` with an earlier check-in; early check-in as a request on the reservation.                    |
+| 4   | Procedure moved → whole trip needs new dates. Rebook flights and hotel together.         | Operator | **Built.** Rules derive from the procedure date; console and `set_procedure_date` both go through `moveProcedure`; the agent walks search → `rebook_flight` → `rebook_hotel`. | One live run: console moves it to Oct 20, agent raises it, new references chained to the old.                               |
+| 5   | Patient cancels entirely. Undo both.                                                     | Patient  | **Built.** Hotel first, verified with Sabre, cost stated first, `confirmed` required.                                                                                         | Nothing.                                                                                                                    |
+| 6   | Brings someone. Husband and wife want one bed, sisters want two. Book the right room.    | Patient  | **Built.** Count established by the greeting, prices for everyone, bed setups are separate options, everyone on the ticket and the room.                                      | Nothing.                                                                                                                    |
+| 7   | Doesn't want the default hotel. Search others, book one instead.                         | Patient  | **Not built.** One property, pinned.                                                                                                                                          | `search_hotels` by geo around the arrival airport; the chosen property becomes this trip's hotel; rooms and booking follow. |
+| 8   | Money is tight. Flight and hotel prices trade off. Bring the total down.                 | Patient  | **Not built.** Flights rank by price alone.                                                                                                                                   | `compare_trip_totals`: hotel total for each distinct stay a flight implies, ranked by flight + hotel.                       |
+| 9   | Hates connections. Fewest stops even if it costs more.                                   | Patient  | **Built.** `rankBy: fewest_stops`, `maxStops: 0`.                                                                                                                             | Nothing.                                                                                                                    |
 
-Six done, one half, three not — plus the operator console and the agent speaking
+Seven done, one half, two not — plus the operator console and the agent speaking
 first, which the brief only asks for at Level 3. Everything not built reuses the
 rebooking tools that already exist; none of it needs a new Sabre call type.
 
@@ -70,7 +70,7 @@ typed into a terminal.
 **Done when:** clicking "Airline cancels outbound" and then typing "what time do I
 land?" in the chat produces the cancellation first, and `rebook_flight` follows.
 
-### B · Procedure moved — question 4
+### B · Procedure moved — question 4 — **built**
 
 - `lib/trip/derive.ts`: from `procedureAtLocal` derive `mustArriveByLocal` (the
   evening before, 20:00), `earliestReturnDepartureLocal` (procedure day + 4, 12:00),
@@ -79,7 +79,11 @@ land?" in the chat produces the cancellation first, and `rebook_flight` follows.
 - `set_procedure_date` tool: writes the new date and derived rules to the
   conversation's snapshot. Callable by the agent when the patient reports it; the
   console's "clinic moves the procedure" writes a `procedure_moved` event and updates
-  the rules directly.
+  the rules directly. Both are `moveProcedure` in `lib/agent/procedure.ts`, which
+  also says which booked leg no longer fits, using the same validators the search
+  uses. Migration `0006` adds the event kind. The loop re-reads the rules within
+  the turn after a tool changes them (`refreshesRules`), so the prompt never
+  describes the old deadlines while the tools obey the new ones.
 - No new rebooking tool. The prompt walks it: raise the change → search flights
   (already obeying the new rules) → `rebook_flight` → `rebook_hotel`. Each step
   confirms with the patient; nothing is bought in the turn that proposes it.

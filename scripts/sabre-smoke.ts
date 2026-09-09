@@ -30,7 +30,7 @@ import { getEnv, paymentCard } from '@/lib/env';
 import { SabreProvider, retrieveBooking, unconfirmedFlightsOf } from '@/lib/providers/sabre';
 import { checkFlightHealth, simulateFlightDisruption } from '@/lib/agent/trip-health';
 import * as repo from '@/lib/db/repo';
-import { OPS_ACTIONS, isOpsAction, runOpsAction } from '@/lib/ops/actions';
+import { OPS_ACTIONS, isOpsAction, opsFields, runOpsAction } from '@/lib/ops/actions';
 import { excludeRefused, isCodeshare, type RefusedFlight } from '@/lib/trip/select';
 import { partitionOffers } from '@/lib/trip/validate';
 import { deriveStay } from '@/lib/trip/nights';
@@ -814,11 +814,15 @@ async function ack() {
 
 /** Any operator-console action from the terminal, so the two surfaces share one list. */
 async function ops() {
-  const [action, conversationId] = args;
+  const [action, conversationId, ...rest] = args;
   if (!action || !conversationId || !isOpsAction(action)) {
-    throw new Error(`usage: ops <${Object.keys(OPS_ACTIONS).join('|')}> <conversationId>`);
+    throw new Error(
+      `usage: ops <${Object.keys(OPS_ACTIONS).join('|')}> <conversationId> [value ...]  (e.g. ops procedure-moved <id> 2026-10-20T08:00)`,
+    );
   }
-  const result = await runOpsAction(action, conversationId);
+  // Positional values fill the action's declared fields, in order.
+  const params = Object.fromEntries(opsFields(action).map((f, i) => [f.name, rest[i] ?? '']));
+  const result = await runOpsAction(action, conversationId, params);
   console.log(JSON.stringify({ ok: true, action, conversationId, result }, null, 2));
 }
 

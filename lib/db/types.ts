@@ -69,7 +69,11 @@ export type BookingRow = {
 };
 
 export type TripEventKind =
-  'flight_cancelled' | 'flight_schedule_change' | 'hotel_cancelled' | 'operator_note';
+  | 'flight_cancelled'
+  | 'flight_schedule_change'
+  | 'hotel_cancelled'
+  | 'procedure_moved'
+  | 'operator_note';
 
 export type TripEventSource = 'provider' | 'operator' | 'simulated';
 

@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 // In-memory stand-in for the Supabase repository.
 const mem = {
+  rules: null as null | Record<string, unknown>,
   messages: [] as { role: string; content: unknown; kind?: string }[],
   toolCalls: [] as { toolName: string; error: unknown }[],
   bookings: [] as { kind: string; status: string; booking_reference: string }[],
@@ -11,6 +12,7 @@ const mem = {
   acknowledged: [] as string[],
 };
 vi.mock('@/lib/db/repo', () => ({
+  getConversation: vi.fn(async (id: string) => ({ id, trip_rules: mem.rules })),
   appendMessage: vi.fn(async (_c: string, role: string, content: unknown, kind = 'patient') => {
     mem.messages.push({ role, content, kind });
     return { id: mem.messages.length, role, content, kind };
@@ -42,6 +44,20 @@ registerTools(
     description: 'echo',
     schema: z.object({ value: z.string() }),
     handler: async (i) => ({ echoed: i.value }),
+  }),
+  defineTool({
+    name: 'move_rules',
+    description: 'stand-in for a tool that changes the trip rules',
+    schema: z.object({}),
+    refreshesRules: true,
+    handler: async () => {
+      mem.rules = {
+        ...TRIP_RULES,
+        procedureAtLocal: '2026-10-20T08:00',
+        mustArriveByLocal: '2026-10-19T20:00',
+      };
+      return { changed: true };
+    },
   }),
   defineTool({
     name: 'explode',
@@ -84,6 +100,7 @@ function scripted(
 }
 
 beforeEach(() => {
+  mem.rules = null;
   mem.messages = [];
   mem.toolCalls = [];
   mem.bookings = [];
@@ -315,6 +332,18 @@ describe('runTurn', () => {
     const client = scripted([msg([use('t1', 'reply', { bubbles: '', expectsInput: false })])]);
     const r = await runTurn('c1', 'x', TRIP_RULES, { client, model: 'test' });
     expect(r.bubbles[0]).toMatch(/garbled/i);
+  });
+
+  it('re-reads the rules within the turn after a tool changes them', async () => {
+    const client = scripted([
+      msg([use('t1', 'move_rules', {})]),
+      msg([use('t2', 'reply', { bubbles: ['Noted, the 20th.'], expectsInput: true })]),
+    ]);
+    await runTurn('c1', 'my procedure moved to the 20th', TRIP_RULES, { client, model: 'test' });
+    const before = (client.calls[0].system as Anthropic.TextBlockParam[])[0].text;
+    const after = (client.calls[1].system as Anthropic.TextBlockParam[])[0].text;
+    expect(before).toContain('Monday 12 October at 8:00 PM');
+    expect(after).toContain('Monday 19 October at 8:00 PM');
   });
 
   it('speaks first when something is untold, and records its own opener as system', async () => {

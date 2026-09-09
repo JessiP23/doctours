@@ -166,10 +166,14 @@ export async function runProactiveTurn(
 
 async function runLoop(
   conversationId: string,
-  rules: TripRules,
+  initialRules: TripRules,
   opener: { text: string; kind: 'patient' | 'system' },
   deps: TurnDeps,
 ): Promise<TurnResult> {
+  // The rules the turn started with. A tool that changes them (party size, the
+  // procedure date) marks itself `refreshesRules`, and they are re-read after it so
+  // the prompt for the rest of the turn describes the trip as it now is.
+  let rules = initialRules;
   const client = deps.client ?? defaultClient();
   const model = deps.model ?? getEnv().ANTHROPIC_MODEL;
   const l = log.child({ conversationId });
@@ -240,10 +244,12 @@ async function runLoop(
     let searchedThisTurn = false;
     const exhausted: string[] = [];
 
+    let rulesChanged = false;
     for (const t of others) {
       const r = await runTool(t.name, t.input, conversationId);
       if ((t.name.startsWith('create_') || t.name.startsWith('rebook_')) && r.ok)
         bookedThisTurn = true;
+      if (r.ok && getTool(t.name)?.refreshesRules) rulesChanged = true;
       // Only a real lookup counts. get_trip_state reads what we already know.
       if (t.name.startsWith('search_')) searchedThisTurn = true;
       if (!r.ok) {
@@ -258,6 +264,11 @@ async function runLoop(
         content: JSON.stringify(r.ok ? r.result : { error: r.error }),
         is_error: !r.ok,
       });
+    }
+
+    if (rulesChanged) {
+      const fresh = await repo.getConversation(conversationId);
+      if (fresh) rules = fresh.trip_rules as unknown as TripRules;
     }
 
     if (reply) {

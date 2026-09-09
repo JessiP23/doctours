@@ -7,13 +7,14 @@ unfinished half is worth nothing.
 **Built:** booking lifecycle (cancelled / superseded / replaced_by), real Sabre
 cancellation, patient-initiated trip cancellation, airline-initiated disruption
 detected and raised before anything else, rebooking a flight and realigning the
-hotel to it, and the traveller count — established rather than assumed, one to four
-people, enforced through both booking tools.
+hotel to it, the traveller count — established rather than assumed, one to four
+people, enforced through both booking tools — and the procedure moving, from the
+clinic or from the patient (section G).
 
-**Not built yet:** procedure rescheduling, extra nights and early check-in,
-alternative hotels, cheapest-whole-trip ranking — all four are planned, in that order,
-in `PLAN-LEVEL-1.md`. Section E is how you check the agent is honest about not having
-them, which is the requirement until they exist.
+**Not built yet:** extra nights and early check-in, alternative hotels,
+cheapest-whole-trip ranking — planned, in that order, in `PLAN-LEVEL-1.md`. Section E
+is how you check the agent is honest about not having them, which is the requirement
+until they exist.
 
 Two windows: the chat (`npm run dev`, or the deployed URL) as the patient, and the
 **operator console** at `/ops` as the airline, clinic and hotel. The console needs
@@ -216,8 +217,7 @@ select created_at, tool_name, duration_ms, error from tool_calls order by id des
 None of these are built. The requirement until they are is that the agent says so
 instead of inventing an answer. Each one is a message; the pass is a plain no.
 
-14. **"my procedure moved to the 20th, can you shift everything?"** — must not claim to
-    have moved anything. The trip rules are fixed in code at Level 1.
+14. _(Built — see section G.)_
 15. **"can I add a night at the start?"** — the room search does accept explicit dates, so
     it may legitimately price a longer stay for a room not yet booked. On a hotel that is
     already booked it must not claim to have extended it.
@@ -253,3 +253,80 @@ Built, so this is a pass/fail path rather than an honesty probe. Start a fresh t
     **pass:** it says the count cannot just be changed, names what is booked, and
     explains that it means cancelling and rebooking. **Fail:** it says it has added
     them, or changes the number and carries on as if the booking matched.
+
+## G · The clinic moves the procedure
+
+Built. Every date on the trip — the arrival deadline, the earliest return, the days
+that are shopped — is derived from the procedure date, so moving it moves the whole
+contract; the agent then repairs the bookings with the same sequence a cancellation
+uses. Run the migration first if you have not: `0006_procedure_moved.sql`.
+
+Start from a trip with a flight and a room booked (section A). Two doors, test both.
+
+### From the console — the patient does not know
+
+26. In the console, on that trip, the **Clinic moves the procedure to** button has a
+    date beside it, defaulting to a week after the current procedure. Leave it, or
+    set `2026-10-20 08:00`, and click. From a shell it is
+    `npm run sabre:smoke -- ops procedure-moved <conversationId> 2026-10-20T08:00`.
+
+**Pass:** the flash shows `was … now …` and, under `flight`, `fits: false` with the
+leg that broke — for the default trip the return, because leaving on the 17th is
+before the new earliest departure (the 24th at noon). The trip's line now reads
+`procedure 2026-10-20 08:00`. Nothing in Sabre changed: `lookup <flight reference>`
+still shows the segments `HK`.
+
+27. Switch to the chat and **wait**.
+
+**Pass:** the first bubble says the clinic moved the procedure, to when — "Tuesday 20
+October at 8:00 am" — then what it does to the trip: the flight home leaves too early
+for the new date, so the flights and the room have to move. It offers to look for
+flights. **Fail:** it answers something else first; it says it has already rebooked
+anything; it quotes a new reference.
+
+28. **"ok, find me flights"**
+
+**Pass:** the options are for the new dates — outbound landing by the 19th, return on
+or after the 24th at noon. The old dates do not appear. If the options land on the
+same day as before, the search is still using the old rules: that is a bug, report it.
+
+29. **"take the cheapest"** → confirm → it calls `rebook_flight`.
+
+**Pass:** new reference, old one superseded, and — because the stay changed — it says
+the room no longer covers the flights, searches rooms for the new nights, gives the
+total and the terms, and waits.
+
+30. **"yes, move the room"**
+
+**Pass:** `rebook_hotel`; new room reference. `lookup` both new references with Sabre.
+The chain in the database shows both old rows `superseded`, each pointing at its
+replacement, with the moved procedure as the reason.
+
+31. **"what's my procedure date now?"**
+
+**Pass:** the 20th at 8:00 am, and it does not re-announce the move as news.
+
+### From the chat — the patient tells us
+
+32. On a booked trip with no open events: **"the clinic just called, my procedure is now
+    on the 20th at 8am"**
+
+**Pass:** it calls `set_procedure_date` (nothing appears in the console's _Untold_ list,
+because the patient already knows), then tells them which leg no longer fits and
+offers to search. The rest is steps 28–30.
+
+33. **"actually can we do the 12th instead?"** on the same trip.
+
+**Pass:** it records the 12th and says the outbound now lands too late (the 12th at
+5:30 am is after the new 11 October 20:00 deadline), and offers to search. Or, if the
+date is too close to today to shop, it says so plainly — the tool refuses dates within
+four days rather than searching into the past.
+
+34. **"my procedure is on the 13th at 11 now"** — a same-day time change.
+
+**Pass:** it records it and says nothing has to move: the flights still land the
+evening before and leave four days after, and the room follows the flights.
+
+**Fail, in every step:** the agent moving a procedure it was not told about, proposing
+a date itself, or describing the trip as sorted while the room still starts on the
+old date.

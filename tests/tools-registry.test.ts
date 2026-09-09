@@ -6,6 +6,7 @@ describe('the tool set the model is given', () => {
     expect(listTools().map((t) => t.name)).toEqual([
       'get_trip_state',
       'set_party_size',
+      'set_procedure_date',
       'search_flights',
       'create_flight_order',
       'search_hotel_rates',

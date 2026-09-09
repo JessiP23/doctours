@@ -40,6 +40,7 @@ export const getTripStateTool = defineTool({
     return {
       trip: {
         route: `${rules.origin} → ${rules.destination} → ${rules.origin}`,
+        procedureAt: `${rules.procedureAtLocal} (${rules.destinationTz})`,
         mustBeOnTheGroundBy: `${rules.mustArriveByLocal} (${rules.destinationTz})`,
         earliestReturnDeparture: `${rules.earliestReturnDepartureLocal} (${rules.destinationTz})`,
         cabin: rules.cabin,

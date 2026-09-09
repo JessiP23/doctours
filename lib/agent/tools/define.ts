@@ -17,6 +17,13 @@ export interface ToolDefinition<TInput extends z.ZodType = z.ZodType, TOutput = 
   name: string;
   description: string;
   schema: TInput;
+  /**
+   * Set on tools that change the conversation's trip rules (party size, procedure
+   * date, hotel). The loop re-reads the rules after one succeeds, so the prompt for
+   * the rest of the turn describes the trip as it now is rather than as it was when
+   * the turn began.
+   */
+  refreshesRules?: boolean;
   handler: (input: z.infer<TInput>, ctx: ToolContext) => Promise<TOutput>;
 }
 

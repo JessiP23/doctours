@@ -139,6 +139,8 @@ const RAISED: Record<string, RegExp> = {
   hotel_cancelled: /\b(cancel(?:led|ed|s|ling)?|dropped|released|no longer (?:has|holds|have))\b/i,
   flight_schedule_change:
     /\b(schedul\w*|time[sd]?|moved|shifted|changed|earlier|later|delay\w*)\b/i,
+  procedure_moved:
+    /\b(moved|resched\w*|new date|pushed (?:back|forward|out)|brought forward|changed the date|date (?:has |was )?changed|now on)\b/i,
 };
 
 export interface EventCheck {

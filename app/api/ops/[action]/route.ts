@@ -13,6 +13,7 @@ const TELLS_THE_PATIENT = new Set([
   'delay-outbound',
   'delay-return',
   'hotel-cancelled',
+  'procedure-moved',
   'check',
 ]);
 
@@ -36,9 +37,16 @@ export async function POST(request: Request, ctx: { params: Promise<{ action: st
     return new Response('conversationId required', { status: 400 });
   }
 
+  // Whatever else the form carried is the action's own input (a date, say); the
+  // action validates what it needs and ignores the rest.
+  const params: Record<string, string> = {};
+  for (const [key, value] of form.entries()) {
+    if (key !== 'conversationId' && typeof value === 'string') params[key] = value;
+  }
+
   const back = new URL('/ops', request.url);
   try {
-    const result = await runOpsAction(action, conversationId);
+    const result = await runOpsAction(action, conversationId, params);
     // The console answers at once; the agent's turn runs after the response so the
     // operator is not held for twenty seconds, and the chat shows it thinking.
     if (TELLS_THE_PATIENT.has(action)) after(() => tellThePatient(conversationId));
