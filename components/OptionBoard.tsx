@@ -287,7 +287,7 @@ function Row({
 export function OptionBoardPanel({ board, busy, onPick, onClose }: OptionBoardProps) {
   const t = board.rules.travellers;
   return (
-    <aside className="flex h-full w-full flex-col border-l border-line bg-bg lg:w-[17rem] lg:shrink-0">
+    <aside className="flex h-full w-full flex-col border-l border-line bg-bg lg:w-1/2 lg:shrink-0">
       <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-3">
         <div>
           <div className="text-[15px] font-semibold">Compare options</div>
