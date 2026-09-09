@@ -163,6 +163,19 @@ and the agent explains the trade in one sentence.
 3. **Every commit ends verified against CERT**, with a walk-through in
    `E2E-LEVEL-1.md` and a `DECISIONS.md` entry for any judgment call.
 
+## Level 2, the part that is built
+
+**Side-by-side comparison.** A "Compare N options" pill in the chat header opens a
+panel beside the conversation (below it on a phone) with one card per flight, room
+and hotel the agent has put on the table — read from the offers table, never
+re-fetched — showing price, times, stops, how far inside the deadlines a flight
+lands, the nights it implies, the trip total when a matching room is also on the
+table, and cheapest / non-stop / current badges. Booked options show their reference;
+expired fares say so. Choosing a card sends a sentence into the chat and the agent
+books through the ordinary confirm-then-book path. DECISIONS #38. Verify: after a
+flight search, click the pill; the cards match the bubbles; "Take this flight" puts
+the sentence in the chat and the agent asks for details as it would have.
+
 ## Deliberately not doing
 
 - **A patient-facing dashboard.** The operator console is for the operator. The

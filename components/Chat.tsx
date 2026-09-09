@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bubble } from './Bubble';
 import { PanelIcon, TripList, type Trip } from './TripList';
 import { TypingIndicator } from './TypingIndicator';
+import { OptionBoardPanel } from './OptionBoard';
+import type { OptionBoard } from '@/lib/agent/board';
 import { OPENING_BUBBLES } from '@/lib/agent/opening';
 
 interface Message {
@@ -28,6 +30,13 @@ export function Chat() {
   const [hydrated, setHydrated] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [showTrips, setShowTrips] = useState(false);
+  /**
+   * The options on the table, laid out side by side. Read from the same offers the
+   * agent has already shown, refreshed after every turn; the panel only offers
+   * itself once there are two or more things to compare.
+   */
+  const [board, setBoard] = useState<OptionBoard | null>(null);
+  const [showBoard, setShowBoard] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const counter = useRef(0);
@@ -48,6 +57,17 @@ export function Chat() {
    */
   const seen = useRef<Set<string>>(new Set());
   const polling = useRef(false);
+
+  const refreshBoard = useCallback(async () => {
+    try {
+      const res = await fetch('/api/conversation/board', { cache: 'no-store' });
+      const data = (await res.json()) as { board: OptionBoard | null };
+      setBoard(data.board);
+      if (!data.board || data.board.count < 2) setShowBoard(false);
+    } catch {
+      /* best effort; the next turn refreshes it */
+    }
+  }, []);
 
   const markAllSeen = useCallback(async () => {
     try {
@@ -88,6 +108,7 @@ export function Chat() {
         if (data.messages.length > 0) {
           for (const m of data.messages) seen.current.add(m.id);
           setMessages([...opening(), ...data.messages]);
+          void refreshBoard();
         } else {
           const run = ++reveal.current;
           for (const [i, text] of OPENING_BUBBLES.entries()) {
@@ -117,7 +138,7 @@ export function Chat() {
     return () => {
       cancelled = true;
     };
-  }, [refreshTrips]);
+  }, [refreshTrips, refreshBoard]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -145,6 +166,7 @@ export function Chat() {
             setMessages((prev) => [...prev, { ...m, animate: true }]);
           }
           void refreshTrips();
+          void refreshBoard();
         } else {
           // Something is untold and the agent has not spoken yet: it is thinking.
           setTyping(data.pendingUpdate);
@@ -157,48 +179,52 @@ export function Chat() {
     };
     const id = window.setInterval(() => void tick(), 4000);
     return () => window.clearInterval(id);
-  }, [hydrated, busy, refreshTrips]);
+  }, [hydrated, busy, refreshTrips, refreshBoard]);
 
-  const send = useCallback(async () => {
-    const text = input.trim();
-    if (!text || busy) return;
-    setInput('');
-    setBusy(true);
-    setMessages((m) => [...m, { id: nextId(), role: 'user', text, animate: true }]);
-    setTyping(true);
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      const data = (await res.json()) as { bubbles: string[] };
-      for (const [i, bubble] of data.bubbles.entries()) {
-        await sleep(i === 0 ? Math.min(revealDelay(bubble), 900) : revealDelay(bubble));
-        setTyping(i < data.bubbles.length - 1);
+  const send = useCallback(
+    async (spoken?: string) => {
+      const text = (spoken ?? input).trim();
+      if (!text || busy) return;
+      setInput('');
+      setBusy(true);
+      setMessages((m) => [...m, { id: nextId(), role: 'user', text, animate: true }]);
+      setTyping(true);
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        const data = (await res.json()) as { bubbles: string[] };
+        for (const [i, bubble] of data.bubbles.entries()) {
+          await sleep(i === 0 ? Math.min(revealDelay(bubble), 900) : revealDelay(bubble));
+          setTyping(i < data.bubbles.length - 1);
+          setMessages((m) => [
+            ...m,
+            { id: nextId(), role: 'assistant', text: bubble, animate: true },
+          ]);
+        }
+        void refreshTrips();
+        void refreshBoard();
+        void markAllSeen();
+      } catch {
         setMessages((m) => [
           ...m,
-          { id: nextId(), role: 'assistant', text: bubble, animate: true },
+          {
+            id: nextId(),
+            role: 'assistant',
+            text: 'Hmm, that didn’t go through. Mind trying again?',
+            animate: true,
+          },
         ]);
+      } finally {
+        setTyping(false);
+        setBusy(false);
+        inputRef.current?.focus();
       }
-      void refreshTrips();
-      void markAllSeen();
-    } catch {
-      setMessages((m) => [
-        ...m,
-        {
-          id: nextId(),
-          role: 'assistant',
-          text: 'Hmm, that didn’t go through. Mind trying again?',
-          animate: true,
-        },
-      ]);
-    } finally {
-      setTyping(false);
-      setBusy(false);
-      inputRef.current?.focus();
-    }
-  }, [input, busy, refreshTrips, markAllSeen]);
+    },
+    [input, busy, refreshTrips, refreshBoard, markAllSeen],
+  );
 
   const startNewTrip = useCallback(async () => {
     if (busy) return;
@@ -210,6 +236,8 @@ export function Chat() {
       await fetch('/api/conversations', { method: 'POST' });
       seen.current = new Set();
       setMessages(opening(true));
+      setBoard(null);
+      setShowBoard(false);
       void refreshTrips();
     } finally {
       setBusy(false);
@@ -235,11 +263,12 @@ export function Chat() {
         seen.current = new Set(data.messages.map((m) => m.id));
         setMessages([...opening(), ...data.messages]);
         void refreshTrips();
+        void refreshBoard();
       } finally {
         setBusy(false);
       }
     },
-    [busy, refreshTrips],
+    [busy, refreshTrips, refreshBoard],
   );
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -263,7 +292,7 @@ export function Chat() {
         >
           <PanelIcon />
         </button>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="truncate text-[15px] leading-tight font-semibold">
             Doctours travel coordinator
           </div>
@@ -271,6 +300,20 @@ export function Chat() {
             Doctours travel coordinator · flights and hotel for your Istanbul procedure
           </div>
         </div>
+        {board && board.count >= 2 ? (
+          <button
+            type="button"
+            onClick={() => setShowBoard((v) => !v)}
+            aria-pressed={showBoard}
+            className={
+              showBoard
+                ? 'shrink-0 rounded-full bg-me px-3 py-1.5 text-xs font-medium text-me-ink'
+                : 'shrink-0 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink transition hover:border-me hover:text-me'
+            }
+          >
+            Compare {board.count} options
+          </button>
+        ) : null}
       </header>
 
       {showTrips && (
@@ -283,15 +326,30 @@ export function Chat() {
         />
       )}
 
-      <main className="flex-1 overflow-y-auto overscroll-contain">
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-2.5 px-4 py-5">
-          {messages.map((m) => (
-            <Bubble key={m.id} role={m.role} text={m.text} animate={m.animate} />
-          ))}
-          {typing && <TypingIndicator />}
-          <div ref={endRef} className="h-1" />
-        </div>
-      </main>
+      <div className="flex min-h-0 flex-1">
+        <main
+          className={`min-w-0 flex-1 overflow-y-auto overscroll-contain ${showBoard && board ? 'hidden lg:block' : ''}`}
+        >
+          <div className="mx-auto flex w-full max-w-2xl flex-col gap-2.5 px-4 py-5">
+            {messages.map((m) => (
+              <Bubble key={m.id} role={m.role} text={m.text} animate={m.animate} />
+            ))}
+            {typing && <TypingIndicator />}
+            <div ref={endRef} className="h-1" />
+          </div>
+        </main>
+        {showBoard && board ? (
+          <OptionBoardPanel
+            board={board}
+            busy={busy}
+            onClose={() => setShowBoard(false)}
+            onPick={(text) => {
+              setShowBoard(false);
+              void send(text);
+            }}
+          />
+        ) : null}
+      </div>
 
       <footer className="shrink-0 border-t border-line bg-bg pb-[env(safe-area-inset-bottom)]">
         <form
