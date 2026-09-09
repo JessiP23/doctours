@@ -20,6 +20,8 @@ const mem = {
   searches: [] as { checkIn: string; checkOut: string }[],
   extraNightAvailable: true,
   lastBookingCall: null as null | { rate: HotelRate; options: unknown },
+  bookingCalls: [] as unknown[],
+  refuseInstruction: false,
 };
 
 vi.mock('@/lib/db/repo', () => ({
@@ -103,6 +105,9 @@ vi.mock('@/lib/providers/sabre', () => ({
     }),
     createHotelBooking: vi.fn(async (r: HotelRate, guests: unknown[], options: unknown) => {
       mem.lastBookingCall = { rate: r, options };
+      mem.bookingCalls.push(options);
+      if (mem.refuseInstruction && (options as { specialInstruction?: string }).specialInstruction)
+        throw new ProviderError('BOOKING_FAILED');
       return {
         id: 'order-1',
         bookingReference: 'HOTEL1',
@@ -170,6 +175,8 @@ beforeEach(() => {
   mem.searches = [];
   mem.extraNightAvailable = true;
   mem.lastBookingCall = null;
+  mem.bookingCalls = [];
+  mem.refuseInstruction = false;
 });
 
 describe('compareStay', () => {
@@ -255,10 +262,12 @@ describe('the room search when the flight lands early', () => {
 describe('early check-in as a request on the reservation', () => {
   it('builds the instruction from the itinerary, never from the model', () => {
     expect(earlyCheckInInstruction(flightLanding('2026-10-12T05:30'), TRIP_RULES)).toBe(
-      'Early check-in requested if available: guest lands 12 Oct at 05:30.',
+      'EARLY CHECK-IN REQUESTED IF AVAILABLE - GUEST ARRIVES 12OCT 0530',
     );
-    expect(earlyCheckInInstruction(null, TRIP_RULES)).toBe(
-      'Early check-in requested if available.',
+    expect(earlyCheckInInstruction(null, TRIP_RULES)).toBe('EARLY CHECK-IN REQUESTED IF AVAILABLE');
+    // Hotel systems read free text as upper-case letters, digits, spaces and hyphens.
+    expect(earlyCheckInInstruction(flightLanding('2026-10-12T05:30'), TRIP_RULES)).toMatch(
+      /^[A-Z0-9 -]+$/,
     );
   });
 
@@ -270,9 +279,9 @@ describe('early check-in as a request on the reservation', () => {
       contact: { emails: ['j@example.com'], phones: ['+15551234567'] },
       paymentPolicy: 'LATE',
       card: null,
-      specialInstruction: 'Early check-in requested if available: guest lands 12 Oct at 05:30.',
+      specialInstruction: 'EARLY CHECK-IN REQUESTED IF AVAILABLE - GUEST ARRIVES 12OCT 0530',
     }) as { hotel: { specialInstruction?: string } };
-    expect(body.hotel.specialInstruction).toMatch(/lands 12 Oct at 05:30/);
+    expect(body.hotel.specialInstruction).toMatch(/ARRIVES 12OCT 0530/);
     const without = buildCreateHotelBookingRequest({
       pcc: 'X',
       bookingKey: 'k',
@@ -298,12 +307,51 @@ describe('early check-in as a request on the reservation', () => {
     };
     expect(result.booked).toBe(true);
     expect(mem.lastBookingCall?.options).toEqual({
-      specialInstruction: 'Early check-in requested if available: guest lands 12 Oct at 05:30.',
+      specialInstruction: 'EARLY CHECK-IN REQUESTED IF AVAILABLE - GUEST ARRIVES 12OCT 0530',
     });
     expect(result.requestsFiled).toHaveLength(1);
     expect(result.requestsNote).toMatch(/not guaranteed/);
     expect(result.coversFlights).toBe(true);
-    expect((mem.inserted[0].details as { requests: string[] }).requests[0]).toMatch(/05:30/);
+    expect((mem.inserted[0].details as { requests: string[] }).requests[0]).toMatch(/0530/);
+  });
+
+  it('books the room without the request when the hotel refuses it, and says so', async () => {
+    // Live: the supplier answered "unable to process supplier response" with the
+    // instruction attached. The room is what matters; the note is not worth losing it.
+    mem.bookings.push(bookedFlight('2026-10-12T05:30'));
+    mem.refuseInstruction = true;
+    const search = (await searchHotelRatesTool.handler({}, ctx)) as { rooms: { rateId: string }[] };
+    const result = (await createHotelBookingTool.handler(
+      { rateId: search.rooms[0].rateId, guests: [guest], earlyCheckIn: true },
+      ctx,
+    )) as {
+      booked: boolean;
+      requestsFiled?: string[];
+      requestNotFiled?: string;
+      requestsNote?: string;
+    };
+    expect(result.booked).toBe(true);
+    expect(mem.bookingCalls).toEqual([
+      { specialInstruction: 'EARLY CHECK-IN REQUESTED IF AVAILABLE - GUEST ARRIVES 12OCT 0530' },
+      {},
+    ]);
+    expect(result.requestsFiled).toBeUndefined();
+    expect(result.requestNotFiled).toMatch(/EARLY CHECK-IN/);
+    expect(result.requestsNote).toMatch(/Do not say it was requested/);
+    expect(mem.inserted[0].details).not.toHaveProperty('requests');
+  });
+
+  it('does not retry a failure that had nothing to do with the request', async () => {
+    mem.bookings.push(bookedFlight('2026-10-12T05:30'));
+    mem.refuseInstruction = true;
+    const search = (await searchHotelRatesTool.handler({}, ctx)) as { rooms: { rateId: string }[] };
+    // No instruction asked for: a BOOKING_FAILED here is a real failure and surfaces.
+    mem.bookingCalls = [];
+    const original = mem.refuseInstruction;
+    mem.refuseInstruction = false;
+    await createHotelBookingTool.handler({ rateId: search.rooms[0].rateId, guests: [guest] }, ctx);
+    expect(mem.bookingCalls).toEqual([{}]);
+    mem.refuseInstruction = original;
   });
 
   it('files nothing when the patient did not ask', async () => {

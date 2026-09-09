@@ -356,8 +356,12 @@ asks whether to file it. It does not book yet.
 **Pass:** the reply says the room is booked from the normal date _and_ that early
 check-in has been requested, not granted. Verify on the Sabre side:
 `npm run sabre:smoke -- lookup <hotel reference>` — the hotel segment carries the
-special instruction "Early check-in requested if available: guest lands 12 Oct at
-05:30." (the time is the itinerary's, not the model's).
+special instruction `EARLY CHECK-IN REQUESTED IF AVAILABLE - GUEST ARRIVES 12OCT 0530`
+(the time is the itinerary's, not the model's). **Also a pass:** the supplier refuses
+the reservation with the note attached (it did once, BUGS #41) — then the room is
+booked without it and the agent must say the room is confirmed but the request could
+not be filed, and suggest asking the hotel directly. **Fail:** it says the request was
+made when the tool reported `requestNotFiled`.
 
 38. On a fresh trip, same flight: **"I'd rather just have the room when I land"**
 

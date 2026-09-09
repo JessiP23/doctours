@@ -91,7 +91,7 @@ export const createHotelBookingTool = defineTool({
       checkOut: sale.booking.checkOut,
       totalUSD: sale.booking.total.amount,
       ...describeCoverage(coverage, flightStay),
-      ...describeRequests(sale.requests),
+      ...describeRequests(sale),
       ...(property ? { property } : {}),
     };
   },

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { DateTime } from 'luxon';
 import * as repo from '@/lib/db/repo';
+import { log } from '@/lib/log';
 import type { Json, OfferRow } from '@/lib/db/types';
 import { travelProvider } from '@/lib/providers/sabre';
 import { isProviderError } from '@/lib/providers/sabre/errors';
@@ -31,10 +32,6 @@ export const earlyCheckInField = z
     'Only when the patient has asked to get into the room before check-in time on their arrival day. Files an early check-in request on the reservation — a request the hotel may not honour, and you must say so. It is not the same as booking the night before, which is an ordinary paid night with its own rateId.',
   );
 
-export type SellHotelResult =
-  | { sold: true; booking: HotelBooking; rate: HotelRate; requests: string[] }
-  | { sold: false; failure: Record<string, unknown> };
-
 export interface SellHotelOptions {
   earlyCheckIn?: boolean;
 }
@@ -49,14 +46,28 @@ export async function bookedFlightSlices(conversationId: string): Promise<Flight
 /**
  * What the hotel is told when the patient asks to get in early. Built from the
  * itinerary rather than typed by the model, so the time the hotel reads is the
- * time the airline holds. Short and plain: it is read by a person at a desk.
+ * time the airline holds. Written the way hotel systems read free text — upper
+ * case, letters, digits, spaces and hyphens, no punctuation — because the first
+ * live attempt, with a colon and lower case, came back from the supplier as
+ * "unable to process supplier response".
  */
 export function earlyCheckInInstruction(slices: FlightSlice[] | null, rules: TripRules): string {
   const arrival = slices?.[0]?.segments.at(-1)?.arriveLocal;
-  if (!arrival) return 'Early check-in requested if available.';
+  if (!arrival) return 'EARLY CHECK-IN REQUESTED IF AVAILABLE';
   const at = DateTime.fromISO(arrival, { zone: rules.destinationTz });
-  return `Early check-in requested if available: guest lands ${at.toFormat('d LLL')} at ${at.toFormat('HH:mm')}.`;
+  return `EARLY CHECK-IN REQUESTED IF AVAILABLE - GUEST ARRIVES ${at.toFormat('ddLLL').toUpperCase()} ${at.toFormat('HHmm')}`;
 }
+
+export type SellHotelResult =
+  | {
+      sold: true;
+      booking: HotelBooking;
+      rate: HotelRate;
+      requests: string[];
+      /** A request the hotel's system refused; the room was booked without it. */
+      requestNotFiled?: string;
+    }
+  | { sold: false; failure: Record<string, unknown> };
 
 /** Re-confirms the rate with the hotel and sells it. Writes nothing. */
 export async function sellHotelRate(
@@ -66,17 +77,33 @@ export async function sellHotelRate(
   context?: { rules: TripRules; slices: FlightSlice[] | null },
 ): Promise<SellHotelResult> {
   const rate = offerRow.raw as unknown as HotelRate;
-  const requests: string[] = [];
   const instruction =
     options.earlyCheckIn && context ? earlyCheckInInstruction(context.slices, context.rules) : null;
-  if (instruction) requests.push(instruction);
-  try {
-    const booking = await travelProvider().createHotelBooking(
+
+  const sell = (specialInstruction: string | null) =>
+    travelProvider().createHotelBooking(
       rate,
       guests,
-      instruction ? { specialInstruction: instruction } : {},
+      specialInstruction ? { specialInstruction } : {},
     );
-    return { sold: true, booking, rate, requests };
+
+  try {
+    try {
+      const booking = await sell(instruction);
+      return { sold: true, booking, rate, requests: instruction ? [instruction] : [] };
+    } catch (e) {
+      // The room matters more than the note on it. A supplier that refuses the
+      // reservation with the request attached (it happened live) gets the same
+      // reservation without it, and the patient is told the request was not filed
+      // rather than left believing it was.
+      if (!instruction || !isProviderError(e) || e.code !== 'BOOKING_FAILED') throw e;
+      log.warn(
+        { instruction, err: e.message },
+        'hotel refused the booking with a special instruction; booking without it',
+      );
+      const booking = await sell(null);
+      return { sold: true, booking, rate, requests: [], requestNotFiled: instruction };
+    }
   } catch (e) {
     if (isProviderError(e) && (e.code === 'OFFER_EXPIRED' || e.code === 'NO_AVAILABILITY')) {
       return {
@@ -173,10 +200,17 @@ export function describeCoverage(coverage: StayCoverage | null, flightStay: Stay
 }
 
 /** What a filed early check-in request means, said once so both tools say it the same way. */
-export function describeRequests(requests: string[]) {
-  if (requests.length === 0) return {};
+export function describeRequests(sale: { requests: string[]; requestNotFiled?: string }) {
+  if (sale.requestNotFiled) {
+    return {
+      requestNotFiled: sale.requestNotFiled,
+      requestsNote:
+        "The hotel's booking system refused the reservation with the early check-in request attached, so the room was booked WITHOUT it. Tell the patient plainly: the room is confirmed, the early check-in request could not be filed through the booking, and they can ask the hotel directly. Do not say it was requested.",
+    };
+  }
+  if (sale.requests.length === 0) return {};
   return {
-    requestsFiled: requests,
+    requestsFiled: sale.requests,
     requestsNote:
       'Filed on the reservation as a request. The hotel decides on the day — tell the patient it is asked for, not guaranteed, and that the room is only theirs from check-in time unless the night before is booked.',
   };

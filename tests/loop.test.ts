@@ -146,7 +146,8 @@ describe('runTurn', () => {
       msg([use('t1', 'echo', { wrong: 1 }), use('t2', 'explode', {}), use('t3', 'nope', {})]),
       msg([
         use('t4', 'reply', {
-          bubbles: ['Something went wrong, trying again.'],
+          // Not "trying again" — that is now a promise the guard holds the model to.
+          bubbles: ['Something went wrong on my side.'],
           expectsInput: false,
         }),
       ]),

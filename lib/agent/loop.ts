@@ -313,7 +313,9 @@ async function runLoop(
             const nudge =
               promise.kind === 'booking'
                 ? `You told the patient "${promise.announced}" but you did not call a booking tool in this turn, so nothing was booked. Either call the booking tool now, or reply telling them plainly what you still need from them.`
-                : `You told the patient "${promise.announced}" but you did not call the tool that does it, so nothing was looked up and they are waiting on nothing. Call the tool now and reply with what it returns, or ask them the question you actually need answered.`;
+                : promise.kind === 'retry'
+                  ? `You told the patient "${promise.announced}" but you did not call any tool, so nothing was retried and they are waiting on nothing. Retry now — call the tool again and report what it returns — or tell them plainly what failed and what the options are.`
+                  : `You told the patient "${promise.announced}" but you did not call the tool that does it, so nothing was looked up and they are waiting on nothing. Call the tool now and reply with what it returns, or ask them the question you actually need answered.`;
             const nudgeBlocks = [...results, { type: 'text' as const, text: nudge }];
             await repo.appendMessage(
               conversationId,

@@ -85,11 +85,19 @@ const BOOKING_PHRASE =
 const RETRIEVAL_PHRASE =
   /\b(?:(?:let me|i'?ll|i'?m going to|i am going to)\s+(?:go\s+)?(?:pull up|pull|find|check|look up|look for|look at|search|see what|get you|get the|get a|grab|fetch)|(?:pulling|checking|looking|searching|fetching|getting)\s+(?:that|those|these|it|them|up|you)|one moment while i)\b/i;
 
+/**
+ * "Let me try again" after a failed tool is a promise of either kind: it is kept by
+ * any tool call that could be the retry, and broken by a turn that ends with none.
+ * Said verbatim to a patient after a hotel booking failed, followed by nothing.
+ */
+const RETRY_PHRASE =
+  /\b((?:let me|i'?ll|i will|i'?m going to)\s+(?:just\s+)?(?:try|attempt)(?:\s+(?:that|this|it))?\s+again|(?:trying|attempting)(?:\s+(?:that|this|it))?\s+again|(?:let me|i'?ll) (?:retry|re-try|give (?:it|that) another (?:go|try)))\b/i;
+
 export interface PromiseCheck {
   ok: boolean;
   /** The phrase that announced work which never happened. */
   announced: string | null;
-  kind: 'booking' | 'retrieval' | null;
+  kind: 'booking' | 'retrieval' | 'retry' | null;
 }
 
 export interface TurnActivity {
@@ -118,6 +126,10 @@ export function checkAnnouncedActions(bubbles: string[], activity: TurnActivity)
     if (!activity.searchedThisTurn) {
       const retrieval = bubble.match(RETRIEVAL_PHRASE);
       if (retrieval) return { ok: false, announced: retrieval[0], kind: 'retrieval' };
+    }
+    if (!activity.bookedThisTurn && !activity.searchedThisTurn) {
+      const retry = bubble.match(RETRY_PHRASE);
+      if (retry) return { ok: false, announced: retry[0], kind: 'retry' };
     }
   }
   return clean;

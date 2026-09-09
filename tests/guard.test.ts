@@ -130,6 +130,30 @@ describe('checkAnnouncedActions', () => {
       expect(checkAnnouncedActions([phrase], idle).kind, phrase).toBe('retrieval');
     }
   });
+
+  it('catches "let me try again" said after a failure with no retry behind it', () => {
+    // Verbatim from a live run: the hotel booking failed, the agent said this, and
+    // the turn ended. The patient waited on nothing.
+    for (const phrase of [
+      'I ran into an issue booking the room just now. Let me try again.',
+      "I'll try that again.",
+      'Trying again now.',
+      "I'll give it another go.",
+    ]) {
+      expect(checkAnnouncedActions([phrase], idle).kind, phrase).toBe('retry');
+    }
+    // Kept by whichever tool could be the retry.
+    expect(checkAnnouncedActions(['Let me try again.'], { ...idle, bookedThisTurn: true }).ok).toBe(
+      true,
+    );
+    expect(
+      checkAnnouncedActions(['Let me try again.'], { ...idle, searchedThisTurn: true }).ok,
+    ).toBe(true);
+    // And not when the turn waits for the patient.
+    expect(checkAnnouncedActions(['Let me try again.'], { ...idle, expectsInput: true }).ok).toBe(
+      true,
+    );
+  });
 });
 
 describe('checkRaisedEvents', () => {

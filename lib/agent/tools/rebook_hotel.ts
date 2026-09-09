@@ -179,7 +179,7 @@ export const rebookHotelTool = defineTool({
       cancelBy: sale.rate.cancelBy,
       oldReservationReleased: oldReleased,
       ...describeCoverage(coverage, flightStay),
-      ...describeRequests(sale.requests),
+      ...describeRequests(sale),
       ...(property ? { property } : {}),
       ...(oldReleased
         ? {}
