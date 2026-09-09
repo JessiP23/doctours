@@ -6,8 +6,8 @@ import { travelProvider } from '@/lib/providers/sabre';
 import type { FlightOffer } from '@/lib/providers/types';
 import {
   applyPreferences,
+  comparisonShortlist,
   describeChoices,
-  distinctItineraries,
   outboundDate,
   returnDate,
   excludeCancelled,
@@ -51,7 +51,14 @@ export async function cancelledFlightsFor(conversationId: string): Promise<Cance
  * Prices are re-confirmed live (Flight Check) before anything is shown, so the
  * number the patient sees is the number they will be asked to confirm.
  */
-const MAX_SHOWN = 5;
+/** How many options the agent reads out in prose. */
+const MAX_SHOWN = 3;
+/**
+ * How many options are re-priced, persisted and laid out on the compare board.
+ * Reading twelve itineraries aloud would be noise; showing them side by side is the
+ * point of the board, and the model can only book what is persisted.
+ */
+const MAX_ON_BOARD = 12;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 const window = z
@@ -148,7 +155,7 @@ export const searchFlightsTool = defineTool({
     // Re-price live before showing anything. A cached fare can be $400 off the live
     // one; the patient should only ever be quoted a price that will book.
     const provider = travelProvider();
-    const shortlist = distinctItineraries(pool, MAX_SHOWN + 2);
+    const shortlist = comparisonShortlist(pool, rankBy, MAX_ON_BOARD);
     const checked = await Promise.allSettled(shortlist.map((o) => provider.priceFlightOffer(o)));
     const live: FlightOffer[] = [];
     let gone = 0;
@@ -162,7 +169,7 @@ export const searchFlightsTool = defineTool({
         );
       }
     }
-    const shown = applyPreferences(live, { rankBy }).slice(0, MAX_SHOWN);
+    const shown = applyPreferences(live, { rankBy });
     if (shown.length === 0) {
       return {
         options: [],
@@ -176,7 +183,14 @@ export const searchFlightsTool = defineTool({
     const expiresAt = rows[0]?.expires_at ?? null;
 
     return {
-      options: rows.map((row) => ({ offerId: row.id, ...(row.summary as object) })),
+      options: rows
+        .slice(0, MAX_SHOWN)
+        .map((row) => ({ offerId: row.id, ...(row.summary as object) })),
+      onTheBoard: rows.length,
+      boardNote: `${rows.length} option(s) are laid out side by side in the Compare panel at the top of the chat, with prices, times, stops and how each sits against the trip dates. Read out at most ${MAX_SHOWN} in prose; if the patient asks to see more or to compare, point them to the panel rather than listing more here. Every option there is bookable — under LIVE STATE each has an offerId.`,
+      moreOptions: rows
+        .slice(MAX_SHOWN)
+        .map((row) => ({ offerId: row.id, ...(row.summary as object) })),
       pricesAreLive: true,
       rankedBy: rankBy,
       preferencesMatched,

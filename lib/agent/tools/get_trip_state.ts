@@ -22,7 +22,7 @@ export const getTripStateTool = defineTool({
     const [conversation, bookings, flightOffers, hotelOffers, hotelProperties] = await Promise.all([
       repo.getConversation(ctx.conversationId),
       repo.listBookingHistory(ctx.conversationId),
-      repo.listRecentOffers(ctx.conversationId, 'flight', 6),
+      repo.listRecentOffers(ctx.conversationId, 'flight', 12),
       repo.listRecentOffers(ctx.conversationId, 'hotel_rate', 6),
       repo.listRecentOffers(ctx.conversationId, 'hotel_property', 6),
     ]);

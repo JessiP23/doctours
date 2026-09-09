@@ -8,6 +8,7 @@ import {
   validateReturn,
 } from '@/lib/trip/validate';
 import { deriveStay } from '@/lib/trip/nights';
+import { comparisonShortlist } from '@/lib/trip/select';
 
 const JFK = { iata: 'JFK', tz: 'America/New_York' };
 const IST = { iata: 'IST', tz: 'Europe/Istanbul' };
@@ -374,5 +375,72 @@ describe('excludeCancelled', () => {
     const { excludeCancelled } = await import('@/lib/trip/select');
     const offers = [offer('QR', '704', '2026-10-11T11:20')];
     expect(excludeCancelled(offers, [])).toBe(offers);
+  });
+});
+
+describe('comparisonShortlist', () => {
+  const DOH = { iata: 'DOH', tz: 'Asia/Qatar' };
+  const o = (id: string, carrier: string, price: number, stops: number, depart: string) =>
+    offer(
+      [
+        stops
+          ? slice(
+              seg({
+                from: JFK,
+                to: DOH,
+                departLocal: depart,
+                arriveLocal: '2026-10-12T05:30',
+                carrier,
+                flightNumber: id,
+              }),
+              seg({
+                from: DOH,
+                to: IST,
+                departLocal: '2026-10-12T07:00',
+                arriveLocal: '2026-10-12T11:55',
+                carrier,
+              }),
+            )
+          : slice(
+              seg({
+                from: JFK,
+                to: IST,
+                departLocal: depart,
+                arriveLocal: '2026-10-12T05:30',
+                carrier,
+                flightNumber: id,
+              }),
+            ),
+        slice(
+          seg({
+            from: IST,
+            to: JFK,
+            departLocal: '2026-10-17T14:00',
+            arriveLocal: '2026-10-17T18:00',
+            carrier,
+          }),
+        ),
+      ],
+      { id, price: { amount: price, currency: 'USD' } },
+    );
+  const offers = [
+    o('q1', 'QR', 833, 1, '2026-10-11T11:20'),
+    o('q2', 'QR', 840, 1, '2026-10-11T12:20'),
+    o('q3', 'QR', 850, 1, '2026-10-11T13:20'),
+    o('q4', 'QR', 860, 1, '2026-10-11T14:20'),
+    o('t1', 'TK', 1391, 0, '2026-10-11T12:50'),
+    o('l1', 'LH', 1200, 1, '2026-10-11T18:00'),
+  ];
+
+  it('mixes the cheapest with the fewest-stops leader and the cheapest per airline', () => {
+    const picked = comparisonShortlist(offers, 'price', 4).map((x) => x.id);
+    // Two cheapest, then the non-stop Turkish and the cheapest Lufthansa — not four Qatar fares.
+    expect(picked).toEqual(['q1', 'q2', 'l1', 't1']);
+  });
+
+  it('never repeats an itinerary and respects the limit', () => {
+    const picked = comparisonShortlist([...offers, ...offers], 'price', 12);
+    expect(picked).toHaveLength(6);
+    expect(new Set(picked.map((x) => x.id)).size).toBe(6);
   });
 });

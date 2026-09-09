@@ -62,8 +62,18 @@ export function Chat() {
     try {
       const res = await fetch('/api/conversation/board', { cache: 'no-store' });
       const data = (await res.json()) as { board: OptionBoard | null };
-      setBoard(data.board);
-      if (!data.board || data.board.count < 2) setShowBoard(false);
+      const next = data.board;
+      setBoard((prev) => {
+        // New options on the table open the panel by themselves where there is room
+        // for both — the patient asked to see options, so show them. On a phone it
+        // stays a tap away, because opening it would hide the chat.
+        const grew = (next?.count ?? 0) > (prev?.count ?? 0);
+        if (grew && next && next.count >= 2 && window.matchMedia('(min-width: 1024px)').matches) {
+          setShowBoard(true);
+        }
+        return next;
+      });
+      if (!next || next.count < 2) setShowBoard(false);
     } catch {
       /* best effort; the next turn refreshes it */
     }

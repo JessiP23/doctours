@@ -186,3 +186,38 @@ export function excludeCancelled(
     ),
   );
 }
+
+/**
+ * A shortlist worth comparing: the cheapest itineraries, plus the best by stops and
+ * the cheapest on each airline, so a board of twelve is not twelve fares on one
+ * carrier via the same hub. Order follows `by`; the mix is deduplicated by
+ * itinerary.
+ */
+export function comparisonShortlist(
+  offers: FlightOffer[],
+  by: Ranking,
+  limit: number,
+): FlightOffer[] {
+  const seen = new Set<string>();
+  const out: FlightOffer[] = [];
+  const add = (offer: FlightOffer) => {
+    const key = itinerarySignature(offer);
+    if (seen.has(key) || out.length >= limit) return;
+    seen.add(key);
+    out.push(offer);
+  };
+  // The best few by the asked-for ranking come first.
+  for (const offer of distinctItineraries(rank(offers, by), Math.ceil(limit / 2))) add(offer);
+  // Then the fewest-stops leaders and the cheapest per marketing airline.
+  for (const offer of distinctItineraries(rank(offers, 'fewest_stops'), 3)) add(offer);
+  const carriers = new Set<string>();
+  for (const offer of rank(offers, 'price')) {
+    const carrier = offer.slices[0].segments[0].carrier;
+    if (carriers.has(carrier)) continue;
+    carriers.add(carrier);
+    add(offer);
+  }
+  // Fill what is left with the next best by the asked-for ranking.
+  for (const offer of rank(offers, by)) add(offer);
+  return rank(out, by);
+}

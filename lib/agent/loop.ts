@@ -195,7 +195,7 @@ async function runLoop(
   for (let i = 1; i <= MAX_ITERATIONS; i++) {
     const [bookings, flightOffers, hotelOffers, hotelProperties, openEvents] = await Promise.all([
       repo.listBookings(conversationId),
-      repo.listRecentOffers(conversationId, 'flight', 6),
+      repo.listRecentOffers(conversationId, 'flight', 12),
       repo.listRecentOffers(conversationId, 'hotel_rate', 6),
       repo.listRecentOffers(conversationId, 'hotel_property', 6),
       repo.listOpenTripEvents(conversationId),

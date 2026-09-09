@@ -15,7 +15,7 @@ export async function GET() {
   if (conversation.isNew) return Response.json({ board: null });
   const [bookings, flights, rooms, hotels] = await Promise.all([
     repo.listBookings(conversation.id),
-    repo.listRecentOffers(conversation.id, 'flight', 6),
+    repo.listRecentOffers(conversation.id, 'flight', 12),
     repo.listRecentOffers(conversation.id, 'hotel_rate', 6),
     repo.listRecentOffers(conversation.id, 'hotel_property', 6),
   ]);
