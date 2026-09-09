@@ -87,7 +87,7 @@ function Flight({
 }: { card: FlightCard; board: OptionBoard } & Omit<OptionBoardProps, 'board' | 'onClose'>) {
   const deadline = fmtTime(board.rules.mustArriveByLocal);
   return (
-    <article className="flex w-64 shrink-0 flex-col rounded-2xl border border-line bg-them p-4 shadow-sm">
+    <article className="flex w-56 shrink-0 flex-col rounded-2xl border border-line bg-them p-3 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-sm font-semibold">{card.carrier}</span>
         <span className="text-lg font-semibold">{usd(card.priceUSD)}</span>
@@ -162,7 +162,7 @@ function Room({
   onPick,
 }: { card: RoomCard } & Omit<OptionBoardProps, 'board' | 'onClose'>) {
   return (
-    <article className="flex w-60 shrink-0 flex-col rounded-2xl border border-line bg-them p-4 shadow-sm">
+    <article className="flex w-56 shrink-0 flex-col rounded-2xl border border-line bg-them p-3 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-sm font-semibold">{card.name}</span>
         <span className="text-lg font-semibold">{usd(card.totalUSD)}</span>
@@ -216,7 +216,7 @@ function Hotel({
   onPick,
 }: { card: HotelCard } & Omit<OptionBoardProps, 'board' | 'onClose'>) {
   return (
-    <article className="flex w-60 shrink-0 flex-col rounded-2xl border border-line bg-them p-4 shadow-sm">
+    <article className="flex w-56 shrink-0 flex-col rounded-2xl border border-line bg-them p-3 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-sm font-semibold">{card.name}</span>
         {card.leadTotalUSD !== null ? (
@@ -287,8 +287,8 @@ function Row({
 export function OptionBoardPanel({ board, busy, onPick, onClose }: OptionBoardProps) {
   const t = board.rules.travellers;
   return (
-    <aside className="flex h-full w-full flex-col border-l border-line bg-bg lg:w-[34rem] lg:shrink-0">
-      <div className="flex items-center justify-between border-b border-line px-4 py-3">
+    <aside className="flex h-full w-full flex-col border-l border-line bg-bg lg:w-[17rem] lg:shrink-0">
+      <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-3">
         <div>
           <div className="text-[15px] font-semibold">Compare options</div>
           <div className="text-xs text-muted">
@@ -305,7 +305,7 @@ export function OptionBoardPanel({ board, busy, onPick, onClose }: OptionBoardPr
           ✕
         </button>
       </div>
-      <div className="flex-1 space-y-6 overflow-y-auto p-4">
+      <div className="flex-1 space-y-5 overflow-y-auto p-3">
         {board.flights.length > 0 ? (
           <Row
             title="Flights"

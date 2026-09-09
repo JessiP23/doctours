@@ -388,6 +388,45 @@ describe('early check-in as a request on the reservation', () => {
   });
 });
 
+describe('who goes on the room', () => {
+  it('takes the guests from the flight booking, so the patient is never asked twice', async () => {
+    mem.bookings.push({
+      ...bookedFlight('2026-10-12T05:30'),
+      raw: {
+        ...bookedFlight('2026-10-12T05:30').raw,
+        travellers: [
+          {
+            givenName: 'Gukesh',
+            familyName: 'Amir',
+            dateOfBirth: '1950-05-06',
+            gender: 'M',
+            email: 'j@example.com',
+            phone: '+16463875453',
+          },
+        ],
+      },
+    });
+    const search = (await searchHotelRatesTool.handler({}, ctx)) as { rooms: { rateId: string }[] };
+    const result = (await createHotelBookingTool.handler(
+      { rateId: search.rooms[0].rateId },
+      ctx,
+    )) as { booked: boolean; guests?: string[]; guestsFrom?: string };
+    expect(result.booked).toBe(true);
+    expect(result.guests).toEqual(['Gukesh Amir']);
+    expect(result.guestsFrom).toBe('the flight booking');
+    expect((mem.inserted[0].details as { guests: string[] }).guests).toEqual(['Gukesh Amir']);
+  });
+
+  it('asks for guests only when there is no flight to take them from', async () => {
+    const result = (await createHotelBookingTool.handler({ rateId: 'nope' }, ctx)) as {
+      booked: boolean;
+      reason?: string;
+    };
+    expect(result.booked).toBe(false);
+    expect(result.reason).toBe('GUESTS_NEEDED');
+  });
+});
+
 describe('a room booked from the night before', () => {
   it('is recorded as covering the flights with one night before landing, not as the wrong dates', async () => {
     mem.bookings.push(bookedFlight('2026-10-12T05:30'));

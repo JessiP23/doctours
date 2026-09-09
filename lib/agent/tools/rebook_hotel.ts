@@ -10,12 +10,12 @@ import {
   describeCoverage,
   describeRequests,
   earlyCheckInField,
-  guestSchema,
+  guestsField,
+  resolveGuests,
   hotelBookingRow,
   sellHotelRate,
 } from './hotel-booking';
 import { loadBookableOffer } from './search_flights';
-import { MAX_TRAVELLERS } from './set_party_size';
 
 /**
  * Moves the room — to different nights, or to a different room.
@@ -38,11 +38,7 @@ export const rebookHotelTool = defineTool({
     'Replace the room this trip already holds with a different one the patient has confirmed — different nights after a flight change, an extra night at the start so the room is ready when they land, or a different room type. Not create_hotel_booking, which refuses when a room exists. Search rooms for the dates you want first, tell the patient the cost and the cancellation terms, and only call this once they agree. It books the new room before releasing the old.',
   schema: z.object({
     rateId: z.string().describe('rateId of the replacement room, from search_hotel_rates'),
-    guests: z
-      .array(guestSchema)
-      .min(1)
-      .max(MAX_TRAVELLERS)
-      .describe('One entry per traveller staying in the room, the patient first'),
+    guests: guestsField,
     earlyCheckIn: earlyCheckInField,
     confirmed: z
       .literal(true)
@@ -68,14 +64,16 @@ export const rebookHotelTool = defineTool({
       };
     }
 
-    if (input.guests.length !== rules.adults) {
+    const resolved = await resolveGuests(ctx.conversationId, input.guests, rules.adults);
+    if (!resolved.ok) {
       return {
         rebooked: false,
-        reason: 'GUEST_COUNT_MISMATCH',
-        message: `This trip is set to ${rules.adults} traveller(s) but you sent ${input.guests.length} guest(s). Every traveller goes on the room.`,
+        reason: resolved.reason,
+        message: resolved.message,
         travellers: rules.adults,
       };
     }
+    const guests = resolved.guests;
 
     const { row } = await loadBookableOffer(ctx.conversationId, input.rateId, 'hotel_rate');
 
@@ -83,7 +81,7 @@ export const rebookHotelTool = defineTool({
     const slices = await bookedFlightSlices(ctx.conversationId);
     const sale = await sellHotelRate(
       row,
-      input.guests,
+      guests,
       { earlyCheckIn: input.earlyCheckIn },
       { rules, slices },
     );
@@ -101,7 +99,7 @@ export const rebookHotelTool = defineTool({
       property,
       coverage,
       flightStay,
-    } = await hotelBookingRow(ctx.conversationId, row, sale, input.guests);
+    } = await hotelBookingRow(ctx.conversationId, row, sale, guests);
     // The room is sold. Nothing past this point may throw and lose the reference.
     let booking;
     try {

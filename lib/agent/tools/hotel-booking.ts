@@ -8,6 +8,8 @@ import { isProviderError } from '@/lib/providers/sabre/errors';
 import type { FlightSlice, Guest, HotelBooking, HotelRate } from '@/lib/providers/types';
 import { compareStay, deriveStay, type Stay, type StayCoverage } from '@/lib/trip/nights';
 import type { TripRules } from '@/lib/trip/rules';
+import { travellersOf } from './flight-booking';
+import { MAX_TRAVELLERS } from './set_party_size';
 import { describeProperty } from './property';
 
 /**
@@ -23,6 +25,64 @@ export const guestSchema = z.object({
   email: z.email(),
   phone: z.string().min(5),
 });
+
+/**
+ * Who is on the room.
+ *
+ * Normally nobody has to be asked: the travellers are already filed on the flight
+ * booking, and a patient who just gave their name, email and phone for the ticket
+ * was being asked for them again for the room. So the guest list is optional; when
+ * it is missing, or has the wrong number of people, the flight's travellers are
+ * used. Only a trip with no flight and no guests given has to ask.
+ */
+export const guestsField = z
+  .array(guestSchema)
+  .min(1)
+  .max(MAX_TRAVELLERS)
+  .optional()
+  .describe(
+    'Only needed when no flight is booked on this trip. Otherwise leave it out: the travellers on the flight booking go on the room automatically, so never ask the patient for details they already gave.',
+  );
+
+export type GuestResolution =
+  | { ok: true; guests: Guest[]; source: 'given' | 'flight' }
+  | { ok: false; reason: 'GUEST_COUNT_MISMATCH' | 'GUESTS_NEEDED'; message: string };
+
+export async function resolveGuests(
+  conversationId: string,
+  given: Guest[] | undefined,
+  adults: number,
+): Promise<GuestResolution> {
+  if (given && given.length === adults) return { ok: true, guests: given, source: 'given' };
+
+  const flight = await repo.getLiveBooking(conversationId, 'flight');
+  const travellers = flight ? travellersOf(flight) : [];
+  if (travellers.length === adults) {
+    return {
+      ok: true,
+      source: 'flight',
+      guests: travellers.map((t) => ({
+        givenName: t.givenName,
+        familyName: t.familyName,
+        email: t.email,
+        phone: t.phone,
+      })),
+    };
+  }
+
+  if (given) {
+    return {
+      ok: false,
+      reason: 'GUEST_COUNT_MISMATCH',
+      message: `This trip is set to ${adults} traveller(s) but you sent ${given.length} guest(s), and the flight booking does not carry ${adults} travellers to fall back on. Every traveller goes on the room.`,
+    };
+  }
+  return {
+    ok: false,
+    reason: 'GUESTS_NEEDED',
+    message: `No flight is booked on this trip to take the guests from. Ask the patient for the name, email and phone of each of the ${adults} traveller(s) and pass them as guests.`,
+  };
+}
 
 /** Schema field shared by both room tools: ask the hotel to let them in early. */
 export const earlyCheckInField = z
