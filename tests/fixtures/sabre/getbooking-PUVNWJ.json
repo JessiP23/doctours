@@ -1,0 +1,677 @@
+{
+  "response": {
+    "bookingId": "PUVNWJ",
+    "startDate": "2026-10-11",
+    "endDate": "2026-10-18",
+    "isCancelable": true,
+    "isTicketed": false,
+    "creationDetails": {
+      "creationUserSine": "AWV",
+      "creationDate": "2026-09-08",
+      "creationTime": "23:25",
+      "userWorkPcc": "REDACTED_PCC",
+      "userHomePcc": "REDACTED_PCC",
+      "primeHostId": "1S",
+      "lastUpdateDate": "2026-09-08",
+      "lastUpdateTime": "23:25",
+      "numberOfUpdates": 4
+    },
+    "contactInfo": {
+      "emails": [
+        "JESSI316866@GMAIL.COM"
+      ],
+      "phones": [
+        "16463875453"
+      ]
+    },
+    "travelers": [
+      {
+        "givenName": "RODRIGO",
+        "surname": "PEREZ",
+        "type": "ADULT",
+        "passengerCode": "ADT",
+        "nameAssociationId": "1"
+      }
+    ],
+    "flights": [
+      {
+        "itemId": "12",
+        "confirmationId": "A7EHA3",
+        "sourceType": "ATPCO",
+        "flightNumber": 704,
+        "airlineCode": "QR",
+        "airlineName": "QATAR AIRWAYS",
+        "operatingFlightNumber": 704,
+        "operatingAirlineCode": "QR",
+        "operatingAirlineName": "QATAR AIRWAYS",
+        "fromAirportCode": "JFK",
+        "toAirportCode": "DOH",
+        "departureDate": "2026-10-11",
+        "departureTime": "11:20:00",
+        "departureTerminalName": "TERMINAL 8",
+        "departureGate": "8",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "06:40:00",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "77W",
+        "aircraftTypeName": "BOEING 777-300ER",
+        "bookingClass": "T",
+        "meals": [
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 740,
+        "distanceInMiles": 6703,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-08",
+        "creationTime": "23:25"
+      },
+      {
+        "itemId": "14",
+        "confirmationId": "A7EHA3",
+        "sourceType": "ATPCO",
+        "flightNumber": 239,
+        "airlineCode": "QR",
+        "airlineName": "QATAR AIRWAYS",
+        "operatingFlightNumber": 239,
+        "operatingAirlineCode": "QR",
+        "operatingAirlineName": "QATAR AIRWAYS",
+        "fromAirportCode": "DOH",
+        "toAirportCode": "IST",
+        "departureDate": "2026-10-12",
+        "departureTime": "07:35:00",
+        "arrivalDate": "2026-10-12",
+        "arrivalTime": "11:55:00",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "77W",
+        "aircraftTypeName": "BOEING 777-300ER",
+        "bookingClass": "T",
+        "meals": [
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 260,
+        "distanceInMiles": 1712,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-08",
+        "creationTime": "23:25"
+      },
+      {
+        "itemId": "16",
+        "confirmationId": "A7EHA3",
+        "sourceType": "ATPCO",
+        "flightNumber": 246,
+        "airlineCode": "QR",
+        "airlineName": "QATAR AIRWAYS",
+        "operatingFlightNumber": 246,
+        "operatingAirlineCode": "QR",
+        "operatingAirlineName": "QATAR AIRWAYS",
+        "fromAirportCode": "IST",
+        "toAirportCode": "DOH",
+        "departureDate": "2026-10-17",
+        "departureTime": "20:05:00",
+        "arrivalDate": "2026-10-18",
+        "arrivalTime": "00:30:00",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "789",
+        "aircraftTypeName": "BOEING 787-9",
+        "bookingClass": "T",
+        "meals": [
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 245,
+        "distanceInMiles": 1712,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-08",
+        "creationTime": "23:25"
+      },
+      {
+        "itemId": "18",
+        "confirmationId": "A7EHA3",
+        "sourceType": "ATPCO",
+        "flightNumber": 703,
+        "airlineCode": "QR",
+        "airlineName": "QATAR AIRWAYS",
+        "operatingFlightNumber": 703,
+        "operatingAirlineCode": "QR",
+        "operatingAirlineName": "QATAR AIRWAYS",
+        "fromAirportCode": "DOH",
+        "toAirportCode": "JFK",
+        "departureDate": "2026-10-18",
+        "departureTime": "01:55:00",
+        "arrivalDate": "2026-10-18",
+        "arrivalTime": "08:50:00",
+        "arrivalTerminalName": "TERMINAL 8",
+        "arrivalGate": "8",
+        "numberOfSeats": 1,
+        "cabinTypeName": "ECONOMY",
+        "cabinTypeCode": "Y",
+        "aircraftTypeCode": "77W",
+        "aircraftTypeName": "BOEING 777-300ER",
+        "bookingClass": "T",
+        "meals": [
+          {
+            "code": "M",
+            "description": "Meal"
+          }
+        ],
+        "flightStatusCode": "HK",
+        "flightStatusName": "Confirmed",
+        "durationInMinutes": 835,
+        "distanceInMiles": 6703,
+        "travelerIndices": [
+          1
+        ],
+        "creationDate": "2026-09-08",
+        "creationTime": "23:25"
+      }
+    ],
+    "journeys": [
+      {
+        "firstAirportCode": "JFK",
+        "departureDate": "2026-10-11",
+        "departureTime": "11:20",
+        "lastAirportCode": "IST",
+        "numberOfFlights": 2
+      },
+      {
+        "firstAirportCode": "IST",
+        "departureDate": "2026-10-17",
+        "departureTime": "20:05",
+        "lastAirportCode": "JFK",
+        "numberOfFlights": 2
+      }
+    ],
+    "fareRules": [
+      {
+        "owningAirlineCode": "QR",
+        "passengerCode": "ADT",
+        "isRefundable": true,
+        "refundPenalties": [
+          {
+            "applicability": "BEFORE_DEPARTURE",
+            "conditionsApply": false,
+            "penalty": {
+              "amount": "715.0",
+              "currencyCode": "USD"
+            },
+            "hasNoShowCost": true,
+            "noShowPenalty": {
+              "amount": "715.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "applicability": "AFTER_DEPARTURE",
+            "conditionsApply": false,
+            "penalty": {
+              "amount": "715.0",
+              "currencyCode": "USD"
+            },
+            "hasNoShowCost": true,
+            "noShowPenalty": {
+              "amount": "715.00",
+              "currencyCode": "USD"
+            }
+          }
+        ],
+        "isChangeable": true,
+        "exchangePenalties": [
+          {
+            "applicability": "BEFORE_DEPARTURE",
+            "conditionsApply": false,
+            "penalty": {
+              "amount": "485.0",
+              "currencyCode": "USD"
+            },
+            "hasNoShowCost": true,
+            "noShowPenalty": {
+              "amount": "485.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "applicability": "AFTER_DEPARTURE",
+            "conditionsApply": false,
+            "penalty": {
+              "amount": "485.0",
+              "currencyCode": "USD"
+            },
+            "hasNoShowCost": true,
+            "noShowPenalty": {
+              "amount": "485.00",
+              "currencyCode": "USD"
+            }
+          }
+        ]
+      }
+    ],
+    "fareOffers": [
+      {
+        "travelerIndices": [
+          1
+        ],
+        "flights": [
+          {
+            "itemId": "12"
+          },
+          {
+            "itemId": "14"
+          },
+          {
+            "itemId": "16"
+          },
+          {
+            "itemId": "18"
+          }
+        ],
+        "cabinBaggageAllowance": {
+          "maximumPieces": 1,
+          "baggagePieces": [
+            {
+              "maximumSizeInInches": 45,
+              "maximumSizeInCentimeters": 115,
+              "maximumWeightInPounds": 15,
+              "maximumWeightInKilograms": 7,
+              "numberOfPieces": 1
+            }
+          ]
+        },
+        "checkedBaggageAllowance": {
+          "maximumPieces": 2,
+          "baggagePieces": [
+            {
+              "maximumSizeInInches": 62,
+              "maximumSizeInCentimeters": 158,
+              "maximumWeightInPounds": 50,
+              "maximumWeightInKilograms": 23,
+              "numberOfPieces": 2
+            }
+          ]
+        },
+        "checkedBaggageCharges": [
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "PREPAID FIRST BAG PC",
+            "fee": {
+              "amount": "200.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "PREPAID SECOND BAG PC",
+            "fee": {
+              "amount": "200.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "PREPAID THIRD BAG PC",
+            "fee": {
+              "amount": "200.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "PREPAID FOURTH BAG PC",
+            "fee": {
+              "amount": "200.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "numberOfPieces": 1,
+            "specialItemDescription": "PREPAID FIFTH BAG PC",
+            "fee": {
+              "amount": "200.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "maximumWeightInPounds": 70,
+            "maximumWeightInKilograms": 32,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "250.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "maximumWeightInPounds": 70,
+            "maximumWeightInKilograms": 32,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "275.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "maximumWeightInPounds": 70,
+            "maximumWeightInKilograms": 32,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "300.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "maximumWeightInPounds": 70,
+            "maximumWeightInKilograms": 32,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "325.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "maximumWeightInPounds": 70,
+            "maximumWeightInKilograms": 32,
+            "numberOfPieces": 1,
+            "fee": {
+              "amount": "350.00",
+              "currencyCode": "USD"
+            }
+          }
+        ]
+      }
+    ],
+    "fares": [
+      {
+        "creationDetails": {
+          "creationUserSine": "AWV",
+          "creationDate": "2026-09-08",
+          "creationTime": "23:25",
+          "purchaseDeadlineDate": "2026-09-30",
+          "purchaseDeadlineTime": "23:59",
+          "userWorkPcc": "REDACTED_PCC",
+          "userHomePcc": "REDACTED_PCC"
+        },
+        "airlineCode": "QR",
+        "fareCalculationLine": "NYC QR X/DOH QR IST151.50QR X/DOH QR NYC Q ISTNYC40.00 151.50NUC343.00END ROE1.00 XFJFK4.5",
+        "isNegotiatedFare": false,
+        "fareConstruction": [
+          {
+            "flights": [
+              {
+                "itemId": "12"
+              },
+              {
+                "itemId": "14"
+              }
+            ],
+            "flightIndices": [
+              1,
+              2
+            ],
+            "fareBasisCode": "TLUSP0RE",
+            "baseRate": {
+              "amount": "151.50",
+              "currencyCode": "NUC"
+            },
+            "brandFareCode": "ECLASSIC",
+            "brandFareName": "ECONOMY CLASSIC",
+            "brandProgramCode": "AREA1",
+            "brandProgramName": "QR BRANDING",
+            "isCurrentItinerary": true,
+            "checkedBaggageAllowance": {
+              "maximumPieces": 2
+            }
+          },
+          {
+            "flights": [
+              {
+                "itemId": "16"
+              },
+              {
+                "itemId": "18"
+              }
+            ],
+            "flightIndices": [
+              3,
+              4
+            ],
+            "fareBasisCode": "TLUSP0RE",
+            "baseRate": {
+              "amount": "151.50",
+              "currencyCode": "NUC"
+            },
+            "brandFareCode": "ECLASSIC",
+            "brandFareName": "ECONOMY CLASSIC",
+            "brandProgramCode": "AREA1",
+            "brandProgramName": "QR BRANDING",
+            "isCurrentItinerary": true,
+            "checkedBaggageAllowance": {
+              "maximumPieces": 2
+            }
+          }
+        ],
+        "taxBreakdown": [
+          {
+            "taxCode": "YC",
+            "taxAmount": {
+              "amount": "7.39",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XY",
+            "taxAmount": {
+              "amount": "7.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XA",
+            "taxAmount": {
+              "amount": "3.84",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "AY",
+            "taxAmount": {
+              "amount": "5.60",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "YR",
+            "taxAmount": {
+              "amount": "44.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "US",
+            "taxAmount": {
+              "amount": "46.80",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "YQ",
+            "taxAmount": {
+              "amount": "270.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "QA",
+            "taxAmount": {
+              "amount": "33.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "PZ",
+            "taxAmount": {
+              "amount": "3.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "G4",
+            "taxAmount": {
+              "amount": "33.00",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "TR",
+            "taxAmount": {
+              "amount": "23.20",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "R9",
+            "taxAmount": {
+              "amount": "5.40",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "M6",
+            "taxAmount": {
+              "amount": "3.50",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "taxCode": "XF",
+            "taxAmount": {
+              "amount": "4.50",
+              "currencyCode": "USD"
+            }
+          }
+        ],
+        "totals": {
+          "subtotal": "343.00",
+          "taxes": "490.23",
+          "total": "833.23",
+          "currencyCode": "USD"
+        },
+        "originalTotalValues": {
+          "total": "343.00",
+          "currencyCode": "USD"
+        },
+        "pricingTypeCode": "S",
+        "pricingTypeName": "System",
+        "pricingStatusCode": "A",
+        "pricingStatusName": "Active",
+        "requestedTravelerType": "ADT",
+        "pricedTravelerType": "ADT",
+        "recordTypeCode": "PQ",
+        "recordTypeName": "Price Quote",
+        "recordId": "1"
+      }
+    ],
+    "allSegments": [
+      {
+        "id": "12",
+        "type": "FLIGHT",
+        "text": "704",
+        "vendorCode": "QR",
+        "startDate": "2026-10-11",
+        "startTime": "11:20:00",
+        "startLocationCode": "JFK",
+        "endDate": "2026-10-12",
+        "endTime": "06:40:00",
+        "endLocationCode": "DOH"
+      },
+      {
+        "id": "14",
+        "type": "FLIGHT",
+        "text": "239",
+        "vendorCode": "QR",
+        "startDate": "2026-10-12",
+        "startTime": "07:35:00",
+        "startLocationCode": "DOH",
+        "endDate": "2026-10-12",
+        "endTime": "11:55:00",
+        "endLocationCode": "IST"
+      },
+      {
+        "id": "16",
+        "type": "FLIGHT",
+        "text": "246",
+        "vendorCode": "QR",
+        "startDate": "2026-10-17",
+        "startTime": "20:05:00",
+        "startLocationCode": "IST",
+        "endDate": "2026-10-18",
+        "endTime": "00:30:00",
+        "endLocationCode": "DOH"
+      },
+      {
+        "id": "18",
+        "type": "FLIGHT",
+        "text": "703",
+        "vendorCode": "QR",
+        "startDate": "2026-10-18",
+        "startTime": "01:55:00",
+        "startLocationCode": "DOH",
+        "endDate": "2026-10-18",
+        "endTime": "08:50:00",
+        "endLocationCode": "JFK"
+      }
+    ],
+    "payments": {
+      "flightTotals": [
+        {
+          "subtotal": "343.00",
+          "taxes": "490.23",
+          "total": "833.23",
+          "currencyCode": "USD"
+        }
+      ]
+    },
+    "specialServices": [
+      {
+        "code": "ADTK",
+        "message": "TO QR BY 10SEP 2359 JFK TIME ZONE OTHERWISE WILL BE XLD"
+      },
+      {
+        "code": "OTHS",
+        "message": "MISSING SSR CTCM MOBILE OR SSR CTCE EMAIL OR SSR CTCR NON-CONSENT FOR QR"
+      },
+      {
+        "code": "OTHS",
+        "message": "429454505745 - FARE RULE OVERRIDES TKT DEADLINE IF MORE RESTRICTIVE"
+      }
+    ],
+    "timestamp": "2026-09-09T04:27:31",
+    "bookingSignature": "68132e8f165babe2e79a50f7d6e9a102ece6a7c3e085962d6f41f2a90aed7e5798724148fc1572558130f07828476d57661a0d72fdb41334d6243707022b708e",
+    "request": {
+      "confirmationId": "PUVNWJ"
+    }
+  }
+}

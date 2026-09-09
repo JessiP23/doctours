@@ -10,7 +10,7 @@ export type OfferKind = 'flight' | 'hotel_rate' | 'hotel_property';
 export type BookingKind = 'flight' | 'hotel';
 /**
  * A booking is confirmed until it is either cancelled outright or superseded by a
- * rebooking. There is no 'paid' or 'pending' — see docs/DECISIONS.md.
+ * rebooking. There is no 'paid' or 'pending' — see README, judgment calls.
  */
 export type BookingStatus = 'confirmed' | 'cancelled' | 'superseded';
 

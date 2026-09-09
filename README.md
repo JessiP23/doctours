@@ -1,218 +1,223 @@
 # Doctours travel coordinator
 
-A chat application that books a real flight and a real hotel against the Sabre CERT
-sandbox for a medical-tourism trip. The conversation is the entire interface: no
-forms, no results page, no date picker.
+A chat agent that books a real flight and a real hotel against the Sabre CERT sandbox
+for a medical-tourism trip, then keeps the trip correct when things change — a
+cancelled flight, a moved procedure, a different hotel, a tight budget. The
+conversation is the patient's whole interface.
 
-The trip it books: **JFK → IST → JFK**, procedure 13 October 2026 at 8:00 AM Istanbul
-time, on the ground in Istanbul by 8:00 PM on the 12th, no flight home before noon on
-the 17th, economy, no checked bags, USD, staying at the **Holiday Inn City Istanbul**.
+Trip: **JFK → IST → JFK**. Procedure 13 Oct 2026, 08:00 Istanbul. On the ground by
+12 Oct 20:00. No return before 17 Oct 12:00. Economy, no bags, USD. Default hotel:
+Holiday Inn City Istanbul.
 
-- Live app: **https://doctours.vercel.app**
-- Health check: [/api/health](https://doctours.vercel.app/api/health) — four checks: configuration, database schema, Sabre auth, model
-- Judgment calls: [`docs/DECISIONS.md`](docs/DECISIONS.md)
-- Known bugs, honestly: [`docs/BUGS.md`](docs/BUGS.md)
-- Booking references from real runs: [`docs/BOOKINGS.md`](docs/BOOKINGS.md)
-- Manual test script: [`docs/E2E.md`](docs/E2E.md)
-- The plan this was built to: [`docs/PLAN.md`](docs/PLAN.md)
+Live: **https://doctours.vercel.app** · Health: `/api/health` · Operator console: `/ops`
 
-## How the agent is put together
+---
 
-One `POST /api/chat` per user turn. No streaming — a turn produces an array of short
-bubbles that the client reveals one at a time, so the chat reads like a person typing.
+## 1. Architecture
+
+**Pattern:** a single-agent **tool-use loop** (ReAct-style) with **state externalized to
+Postgres** and **deterministic guards in code** around the model. The model chooses and
+phrases; code decides, validates, computes and books.
 
 ```
-browser ──POST /api/chat {text}──▶ route ──▶ runTurn()            lib/agent/loop.ts
-                                              │
-   1. append the user message to `messages`
-   2. load history (raw Anthropic content blocks) from Supabase
-   3. loop, at most 8 times:
-        a. project TripState from `bookings` + recent `offers`      lib/agent/state.ts
-        b. build the system prompt around that live state           lib/agent/system.ts
-        c. call the model with tool_choice: "any", system cached
-        d. persist the assistant blocks
-        e. for each tool_use except `reply`: validate with the
-           tool's Zod schema, run it inside a provider trace,
-           record a row in `tool_calls`, return a tool_result
-        f. `reply` called → guards → humanize → return bubbles
+patient ──POST /api/chat──▶ runTurn()                          lib/agent/loop.ts
+  1. append message
+  2. loop ≤ 8×:
+     a. TripState ← bookings + offers + open events            lib/agent/state.ts
+     b. system prompt rebuilt from that state                  lib/agent/system.ts
+     c. model call, tool_choice: any, 15 tools
+     d. run tools (Zod-validated), persist results             lib/agent/tools/*
+     e. `reply` → guards → 1–4 plain-text bubbles              lib/agent/guard.ts
 ```
 
-**Trips.** There are no accounts. A httpOnly _visitor_ cookie owns the trips a browser
-has started and a second cookie remembers which one is open, so the Trips panel can list
-them with their progress ("fully booked · ABC12D, XYZ98W") and switching only ever opens
-a trip that browser created. Replacing the visitor id with a real user id is the whole of
-what authentication would change.
+| Layer    | Where                 | Rule                                                               |
+| -------- | --------------------- | ------------------------------------------------------------------ |
+| Rules    | `lib/trip/`           | Pure. Deadlines, cabin, party, hotel, derivation, ranking. No IO.  |
+| Agent    | `lib/agent/`          | Loop, prompt, tools, guards, board. Talks to repo + provider only. |
+| Provider | `lib/providers/sabre` | Auth, retries, request shapes, response mapping. No agent imports. |
+| Data     | `lib/db/`             | Supabase repo. Tables below.                                       |
+| UI       | `components/`, `app/` | Chat, compare panel, trips panel, operator console.                |
 
-**State.** The agent holds nothing in memory between requests. Everything is in
-Postgres: the conversation, the exact Anthropic content blocks, every offer the model
-was shown, every booking, every tool call. The model is _told_ the current state each
-turn rather than remembering it, so a page refresh, a new tab or a cold lambda all
-resume identically.
+Layering is enforced by tests (`tests/architecture.test.ts`).
 
-**Tools** (`lib/agent/tools/`). The Level 0 six, and the interesting part is what they refuse:
+**Stack:** Next.js 16 · React 19 · TypeScript · Tailwind 4 · Zod 4 · Supabase Postgres ·
+Anthropic Messages API · Sabre REST (Flight Shop, Flight Check, Create/Get/Cancel
+Booking, Get Hotel Details, Hotel Price Check, Get Hotel Avail) · Luxon · pino.
 
-| Tool                   | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `get_trip_state`       | Authoritative "what is actually booked", read from the database.                                                                                                                                                                                                                                                                                                                                                                     |
-| `search_flights`       | Takes a ranking, and optionally narrows to a departure or return date the rules already allow. It **cannot** set cabin, baggage, passengers or the route. Itineraries breaking a deadline are removed before the model sees them; the rejection reasons are returned so the agent can explain a refusal truthfully. Reports the total valid count and which dates have options, so it cannot claim a date is empty from a shortlist. |
-| `create_flight_order`  | Guard chain: the offer exists in this conversation → nothing already booked → not past its expiry → Flight Check still honours it → re-validated against the rules _after_ re-pricing → a changed price is reported, never charged.                                                                                                                                                                                                  |
-| `search_hotel_rates`   | Nights are derived from the flight actually booked, so the stay cannot drift from the itinerary.                                                                                                                                                                                                                                                                                                                                     |
-| `create_hotel_booking` | Hotel Price Check re-confirms the rate and mints the booking key, so an expired rate cannot book.                                                                                                                                                                                                                                                                                                                                    |
-| `reply`                | Terminal. Forced by `tool_choice: "any"`, so every turn ends in `{bubbles: string[1..4], expectsInput}` — plain text, short, no markdown.                                                                                                                                                                                                                                                                                            |
+### State (Postgres)
 
-Level 1 added the rest, all on the same pattern — rules in code, preferences typed,
-nothing bought in the turn that proposes it: `set_party_size`, `set_procedure_date`
-(every trip date derives from it), `compare_trip_totals` (flight + room ranked by the
-sum, arithmetic done in code), `search_hotels` / `choose_hotel` (alternatives only when
-the patient asks; the default stays pinned), `rebook_flight` / `rebook_hotel` (sell
-first, release second, `superseded` chain) and `cancel_trip`. The room tools take
-`earlyCheckIn` as a request filed on the reservation. `docs/PLAN-LEVEL-1.md` maps the
-brief's nine questions to them; `docs/E2E-LEVEL-1.md` is how each is verified against
-CERT. What the sandbox cannot originate — an airline cancelling, a clinic moving a
-procedure — an operator does from `/ops` (needs `OPS_TOKEN`), and the agent tells the
-patient without being asked.
+| Table           | Holds                                                                              | Why                                                               |
+| --------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `conversations` | `trip_rules` snapshot (dates, party, hotel, deadlines)                             | Rules are per trip and can change (party, procedure date, hotel). |
+| `messages`      | Raw Anthropic content blocks, `kind: patient \| system`                            | Exact replay; system rows hidden from the transcript.             |
+| `offers`        | `flight`, `hotel_rate`, `hotel_property` — summary + raw provider                  | The model books by offer id, never by a name it remembered.       |
+| `bookings`      | `confirmed \| cancelled \| superseded`, `replaced_by`, `raw` itinerary             | Real references only; rebooking chain; disruption baseline.       |
+| `trip_events`   | `flight_cancelled`, `flight_schedule_change`, `hotel_cancelled`, `procedure_moved` | Things done to the trip; raised first; acknowledged once told.    |
+| `tool_calls`    | Every tool input/output/error + Sabre requests                                     | Audit.                                                            |
 
-**Never reporting a booking that did not happen.** Four independent layers:
+The model remembers nothing between turns. Refresh, new tab, cold lambda — identical.
 
-1. A booking reference is only ever read from the provider's response. No code path
-   constructs one.
-2. The prompt's BOOKED section is rendered from the `bookings` table, and the model may
-   only quote references that appear there.
-3. `lib/agent/guard.ts` scans outgoing bubbles for record-locator-shaped tokens and
-   blocks any that are not in that table, correcting the model once.
-4. The same guard blocks a turn-closing reply that _announces_ a booking ("booking it
-   now") when no booking tool ran that turn.
+### Tools (`lib/agent/tools/`)
 
-**Provider isolation.** Tools depend on the `TravelProvider` interface
-(`lib/providers/types.ts`), never on Sabre. `lib/providers/sabre/` owns auth, retries,
-request shapes and the mapping from Sabre's reference-graph responses to normalized
-offers. Adding another GDS, or making the trip generic over origin and destination, is
-work inside that folder.
+Each tool = Zod schema + handler. The schema is what the model sees and what validates
+its input. Side effects require schema literals: `confirmed: true`, `theyToldMe: true`.
 
-**Sabre endpoints used** (agentic-ready REST, not the MCP server — see DECISIONS #12):
+| Tool                   | Does                                                                                  | Refuses / guarantees                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `get_trip_state`       | Authoritative state from the DB.                                                      | —                                                                                       |
+| `set_party_size`       | 1–4 travellers → trip rules.                                                          | `theyToldMe`; refuses once booked.                                                      |
+| `set_procedure_date`   | New date → every rule re-derived; says which bookings no longer fit.                  | `theyToldMe`; refuses past/unchanged; books nothing.                                    |
+| `search_flights`       | 4 Flight Shop calls in parallel → rule filter → live re-price → 12 offers.            | Model sets preferences only (rank, stops, airline, window). Cancelled flights excluded. |
+| `compare_trip_totals`  | Flight + cheapest room per implied stay, ranked by sum; trade-off sentence.           | Arithmetic in code. Options without a room have no total.                               |
+| `create_flight_order`  | Flight Check → Create Booking → Get Booking; stores held itinerary.                   | Offer must exist, be unexpired, re-validate after re-price; refuses if a flight exists. |
+| `search_hotels`        | Geo availability around arrival airport; distance, address, lead rate.                | Only when asked. Only properties Sabre priced.                                          |
+| `choose_hotel`         | Property → `rules.hotel`; room tools follow.                                          | `theyToldMe`; held room untouched (→ `rebook_hotel`).                                   |
+| `search_hotel_rates`   | Rooms for the nights the flight implies; night-before priced on early landing.        | Occupancy ≥ party; check-in time from the property.                                     |
+| `create_hotel_booking` | Price Check → Create Booking; guests from the flight booking; `earlyCheckIn` request. | Refuses if a room exists; request refused → books without, says so.                     |
+| `rebook_flight`        | Sell new → supersede old → cancel old → hotel fit check.                              | `confirmed`; passengers reused; never leaves the patient with no flight.                |
+| `rebook_hotel`         | Same order for rooms.                                                                 | `confirmed`; reports whether nights cover the flights.                                  |
+| `cancel_trip`          | Hotel first, then flight, each verified by Get Booking.                               | `confirmed` + reason; partial failure reported, never "cancelled".                      |
+| `reply`                | Terminal. 1–4 bubbles.                                                                | Forced every turn.                                                                      |
 
-```
-flights  POST /v1/offers/flightShop → /v1/offers/flightCheck → /v1/trip/orders/createBooking
-hotel    POST /v5/get/hoteldetails  → /v5/hotel/pricecheck   → /v1/trip/orders/createBooking
-```
+### Guards (`lib/agent/guard.ts`, `lib/agent/loop.ts`)
 
-Both bookings return Sabre's `confirmationId`, which is the reference the patient is
-given.
+| Guard            | Blocks                                                                     |
+| ---------------- | -------------------------------------------------------------------------- |
+| Reference        | Any locator-shaped token not in `bookings`.                                |
+| Announced action | "booking it now", "let me pull up…", "let me try again" with no tool call. |
+| Raised event     | A reply whose first bubble does not name an open `trip_event`.             |
+| Rule refresh     | Prompt re-read after a rule-changing tool, within the same turn.           |
 
-**Codeshares.** Flight Shop is cache-based and the sell is live. In CERT, a seat sold by
-one airline on another airline's flight (`operatingAirlineCode ≠ marketingAirlineCode`)
-passes Flight Check and then fails the sell with `UC`, every time, because the operating
-carrier's confirmation is not simulated; an airline selling its own seats confirms
-instantly. Flight Shop has no "online only" filter, so `TRIP_RULES.allowCodeshares`
-makes those itineraries ineligible in `validateOffer` — they are never shown, and the
-agent can say why if asked. See DECISIONS #18.
+Each failure sends the model back once with the reason.
 
-**Timezones.** Sabre returns local wall-clock times with no UTC offset. Deadline checks
-therefore use the zones declared in the trip rules, after asserting the segment's
-airport is the expected origin or destination; layovers are wall-clock differences at a
-single airport, needing no zone at all. An unknown connection airport can never cause a
-wrong booking.
+### Disruptions and proactivity
 
-## Running it
+Anything done to the trip from outside is a `trip_events` row: the operator console
+(`/ops`) writes them (source `simulated`); "Re-read from Sabre" compares the live order
+against the stored itinerary (source `provider`). After a console action the agent's
+turn runs via `after()`; the chat polls while idle, so the patient is told without
+typing. Events go to the top of the prompt and are acknowledged once delivered.
 
-Requires Node 22 and a Supabase project.
+### Compare panel (Level 2)
+
+Interviewed one user; the ask was options laid out side by side instead of read out of
+bubbles. `lib/agent/board.ts` projects the `offers` table into cards — price, times,
+stops, hours inside the deadline, nights implied, trip total when a matching room is on
+the table, badges, booked/expired state. No Sabre call, no model turn. Choosing a card
+sends a sentence into the chat; booking still goes through the normal confirm path.
+
+---
+
+## 2. Levels
+
+**Level 0** — book flight + hotel by conversation. Done, verified against CERT.
+
+**Level 1** — the brief's nine questions. All built, verified live.
+
+| #   | Question                       | How                                                                        |
+| --- | ------------------------------ | -------------------------------------------------------------------------- |
+| 1   | Outbound cancelled             | Event → agent speaks first → `rebook_flight` → `rebook_hotel`.             |
+| 2   | Return cancelled               | Same path; checkout moves.                                                 |
+| 3   | Lands before check-in          | Night-before rate priced; `earlyCheckIn` filed as a request.               |
+| 4   | Procedure moved                | `set_procedure_date` / console; rules re-derived; same rebooking sequence. |
+| 5   | Patient cancels                | `cancel_trip`, hotel first, verified.                                      |
+| 6   | Brings someone                 | Party size established, prices for all, occupancy filter, all on the room. |
+| 7   | Doesn't want the default hotel | `search_hotels` → `choose_hotel`; default pinned until asked.              |
+| 8   | Money is tight                 | `compare_trip_totals`; total ranked in code.                               |
+| 9   | Hates connections              | `rankBy: fewest_stops`, `maxStops: 0`.                                     |
+
+**Level 2** — side-by-side comparison panel. Built.
+
+**Level 3** — operator console + proactive notification. Built early; needed by Level 1.
+
+**Next:** remaining Level 2 views as projections of the same state; console booking
+edits as events on the same path; visitor cookie → user id.
+
+---
+
+## 3. Running it
+
+Node 22, a Supabase project, Sabre CERT credentials, an Anthropic key.
 
 ```bash
 npm install
-cp .env.example .env            # fill in the values
-npm run db:sql                  # paste the output into Supabase → SQL editor → Run
-                                # (prints every migration, in order)
-npm run dev                     # http://localhost:3000
-curl -s localhost:3000/api/health | jq
+cp .env.example .env        # fill in values; OPS_TOKEN enables /ops
+npm run db:sql              # paste output into Supabase → SQL editor → Run
+npm run dev                 # http://localhost:3000
+curl -s localhost:3000/api/health | jq   # env, schema, Sabre auth, model must be green
 ```
 
-Health must show four green checks (env, database schema, Sabre auth, model) before the
-chat will work.
+Checks: `npm run check` (typecheck, lint, format, 290 tests) · `npm run build`.
 
-### Talking to Sabre directly
+### Using it
 
-`scripts/sabre-smoke.ts` exercises the API without the agent, and saves raw responses to
-`tests/fixtures/sabre/` (account identifiers redacted) so mappers are written and tested
-against real payloads:
+1. New chat → answer the party-size question → `find me the cheapest flight` or
+   `money is tight, cheapest way to do the whole trip`.
+2. The **Compare N options** panel opens with every option; click a card or type.
+3. Give name, date of birth, gender, email, phone once. Confirm the read-back.
+4. Hotel follows automatically; ask for the night before or early check-in.
+5. `/ops`: airline cancels / changes schedule, hotel cancels, clinic moves the
+   procedure, re-read from Sabre. Return to the chat and wait — the agent speaks.
+6. Verify anything: `npm run sabre:smoke -- lookup <reference>`.
 
-```bash
-npm run sabre:smoke -- auth
-npm run sabre:smoke -- flights [departDate] [returnDate]
-npm run sabre:smoke -- hotel <hotelCode> [checkIn] [checkOut]
-npm run sabre:smoke -- hotels-probe          # which hotel search strategies return rates
-npm run sabre:smoke -- e2e --dry-run         # the whole booking path without creating anything
-npm run sabre:smoke -- e2e                   # books a flight and a hotel for real, verifies both
-                                             # with Get Booking, records them in docs/BOOKINGS.md
-npm run sabre:smoke -- lookup <reference>    # prove a reference is a real Sabre order
+### CLI (`scripts/sabre-smoke.ts`)
+
+```
+npm run sabre:smoke -- auth | flights | hotel <code> | hotels-probe
+npm run sabre:smoke -- e2e [--dry-run]            # whole booking path, no model
+npm run sabre:smoke -- lookup <reference>         # prove an order exists
+npm run sabre:smoke -- trips                      # conversation ids and what they hold
+npm run sabre:smoke -- check <conversationId>     # re-read order, record disruptions
+npm run sabre:smoke -- ops <action> <conversationId> [value]   # any console action
+npm run sabre:smoke -- cancel <reference>
 ```
 
-`e2e` is the deterministic proof of the integration — the same provider calls and
-trip rules the agent uses, with no model in the loop.
+---
 
-### Checks
+## 4. Judgment calls
 
-```bash
-npm run check      # typecheck, lint, prettier, tests
-```
+Where the brief was silent, the decision and why.
 
-`npm run check` also runs on `git push` via a pre-push hook. The mapper tests run
-against committed real CERT payloads, so they need no network.
+- **Rules in code, preferences from the model** — the model can't bend a deadline it
+  can't pass.
+- **Custom agent loop on the Anthropic SDK** — full control of tool dispatch, guards,
+  persistence.
+- **Terminal `reply` tool, `tool_choice: any`** — every turn ends in structured bubbles.
+- **State in Postgres, prompt rebuilt each turn** — no memory to drift; resumable.
+- **Offers persisted with ids** — book by id, never by recollection.
+- **Live re-price before showing any fare** — the number shown is the number booked.
+- **Codeshares excluded** — CERT accepts them at price check and refuses at sell.
+- **Order is the truth, not the shop** — shop times drift; stored itinerary comes from Get
+  Booking.
+- **No passport numbers** — nothing files them; name, DOB, gender only.
+- **Party size established, never assumed** — asked in the greeting; gated on search.
+- **Sell before release on every rebooking** — a patient is never left without a flight.
+- **`superseded` chain** — history says what replaced what and why.
+- **Cancellation needs `confirmed: true` and cancels the hotel first** — discussing can't
+  perform.
+- **Pinned hotel is a default, not a rule** — alternatives only when asked.
+- **Every date derives from the procedure date** — one function; nothing half-moved.
+- **Arithmetic in code** — totals and the trade-off sentence are computed, repeated by
+  the model.
+- **Operator console instead of a fake feed** — visible simulation; one patient interface.
+- **Agent speaks first** — an untold event outranks whatever was typed.
+- **Compare panel reads the offers table** — no second interface that books.
+- **Agency card from the environment** — the patient is never asked for payment.
 
-## What a booking actually is
+---
 
-Both bookings are Sabre orders in the CERT environment, retrievable by reference.
-`npm run sabre:smoke -- lookup <reference>` reads one back and prints what Sabre holds.
-A confirmed flight order looks like this:
+## 5. Known bugs and limits
 
-| Field                                     | Meaning                                                                                                            |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `bookingId`                               | the record locator quoted to the patient, e.g. `OCGMJQ`                                                            |
-| `flights[].flightStatusCode`              | **`HK` = confirmed** — the seat is held. This is the field that proves a booking is real                           |
-| `flights[].bookingClass`, `cabinTypeName` | the class actually sold, e.g. `V` / `ECONOMY`                                                                      |
-| `startDate`, `endDate`                    | the span the order holds                                                                                           |
-| `isTicketed`                              | `false` — booked, not yet ticketed. Ticketing is a separate step (Fulfill Flight Tickets) and is out of scope here |
-| `travelers[]`                             | the passenger as filed                                                                                             |
-
-A hotel order carries `hotels[]` with the property name, `checkInDate` / `checkOutDate`,
-the room and rate, `paymentPolicy` (`DEPOSIT` here — hence the agency card), and
-`confirmationId`, which is _the hotel's own_ confirmation number, separate from the Sabre
-record locator.
-
-**"Fixed property"** means what the brief asks for: one named hotel where every patient
-stays, not a hotel search. It is `TRIP_RULES.hotel` — Holiday Inn City Istanbul, CERT
-property `100071112`. The **nights are not fixed**: they are derived from the flight
-actually booked, so a flight landing a day early produces a six-night stay and a
-different flight a five-night one. Both cases have been booked and verified.
-
-## Deploying
-
-1. Import the repo on Vercel (framework auto-detects as Next.js; no build config needed).
-2. Set these environment variables for Production and Preview:
-
-   | Variable                    | Notes                                     |
-   | --------------------------- | ----------------------------------------- |
-   | `ANTHROPIC_API_KEY`         |                                           |
-   | `ANTHROPIC_MODEL`           | e.g. `claude-sonnet-4-5`                  |
-   | `SABRE_BASE_URL`            | `https://api.cert.platform.sabre.com`     |
-   | `SABRE_USER_ID`             | as issued, e.g. `V1:<EPR>`                |
-   | `SABRE_PASSWORD`            |                                           |
-   | `SABRE_PCC`                 |                                           |
-   | `SUPABASE_URL`              |                                           |
-   | `SUPABASE_SERVICE_ROLE_KEY` | server-only; never exposed to the browser |
-
-3. Deploy, then open `/api/health` and confirm four green checks.
-
-The chat route runs on the Node runtime with `maxDuration = 60`: a flight search makes
-several concurrent Sabre calls and the agent may take a few model turns.
-
-## Logging
-
-Every tool call is written to the `tool_calls` table with its input, output, error, the
-upstream HTTP requests it made (method, URL, status, duration) and total duration —
-durable proof that Sabre was really called, since platform logs are ephemeral. The same
-events go to stdout as JSON via pino, with credentials redacted at the logger.
-
-```sql
-select created_at, tool_name, duration_ms, provider_requests, error
-from tool_calls order by id desc limit 20;
-```
+- Fares expire in ~20 minutes; a slow patient is re-priced.
+- Disruptions are simulated; CERT has no feed. Real detection only runs on "Re-read".
+- Istanbul has three properties in the sandbox.
+- A booking turn takes 30–50 s; Sabre's price check → create → read-back are sequential.
+- Output guards are regexes; an unseen phrasing gets through until added.
+- The model still sometimes narrates instead of acting; guards catch known forms.
+- No accounts; a browser cookie owns its trips.
+- Flight Shop times drift from the order by minutes; handled by using the order as
+  baseline, but the first `check` on an old booking only records it.
+- Hotel supplier may reject a reservation carrying a special instruction; the room is
+  then booked without it.
+- Rules default check-in 15:00 for the pinned hotel; the property reports 14:00. The
+  property's value is preferred when present.

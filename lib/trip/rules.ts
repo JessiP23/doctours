@@ -73,7 +73,7 @@ export const TRIP_RULES: TripRules = {
     // Pinned after probing CERT inventory: of the three Istanbul properties that
     // return bookable rates for these dates (Holiday Inn City $107.94/night,
     // Hilton $382.54, Ritz-Carlton $468.91) this is the cheapest and sits in
-    // Fatih, close to the hospital district. See docs/DECISIONS.md #13.
+    // Fatih, close to the hospital district. See README, judgment calls.
     providerPropertyId: '100071112',
     name: 'Holiday Inn City Istanbul',
     city: 'Istanbul',

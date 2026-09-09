@@ -10,7 +10,7 @@
  *   npm run sabre:smoke -- hotels-probe [checkIn] [checkOut]     try every strategy, report which returns rates
  *   npm run sabre:smoke -- e2e [--dry-run]                       the whole booking path, no model: shop → check →
  *                                                                book flight, then rooms → price check → book hotel;
- *                                                                records references in docs/BOOKINGS.md
+ *                                                                records references in BOOKINGS.md
  *   npm run sabre:smoke -- lookup <reference>                    Get Booking: prove a reference is a real order
  *   npm run sabre:smoke -- cancel <reference>                    cancel an order and verify it is gone
  *   npm run sabre:smoke -- check <conversationId>                re-read the order; record any disruption found
@@ -408,7 +408,7 @@ async function pricecheck() {
  * model. This is the deterministic proof that the integration works; the chat
  * adds conversation on top of exactly these calls.
  *
- * Bookings made here are real CERT orders and are recorded in docs/BOOKINGS.md.
+ * Bookings made here are real CERT orders and are recorded in BOOKINGS.md.
  * --dry-run stops before creating anything.
  */
 async function e2e() {
@@ -612,8 +612,8 @@ async function e2e() {
     `| ${date} | flight | ${flight.bookingReference} | ${flight.id} | scripts/sabre-smoke.ts e2e | $${priced.price.amount} ${chosen.slices[0].segments[0].carrier}, ${stay.nights} nights derived |`,
     `| ${date} | hotel | ${hotel.bookingReference} | ${hotel.id} | scripts/sabre-smoke.ts e2e | ${room.propertyName}, ${room.roomName}, $${hotel.total.amount} |`,
   ];
-  await appendFile(path.resolve(process.cwd(), 'docs/BOOKINGS.md'), rows.join('\n') + '\n');
-  step('recorded in docs/BOOKINGS.md', { rows: rows.length });
+  await appendFile(path.resolve(process.cwd(), 'BOOKINGS.md'), rows.join('\n') + '\n');
+  step('recorded in BOOKINGS.md', { rows: rows.length });
 }
 
 /**
