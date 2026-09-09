@@ -115,78 +115,110 @@ the sum. The arithmetic is in code; the model repeats it.
 
 ## Part 2 — how it's built
 
-**SAY:** Next.js on Vercel, Postgres on Supabase, the Anthropic API with a custom
-agent loop, Sabre behind a provider interface.
+**SAY:** Stack: Next.js on Vercel, Postgres on Supabase, Anthropic's Messages API,
+Sabre's REST APIs. Sabre sits behind a provider interface — the agent never talks to
+it directly.
 
-**SAY:** Fifteen tools, each a Zod schema plus a handler. The model never sets cabin,
-bags, passengers, dates or deadlines — those are trip rules in code. It fills
-preferences; code applies them. Booking needs `confirmed: true`; party size, procedure
-date and hotel need `theyToldMe: true`.
+**SAY:** The agent is a tool loop. Each turn the model gets the system prompt, the
+transcript and fifteen tools, and must end by calling `reply`. Every tool is a Zod
+schema plus a handler; the schema is what the model sees and what validates its
+input.
 
-**SAY:** State lives in Postgres, not the model. Every turn the prompt is rebuilt from
-the tables: bookings with real references, offers with ids, untold events, and the
-next step. Refresh or cold start resumes identically.
+**SAY:** Hard constraints are code, not prompt. Deadlines, cabin, bags, party size and
+hotel are trip rules stored per conversation and derived from the procedure date.
+Tools read them; the model can't pass them. Every itinerary is validated against them
+before the model sees it and again before booking.
 
-**SAY:** Guards, because the unforgivable failure is a booking that didn't happen:
-references only copied from Sabre; invented locators blocked; "booking it now" with no
-tool call blocked; untold changes must be the first bubble. Each nudges the model
-once. 290 tests, most against real Sabre fixtures.
+**SAY:** State is in Postgres. The model remembers nothing between turns — the prompt
+is rebuilt each time from the bookings, offers and events tables. Offers are
+persisted with ids, so the model books by id, never by a name it remembered.
+
+**SAY:** What to do next is computed from the bookings table — flight, then room,
+then questions — and any untold event outranks all of it.
+
+**SAY:** Side effects are gated by schema literals: `confirmed: true` to book or
+cancel, `theyToldMe: true` to change party size, procedure date or hotel.
+
+**SAY:** Output is guarded before it reaches the patient: references must exist in
+the bookings table, announced actions must have a tool call behind them, an untold
+event must be the first bubble. Failures send the model back once with the reason.
+
+**SAY:** Disruptions are events, not messages: the console and the Sabre re-read both
+write `trip_events`; the loop raises them and marks them told. Rebooking sells first
+and releases second, and every replaced booking is `superseded` with a pointer to
+its replacement.
 
 ---
 
 ## Part 3 — level reached, and next
 
-**SAY:** Level 0 done and verified. Level 1: all nine scenarios built and verified
-live. From Level 2, the side-by-side comparison. From Level 3, the operator console
-and the agent speaking first.
+**SAY:** Level 0 is complete and verified against CERT. Level 1 is complete — all nine
+scenarios built, tested, and run live. Two pieces from later levels are in: the
+side-by-side comparison from Level 2, and the operator console plus proactive
+notification from Level 3, because the disruption scenarios needed them.
 
-**SAY:** Rest of Level 2: more projections of state the agent already keeps, never a
-second interface that books. Level 3: operator edits are already events told by the
-same loop; editing a booking from the console is one more action. Auth: the visitor
-cookie becomes a user id.
-
----
-
-## Part 4 — judgment calls (38 in `docs/DECISIONS.md`)
-
-**SAY:** Rules in code, preferences typed.
-
-**SAY:** One hotel by design; others only on request.
-
-**SAY:** No passport numbers — nothing here files documents.
-
-**SAY:** Cancel-and-rebook, sell first — never leave a patient without a flight; the
-superseded chain keeps history honest.
-
-**SAY:** An operator console instead of a patient dashboard — the sandbox has no
-airline or clinic, and the patient keeps one interface.
-
-**SAY:** Codeshares excluded because the sandbox can't confirm them; totals computed
-in code; the compare panel reads the offers table, not Sabre.
+**SAY:** Next: finish Level 2 the same way — each view a projection of state the agent
+already keeps, choosing feeds the chat, nothing books on its own. Then Level 3:
+booking edits from the console become one more event kind on the same path, and the
+visitor cookie becomes a real user id. No new architecture; more tools and views on
+the same loop.
 
 ---
 
-## Part 5 — what's broken (44 in `docs/BUGS.md`, most fixed)
+## Part 4 — judgment calls
 
-**SAY:** Fares expire in about twenty minutes; a slow patient comes back to a dead
-offer and gets re-priced.
+**SAY:** Where the brief was silent I wrote the decision down — thirty-eight of them
+in `docs/DECISIONS.md`. The ones that shaped the system:
 
-**SAY:** Sandbox quirks: cached shop times drift from the order, so the order became
-the baseline; a codeshare accepted at price check was refused at booking; the hotel
-supplier rejected an early check-in note, so the room now books without it.
+**SAY:** Rules in code, preferences from the model. The brief's constraints are not
+negotiable, so the model was never given a way to change them.
 
-**SAY:** Istanbul has three properties in the sandbox — alternatives are real but few.
+**SAY:** No passport numbers. Nothing here files travel documents, so collecting them
+is liability without purpose. Name, date of birth, gender; the airline checks the
+passport.
 
-**SAY:** Disruptions are simulated; there is no feed. The real detection path is the
-"Re-read from Sabre" button.
+**SAY:** Cancel-and-rebook instead of Sabre's modify. Two calls I could verify, sell
+before release, and a superseded chain so the history is honest.
 
-**SAY:** A booking turn takes thirty to fifty seconds — Sabre's calls must run in
-sequence.
+**SAY:** The pinned hotel is a default, not a rule. The brief pins it; the brief also
+asks for alternatives. Book it without asking, search only when asked.
 
-**SAY:** Guards are regexes; a new phrasing gets through until it's added.
+**SAY:** An operator console rather than a fake feed. The sandbox can't cancel a
+flight, so a human writes the event a feed would write — visibly simulated, and the
+patient still has one interface.
 
-**SAY:** No accounts — a browser cookie owns its trips.
+**SAY:** Codeshares excluded. CERT accepted one at price check and refused it at
+booking; a rule beats a retry.
 
-**SAY:** Everything is in the repo: a walk-through per scenario, a decisions log, a
-bugs file updated with the code. The rule throughout: a number the tools didn't
-return is a number the patient doesn't hear.
+**SAY:** Arithmetic in code. Trip totals and the trade-off sentence are computed;
+the model repeats them.
+
+---
+
+## Part 5 — what's broken
+
+**SAY:** Forty-four entries in `docs/BUGS.md`, most fixed. What's still true:
+
+**SAY:** Fares expire in about twenty minutes. A patient who pauses comes back to a
+dead offer and has to be re-priced.
+
+**SAY:** Disruptions are simulated. CERT has no cancellation feed; the console writes
+what a feed would. The real detection — re-reading the order — only runs when
+triggered.
+
+**SAY:** Istanbul has three properties in the sandbox. The hotel search is real; the
+choice is thin.
+
+**SAY:** Booking turns take thirty to fifty seconds. Sabre's price-check, create and
+read-back can't be parallelised.
+
+**SAY:** The output guards are regexes. They catch the phrasings I've seen; a new one
+gets through until it's added.
+
+**SAY:** No accounts. A browser cookie owns its trips.
+
+**SAY:** The model still sometimes narrates instead of acting — "let me try again" with
+no tool call. The guard catches the known forms; it's a mitigation, not a fix.
+
+**SAY:** Everything is in the repo: a walk-through per scenario, the decisions log,
+and the bugs file, updated in the same commits as the code.
