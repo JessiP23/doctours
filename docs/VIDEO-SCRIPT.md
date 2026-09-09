@@ -1,224 +1,279 @@
-# Video script — Doctours travel coordinator
+# Video script
 
-Target: 10–12 minutes. Two windows open: the chat (deployed URL) and the operator
-console at `/ops`. A terminal for `npm run sabre:smoke -- lookup <ref>`. Supabase
-table view on a third tab for the `bookings` chain. Speak plainly; every claim
-below is something the screen shows.
+Only two kinds of line. **TYPE** is what you type or click. **SAY** is what you read
+aloud. Have the dev-server log visible in a corner: every SAY about a tool matches a
+`tool ok` line you can point at.
 
-Structure follows the brief: **1** show it working, **2** how the agent is put
-together, **3** the level reached and the next one, **4** judgment calls, **5**
-what's broken.
-
----
-
-## 0 · Opening (30s)
-
-**Say:** "This is Doctours' travel coordinator. A patient has a procedure in
-Istanbul on 13 October. The only interface is this conversation — it books a real
-flight and a real hotel against Sabre's certification sandbox, and every reference
-you'll see can be looked up in Sabre. I'll show it working end to end, then how it's
-built, what I decided where the brief was silent, and what's still broken."
+Setup before recording: `npm run dev`; chat at `localhost:3000` (new chat); `/ops`
+open in a second tab, token entered; a terminal for `npm run sabre:smoke -- lookup`;
+Supabase `bookings` table in a third tab.
 
 ---
 
-## 1 · Show it working (5–6 min)
+## Part 1 — the automation, step by step
 
-### 1a · A whole trip, priced as a whole (Level 0 + Q8, Q9, Q6)
+**SAY:** This is Doctours' travel coordinator. A patient has a procedure in Istanbul
+on 13 October. The conversation is their whole interface. Everything I book is real,
+against Sabre's certification sandbox, and I'll show the agent's internals as we go.
 
-Fresh chat. The greeting asks how many are travelling.
+**SAY:** The agent opened the conversation itself — there's no model call for that,
+it's a fixed greeting — and its first question is the party size, because prices,
+room occupancy and passports all depend on it.
 
-**Type:** `just me`
-**Say:** "It asks the party size before it searches — prices, room occupancy and
-how many passports it needs all depend on it, so it's trip state, not an assumption."
+**TYPE:** `just me`
 
-**Type:** `money is tight, what's the cheapest way to do the whole trip, flights and hotel?`
-**Say (while it runs, ~20s):** "It's re-pricing eleven flights live and pricing a room
-for every distinct stay those flights imply — the cheapest fare often lands a day
-early and adds a night. It ranks by the sum, and the sentence it gives me has the
-arithmetic already done, so the model never adds prices."
+**SAY:** Two tool calls just happened. `set_party_size` with `travellers: 1` and
+`theyToldMe: true` — that literal is in the schema, so the model can't file a number
+the patient never said; it's written to this trip's rules snapshot in Postgres. Then
+`search_flights`: four Sabre Flight Shop calls in parallel, one per allowed date pair,
+about thirty-five itineraries back. Code, not the model, validates each one against
+the trip rules — on the ground by the twelfth at eight pm, no return before the
+seventeenth at noon, economy, no codeshares. The survivors are re-priced live with
+Flight Check, the twelve most useful are persisted as offers with ids, and the model
+is handed those ids. It read out one; the panel opened with all twelve.
 
-When the answer lands: point at the total, the two halves, and the trade-off.
+**SAY:** The panel is not a tool and not a second interface. It's a projection of the
+offers table — the same rows the model sees — with the facts a patient compares on:
+hours inside the deadline, nights implied, cheapest and non-stop badges.
 
-**Click** the **Compare N options** pill. **Say:** "Same options, side by side. This
-panel is a projection of what the agent already showed — same ids, same prices, no
-new search. What it adds is what you compare on: how far inside the deadline each
-flight lands, the nights it implies, the trip total when a matching room is on the
-table." **Click** _Take this flight_ on the cheapest. **Say:** "Choosing doesn't book.
-It says so in the chat, and the agent takes it from there — the conversation stays
-the interface."
+**TYPE:** click **Take this flight** on the cheapest card
 
-Give details when asked, confirm the read-back, watch it book flight then room.
+**SAY:** Clicking sent a sentence into the chat. Nothing was booked. The model matched
+the sentence to an offer id under LIVE STATE and asked for details — name, date of
+birth, gender, email, phone. No passport number: nothing here files travel documents,
+so we don't collect them.
 
-**Say:** "Two references. Both real." Terminal: `lookup <flight ref>` — segments
-`HK`. "And it told me I land before check-in — the hotel says 2 pm."
+**TYPE:** `gukesh amir, 6 may 1950, male, jessi316866@gmail.com, 6463875453`
 
-### 1b · The airline cancels the flight — and the agent speaks first (Q1, Q2)
+**SAY:** It reads the details back before booking. That's a prompt rule: a typo in a
+ticketed name costs money and only the patient can catch it.
 
-Console tab. **Say:** "The sandbox can't cancel a flight for us, so this console
-plays the airline. It writes the event a real feed would write and nothing else — no
-booking is touched, Sabre isn't called."
+**TYPE:** `yes`
 
-**Click** _Airline cancels the outbound_. Switch to the chat. **Don't type.**
+**SAY:** `create_flight_order`. Guard chain first: the offer exists in this
+conversation, nothing is already booked, the fare hasn't expired. Then three Sabre
+calls in order — Flight Check re-prices, Create Booking sells, Get Booking reads the
+order back. The reference you see was copied from Sabre's response; no code path
+constructs one. The itinerary Sabre actually holds is stored as the baseline for
+disruption checks. Then, without being asked, it went to the hotel: `nextStep` is
+computed from the bookings table — flight booked, no room, so room. `search_hotel_rates`
+derived the nights from the booked flight, called Get Hotel Details, and because this
+flight lands before check-in it priced the night before as well.
 
-**Say:** "I haven't said anything." Wait for the typing indicator and the bubble.
-"It raised it before anything else, named the exact flights, and said what it does
-to the hotel nights."
+**TYPE:** `the 5 nights, and ask them for early check-in`
 
-**Type:** `ok find me flights` → **Say:** "The cancelled flight isn't offered back —
-the sandbox still lists it; the search excludes it by carrier, number and date."
-**Type:** `take the cheapest` → confirm. **Say:** "Rebooking sells the replacement
-first and releases the old order second. A patient with no flight is the worst
-state, so a failed sell leaves them where they were. Then it tells me the room no
-longer covers the new flights." → **Type:** `yes move the room`.
+**SAY:** `create_hotel_booking` with `earlyCheckIn: true` and no guests — the travellers
+come from the flight booking, so it never asks for details twice. Hotel Price Check
+mints the booking key, Create Booking sells the room with an early check-in
+instruction written by code from the itinerary, not typed by the model. If the
+supplier refuses the note, it books the room without it and says so. Two references,
+both real.
 
-Supabase tab: `select kind, booking_reference, status, replaced_by, change_reason
-from bookings order by created_at`. **Say:** "The old rows are `superseded`, each
-pointing at what replaced it, with the reason in the words I was given. The trip
-moved; it wasn't abandoned."
+**TYPE:** in the terminal: `npm run sabre:smoke -- lookup <flight reference>`
 
-### 1c · The clinic moves the procedure (Q4)
-
-Console: **Clinic moves the procedure to** — default a week later. **Click.**
-**Say:** "Every date on this trip derives from one fact, the procedure date: land by
-the evening before, no return before four days after, which days to shop. Move the
-date, everything recomputes." Chat: wait; it raises it, then `ok find me flights` →
-dates are the new ones → rebook → room follows. (If short on time, show the console
-flash and the first bubble only.)
-
-### 1d · Not that hotel (Q7), early landing (Q3), cancel (Q5)
-
-**Type:** `I don't want this hotel, what else is there?` → real properties with
-distance from the airport and a price for these nights. **Say:** "The default hotel
-stays pinned and is booked without asking. Alternatives only when the patient asks —
-and only what Sabre returned." Open the compare panel: hotel cards. **Type:** `the
-Hilton` → it switches the trip's hotel and searches rooms there.
-
-**Type:** `can I get into the room early?` → two honest answers: an extra paid night
-with its price, or a request the hotel may not honour. **Say:** "Two options, both
-real — one is a rate, the other is text on the reservation. It never promises early
-check-in."
-
-**Type:** `cancel the whole thing` → it states the cost → `yes cancel it` → hotel
-first, then flight. Terminal: `lookup` both — empty. **Say:** "Cancellation needs an
-explicit confirmed flag in the tool schema; discussing cancelling can't perform it."
+**SAY:** Every segment HK — held and confirmed. That's the same Get Booking call the
+agent used.
 
 ---
 
-## 2 · How it's put together (2–3 min)
+**SAY:** Now the part the brief calls Level 1: things that happen to the trip. The
+sandbox has no airline feed, so this console plays the airline. It writes one row to
+`trip_events` and nothing else — no booking touched, Sabre not called.
 
-Show `lib/agent/tools/` in the editor, then `lib/agent/system.ts`, then the
-`bookings` / `offers` / `trip_events` tables.
+**TYPE:** in `/ops`, on this trip, click **Airline cancels the outbound**
 
-**Say:**
+**SAY:** Switch to the chat and don't type. The console handed the conversation to
+the agent after responding — Next.js `after()` — and the chat polls while idle.
 
-"Next.js on Vercel, Postgres on Supabase, the Anthropic Messages API with a custom
-agent loop, and Sabre's REST APIs behind a `TravelProvider` interface — the agent
-never imports Sabre.
+**TYPE:** wait
 
-**Tools.** Fifteen, each a Zod schema plus a handler; the schema is what the model
-sees and what validates its input. The interesting part is what they refuse. The
-model can't set cabin, baggage, passengers, dates or deadlines — those are trip
-rules, in code, snapshotted per conversation and derived from the procedure date.
-The model fills preferences: cheapest, fewest stops, a date the rules already
-allow. Every itinerary is validated against the rules before the model sees it and
-again before it's booked. Booking tools take a `confirmed: true` literal; party size
-and the procedure date take `theyToldMe: true`, so a value the patient never said
-can't be filed.
+**SAY:** It spoke first. The open event went to the top of its system prompt, above
+anything I could have typed, and a guard checked that the first bubble actually names
+the cancellation — if it hadn't, the loop would have sent it back once. The event is
+now acknowledged, so it won't be repeated.
 
-**State.** The agent remembers nothing between requests. Every turn the system
-prompt is rebuilt from the database: what's booked with real references, what
-options are on the table with their ids, what still needs doing, and anything that
-happened to the trip the patient hasn't been told. A refresh, a new tab or a cold
-lambda all resume identically. Offers are persisted, so the model books by id and
-never by a name it remembered.
+**TYPE:** `ok find me flights`
 
-**Deciding what to do next.** `nextStep` is computed, not remembered: no flight →
-flight; flight and no room → room; both → answer questions. Open trip events outrank
-everything and go first in the prompt. The loop ends every turn with a `reply` tool
-that returns one to four plain-text bubbles.
+**SAY:** Same `search_flights`, one difference: the cancelled flight is excluded by
+carrier, number and date. The sandbox still sells it; we won't offer it back.
 
-**Guards, because the one unforgivable failure is reporting a booking that didn't
-happen.** A reference is only ever copied from Sabre's response. The prompt may only
-quote references in the bookings table. A regex guard blocks locator-shaped tokens
-that aren't in that table. Another catches 'booking it now' or 'let me try again'
-with no tool call behind it. A third checks the first bubble actually raises an
-untold change. Each nudges the model once with the reason.
+**TYPE:** click **Take this flight** on the cheapest → `yes`
 
-**Proactive.** An operator action runs the agent's turn after the response; the
-chat polls while idle and reveals what it hasn't shown. Events are acknowledged once
-delivered, so nothing is re-announced."
+**SAY:** `rebook_flight`, not `create_flight_order` — create refuses while a flight
+exists. It sells the replacement first, records the old row as superseded pointing at
+the new one, and only then cancels the old order. A patient holding no flight is the
+worst state, so a failed sell changes nothing. Traveller details were reused. Then it
+compared the room to the new flights: the nights no longer cover them, so it searched
+rooms for the new dates and is waiting for a yes.
+
+**TYPE:** `yes move the room`
+
+**SAY:** `rebook_hotel`, same order: new room sold, old row superseded, old
+reservation released.
+
+**TYPE:** Supabase: `select kind, booking_reference, status, replaced_by, change_reason from bookings order by created_at`
+
+**SAY:** The chain. Nothing was deleted; the trip moved and the history says why, in
+the words the patient was given.
 
 ---
 
-## 3 · Level reached, and the next one (1 min)
+**TYPE:** in `/ops`, click **Clinic moves the procedure to** — leave the default date
 
-**Say:** "Level 0 complete and verified against CERT. Level 1: all nine scenarios
-built and verified live. From Level 2, the side-by-side comparison. From Level 3, the
-operator console and the agent speaking first — the disruption scenarios needed
-them, so they came early.
+**SAY:** Every date on this trip derives from one fact, the procedure date: arrive by
+the evening before, leave no earlier than four days after, which days to shop.
+`moveProcedure` recomputed the rules snapshot, judged the booked flights against them
+with the same validators the search uses, and wrote a `procedure_moved` event.
 
-The rest of Level 2 I'd approach the same way the compare view was done: as
-projections of state the agent already keeps, never as parallel interfaces that
-book on their own. Level 3 is mostly here — operator edits are `trip_events`, told
-to the patient by the same loop; what's missing is the operator editing a booking
-directly, and that would be another action on the console writing the same event.
-Auth is one change: the visitor cookie becomes a user id."
+**TYPE:** wait
 
----
-
-## 4 · Judgment calls (1–2 min) — `docs/DECISIONS.md`, 38 entries
-
-Pick five to say aloud:
-
-- **Rules in code, preferences typed.** The deadlines, cabin, bags and party size
-  are never the model's to set. It maps the patient's words onto a schema; code
-  applies it.
-- **One hotel by design, others on request.** The brief pins a hotel; a patient who
-  doesn't want it is a preference, not a rule change — so the default is booked
-  without asking, and the search runs only when asked.
-- **No passport numbers.** Nothing here files travel documents, so collecting them
-  would be holding sensitive data for no purpose. Name, date of birth, gender; the
-  airline checks the passport at the desk.
-- **Cancel-and-rebook, sell first.** No `modifyBooking`. Two calls I trust, in the
-  order that never leaves a patient without a flight, and a `superseded` chain that
-  makes the history honest.
-- **An operator console, not a patient dashboard.** The sandbox has no airline or
-  clinic; a console that writes only events lets the demo be honest about what's
-  simulated. The patient still has exactly one interface.
-
-Also worth a sentence each: codeshares excluded because CERT can't confirm them;
-the order, not the shopped cache, is the baseline for disruption checks; totals and
-the trade-off sentence computed in code; the compare panel reads the offers table.
+**SAY:** Raised first, unprompted, with the new date and which leg no longer fits.
+From here it's the same rebooking sequence, on the new dates. The patient could also
+have told us themselves — `set_procedure_date` runs the same function, without the
+event, because then they already know.
 
 ---
 
-## 5 · What's broken (1 min) — `docs/BUGS.md`, 42 entries, most fixed
+**TYPE:** `I don't want this hotel, what else is there?`
 
-**Say it straight:**
+**SAY:** `search_hotels`. The default hotel is booked without asking; alternatives
+only when asked. This is Sabre's geo availability around the arrival airport for the
+nights the flights imply — the three properties Istanbul has in the sandbox, each
+with distance, address and a price for these nights, each persisted with an id. The
+panel shows them as cards.
 
-- "Fares expire after about twenty minutes. A patient who goes to find their
-  passport comes back to a dead offer; the agent re-prices and says so, but it's a
-  real gap in the experience. (BUGS #6)"
-- "CERT quirks I had to work around, not fix: the flight shop is cache-based and
-  its times drift from the order by minutes, which produced false schedule changes
-  until the order became the baseline; a codeshare Flight Check accepted was refused
-  at Create Booking, which is why codeshares are excluded; and the hotel supplier
-  rejected a reservation with an early check-in note attached, so the room is now
-  booked without it and the patient is told. (#13, #19, #41)"
-- "Istanbul inventory in the sandbox is three properties. Alternatives work, but the
-  list is short, and that's the sandbox, not the search."
-- "Disruptions are simulated. There is no cancellation feed in CERT; the console
-  writes what a feed would write, and the real detection path — re-reading the order
-  and comparing statuses — is exercised only by the 'Re-read from Sabre' button."
-- "Latency: a booking turn is thirty to fifty seconds because Sabre calls run in
-  sequence where they must — price check, create, read back. Searches are
-  parallelised; bookings can't be."
-- "The model still occasionally announces work it hasn't done. The guards catch
-  the patterns I've seen and nudge once; they are regexes, not understanding, and
-  a new phrasing will get through until it's added."
-- "No accounts. A browser cookie owns its trips. Fine for a demo, not for a patient."
+**TYPE:** click **Stay here** on the Hilton
 
-**Close:** "Everything shown is in the repo with a walk-through for each scenario,
-a decisions log, and a bugs file that's updated in the same commit as the code.
-The rule I held throughout: a number the tools didn't return is a number the
-patient doesn't hear."
+**SAY:** `choose_hotel`: the trip's hotel is trip state, like the party size. It
+rewrote `rules.hotel`; every room tool reads the rules, so they follow without
+knowing anything changed. The room already held is untouched until the patient agrees
+to move it.
+
+**TYPE:** `money is tight — was there a cheaper way to do the whole trip?`
+
+**SAY:** `compare_trip_totals`. The cheapest flight isn't the cheapest trip when it
+lands a day early and adds a night. It re-priced the cheapest flights for each
+distinct stay, priced one room per stay concurrently, ranked by the sum, and wrote the
+trade-off sentence with the subtraction already done. The model repeats a number; it
+never computes one.
+
+**TYPE:** `cancel the whole thing`
+
+**SAY:** It states the cost first and books nothing. `cancel_trip` takes a
+`confirmed: true` literal, so discussing cancellation can't perform it.
+
+**TYPE:** `yes cancel it`
+
+**SAY:** Hotel first, then flight, each verified by reading the order back. If either
+were still live it would say which, never "cancelled".
+
+**TYPE:** terminal: `lookup` both references
+
+**SAY:** Both empty. That's the automation, end to end.
+
+---
+
+## Part 2 — how it's put together
+
+**SAY:** Next.js on Vercel, Postgres on Supabase, the Anthropic Messages API with a
+custom agent loop, Sabre REST behind a `TravelProvider` interface the agent never
+looks past.
+
+**SAY:** Fifteen tools, each a Zod schema and a handler. The schema is both what the
+model sees and what validates its input. The model never sets cabin, baggage,
+passengers, dates or deadlines — those are trip rules in code, snapshotted per
+conversation, derived from the procedure date. The model fills preferences; code
+applies them. Booking takes `confirmed: true`; party size, procedure date and hotel
+take `theyToldMe: true`.
+
+**SAY:** State lives in Postgres, not in the model. Every turn the system prompt is
+rebuilt from the tables: what's booked with real references, which offers are on the
+table with their ids, what's still untold, and `nextStep` computed from the bookings.
+A refresh, a new tab or a cold lambda resume identically. Rules can change mid-turn —
+party size, procedure date, hotel — and the loop re-reads them so the prompt never
+describes yesterday's trip.
+
+**SAY:** Four guards, because the one unforgivable failure is reporting a booking that
+didn't happen. References are only copied from Sabre. The prompt may only quote
+references in the bookings table. A regex blocks locator-shaped tokens that aren't in
+it. Another catches "booking it now" or "let me try again" with no tool call behind
+it. Another checks that an untold change is the first bubble. Each nudges the model
+once with the reason. Two hundred and ninety tests, most of them against real Sabre
+fixtures.
+
+---
+
+## Part 3 — level reached, and next
+
+**SAY:** Level 0 complete and verified against CERT. Level 1: all nine scenarios built
+and verified live. From Level 2, the side-by-side comparison. From Level 3, the
+operator console and the agent speaking first — the disruption scenarios needed them.
+
+**SAY:** The rest of Level 2 I'd build the same way as the comparison: projections of
+state the agent already keeps, never a second interface that books on its own.
+Level 3 is mostly here — operator edits are `trip_events`, told to the patient by the
+same loop; what's missing is editing a booking from the console, which is one more
+action writing the same kind of event. Auth is one change: the visitor cookie becomes
+a user id.
+
+---
+
+## Part 4 — judgment calls (38 in `docs/DECISIONS.md`)
+
+**SAY:** Rules in code, preferences typed — the model maps words onto a schema and
+never reasons over dates or deadlines.
+
+**SAY:** One hotel by design, others on request — "doesn't want the default" is a
+preference, so the default is booked without asking and the search runs only when
+asked.
+
+**SAY:** No passport numbers — nothing here files documents; collecting them would be
+holding sensitive data for no purpose.
+
+**SAY:** Cancel-and-rebook, sell first — no `modifyBooking`; two calls I trust, in the
+order that never leaves a patient without a flight, and a superseded chain that keeps
+the history honest.
+
+**SAY:** An operator console, not a patient dashboard — the sandbox has no airline or
+clinic, so a console that writes only events keeps the demo honest about what's
+simulated, and the patient keeps one interface.
+
+**SAY:** Codeshares excluded because CERT can't confirm them; the order, not the
+shop cache, is the baseline for disruption checks; totals and the trade-off sentence
+computed in code; the compare panel reads the offers table.
+
+---
+
+## Part 5 — what's broken (44 in `docs/BUGS.md`, most fixed)
+
+**SAY:** Fares expire after about twenty minutes. A patient who goes to find their
+passport comes back to a dead offer; the agent re-prices and says so, but it's a real
+gap.
+
+**SAY:** CERT quirks worked around, not fixed: the flight shop is cached and its times
+drift from the order by minutes, which produced false schedule changes until the order
+became the baseline; a codeshare Flight Check accepted was refused at Create Booking,
+which is why codeshares are excluded; the hotel supplier rejected a reservation with an
+early check-in note attached, so the room is now booked without it and the patient is
+told.
+
+**SAY:** Istanbul inventory in the sandbox is three properties. The alternatives
+search works; the list is short because the sandbox is.
+
+**SAY:** Disruptions are simulated. There is no cancellation feed in CERT; the console
+writes what a feed would write. The real detection path — re-reading the order and
+comparing statuses — is exercised only by the "Re-read from Sabre" button.
+
+**SAY:** Latency. A booking turn is thirty to fifty seconds because Sabre's price
+check, create and read-back must run in sequence. Searches are parallel; bookings
+can't be.
+
+**SAY:** The guards are regexes, not understanding. They catch the phrasings I've seen
+the model use and nudge once; a new phrasing gets through until it's added.
+
+**SAY:** No accounts. A browser cookie owns its trips — fine for a demo, not for a
+patient.
+
+**SAY:** Everything shown is in the repo with a walk-through per scenario, a decisions
+log, and a bugs file updated in the same commit as the code. The rule I held
+throughout: a number the tools didn't return is a number the patient doesn't hear.
