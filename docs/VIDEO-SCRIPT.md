@@ -115,110 +115,69 @@ the sum. The arithmetic is in code; the model repeats it.
 
 ## Part 2 — how it's built
 
-**SAY:** Stack: Next.js on Vercel, Postgres on Supabase, Anthropic's Messages API,
-Sabre's REST APIs. Sabre sits behind a provider interface — the agent never talks to
-it directly.
+**SAY:** Next.js, Postgres, Anthropic API, Sabre behind a provider interface.
 
-**SAY:** The agent is a tool loop. Each turn the model gets the system prompt, the
-transcript and fifteen tools, and must end by calling `reply`. Every tool is a Zod
-schema plus a handler; the schema is what the model sees and what validates its
-input.
+**SAY:** A tool loop. Fifteen tools, each a Zod schema and a handler. Every turn ends
+with `reply`.
 
-**SAY:** Hard constraints are code, not prompt. Deadlines, cabin, bags, party size and
-hotel are trip rules stored per conversation and derived from the procedure date.
-Tools read them; the model can't pass them. Every itinerary is validated against them
-before the model sees it and again before booking.
+**SAY:** Rules are code. Deadlines, cabin, bags, party size, hotel — stored per trip,
+read by the tools, never set by the model.
 
-**SAY:** State is in Postgres. The model remembers nothing between turns — the prompt
-is rebuilt each time from the bookings, offers and events tables. Offers are
-persisted with ids, so the model books by id, never by a name it remembered.
+**SAY:** State is Postgres. The prompt is rebuilt every turn from bookings, offers and
+events. The model books by id.
 
-**SAY:** What to do next is computed from the bookings table — flight, then room,
-then questions — and any untold event outranks all of it.
+**SAY:** Side effects need a schema literal: `confirmed: true`, `theyToldMe: true`.
 
-**SAY:** Side effects are gated by schema literals: `confirmed: true` to book or
-cancel, `theyToldMe: true` to change party size, procedure date or hotel.
-
-**SAY:** Output is guarded before it reaches the patient: references must exist in
-the bookings table, announced actions must have a tool call behind them, an untold
-event must be the first bubble. Failures send the model back once with the reason.
-
-**SAY:** Disruptions are events, not messages: the console and the Sabre re-read both
-write `trip_events`; the loop raises them and marks them told. Rebooking sells first
-and releases second, and every replaced booking is `superseded` with a pointer to
-its replacement.
+**SAY:** Output is guarded: references must exist in the database, announced actions
+must have a tool call, untold events go first. One retry with the reason.
 
 ---
 
-## Part 3 — level reached, and next
+## Part 3 — level, and next
 
-**SAY:** Level 0 is complete and verified against CERT. Level 1 is complete — all nine
-scenarios built, tested, and run live. Two pieces from later levels are in: the
-side-by-side comparison from Level 2, and the operator console plus proactive
-notification from Level 3, because the disruption scenarios needed them.
+**SAY:** Level 0 done. Level 1 done, all nine, verified live. From Level 2, the
+comparison panel. From Level 3, the console and proactive notification.
 
-**SAY:** Next: finish Level 2 the same way — each view a projection of state the agent
-already keeps, choosing feeds the chat, nothing books on its own. Then Level 3:
-booking edits from the console become one more event kind on the same path, and the
-visitor cookie becomes a real user id. No new architecture; more tools and views on
-the same loop.
+**SAY:** Next: more views as projections of the same state; console edits as events on
+the same path; cookie becomes user id. Same loop, more tools.
 
 ---
 
 ## Part 4 — judgment calls
 
-**SAY:** Where the brief was silent I wrote the decision down — thirty-eight of them
-in `docs/DECISIONS.md`. The ones that shaped the system:
+**SAY:** Thirty-eight in `DECISIONS.md`. The big ones:
 
-**SAY:** Rules in code, preferences from the model. The brief's constraints are not
-negotiable, so the model was never given a way to change them.
+**SAY:** Rules in code, not in the prompt.
 
-**SAY:** No passport numbers. Nothing here files travel documents, so collecting them
-is liability without purpose. Name, date of birth, gender; the airline checks the
-passport.
+**SAY:** No passport numbers — nothing files them.
 
-**SAY:** Cancel-and-rebook instead of Sabre's modify. Two calls I could verify, sell
-before release, and a superseded chain so the history is honest.
+**SAY:** Cancel-and-rebook, sell first, `superseded` chain.
 
-**SAY:** The pinned hotel is a default, not a rule. The brief pins it; the brief also
-asks for alternatives. Book it without asking, search only when asked.
+**SAY:** Pinned hotel is a default; search only when asked.
 
-**SAY:** An operator console rather than a fake feed. The sandbox can't cancel a
-flight, so a human writes the event a feed would write — visibly simulated, and the
-patient still has one interface.
+**SAY:** Operator console instead of a fake feed.
 
-**SAY:** Codeshares excluded. CERT accepted one at price check and refused it at
-booking; a rule beats a retry.
+**SAY:** Codeshares excluded — CERT can't confirm them.
 
-**SAY:** Arithmetic in code. Trip totals and the trade-off sentence are computed;
-the model repeats them.
+**SAY:** Totals computed in code, never by the model.
 
 ---
 
 ## Part 5 — what's broken
 
-**SAY:** Forty-four entries in `docs/BUGS.md`, most fixed. What's still true:
+**SAY:** Fares expire in twenty minutes.
 
-**SAY:** Fares expire in about twenty minutes. A patient who pauses comes back to a
-dead offer and has to be re-priced.
+**SAY:** Disruptions are simulated — CERT has no feed.
 
-**SAY:** Disruptions are simulated. CERT has no cancellation feed; the console writes
-what a feed would. The real detection — re-reading the order — only runs when
-triggered.
+**SAY:** Three hotels in the sandbox.
 
-**SAY:** Istanbul has three properties in the sandbox. The hotel search is real; the
-choice is thin.
+**SAY:** Booking turns take thirty to fifty seconds.
 
-**SAY:** Booking turns take thirty to fifty seconds. Sabre's price-check, create and
-read-back can't be parallelised.
+**SAY:** The guards are regexes.
 
-**SAY:** The output guards are regexes. They catch the phrasings I've seen; a new one
-gets through until it's added.
+**SAY:** No accounts — a cookie owns the trips.
 
-**SAY:** No accounts. A browser cookie owns its trips.
+**SAY:** The model still narrates instead of acting sometimes. The guard catches the
+known forms.
 
-**SAY:** The model still sometimes narrates instead of acting — "let me try again" with
-no tool call. The guard catches the known forms; it's a mitigation, not a fix.
-
-**SAY:** Everything is in the repo: a walk-through per scenario, the decisions log,
-and the bugs file, updated in the same commits as the code.
+**SAY:** All of it is in `BUGS.md`, updated with the code.
