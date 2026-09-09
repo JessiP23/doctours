@@ -13,6 +13,7 @@ import { setPartySizeTool } from './set_party_size';
 import { setProcedureDateTool } from './set_procedure_date';
 import { searchHotelsTool } from './search_hotels';
 import { chooseHotelTool } from './choose_hotel';
+import { compareTripTotalsTool } from './compare_trip_totals';
 
 /**
  * Tool registry. Booking tools register here as they land; the loop only ever
@@ -23,6 +24,7 @@ const registry: ToolDefinition[] = [
   setPartySizeTool,
   setProcedureDateTool,
   searchFlightsTool,
+  compareTripTotalsTool,
   createFlightOrderTool,
   searchHotelsTool,
   chooseHotelTool,

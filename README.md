@@ -49,7 +49,7 @@ was shown, every booking, every tool call. The model is _told_ the current state
 turn rather than remembering it, so a page refresh, a new tab or a cold lambda all
 resume identically.
 
-**Tools** (`lib/agent/tools/`). Six, and the interesting part is what they refuse:
+**Tools** (`lib/agent/tools/`). The Level 0 six, and the interesting part is what they refuse:
 
 | Tool                   | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -59,6 +59,18 @@ resume identically.
 | `search_hotel_rates`   | Nights are derived from the flight actually booked, so the stay cannot drift from the itinerary.                                                                                                                                                                                                                                                                                                                                     |
 | `create_hotel_booking` | Hotel Price Check re-confirms the rate and mints the booking key, so an expired rate cannot book.                                                                                                                                                                                                                                                                                                                                    |
 | `reply`                | Terminal. Forced by `tool_choice: "any"`, so every turn ends in `{bubbles: string[1..4], expectsInput}` — plain text, short, no markdown.                                                                                                                                                                                                                                                                                            |
+
+Level 1 added the rest, all on the same pattern — rules in code, preferences typed,
+nothing bought in the turn that proposes it: `set_party_size`, `set_procedure_date`
+(every trip date derives from it), `compare_trip_totals` (flight + room ranked by the
+sum, arithmetic done in code), `search_hotels` / `choose_hotel` (alternatives only when
+the patient asks; the default stays pinned), `rebook_flight` / `rebook_hotel` (sell
+first, release second, `superseded` chain) and `cancel_trip`. The room tools take
+`earlyCheckIn` as a request filed on the reservation. `docs/PLAN-LEVEL-1.md` maps the
+brief's nine questions to them; `docs/E2E-LEVEL-1.md` is how each is verified against
+CERT. What the sandbox cannot originate — an airline cancelling, a clinic moving a
+procedure — an operator does from `/ops` (needs `OPS_TOKEN`), and the agent tells the
+patient without being asked.
 
 **Never reporting a booking that did not happen.** Four independent layers:
 

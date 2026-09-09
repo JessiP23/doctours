@@ -22,7 +22,7 @@ import { persistFlightOffers, searchAllowedFlights } from './flight-offers';
  * a replacement search leaves them out. Structured fields were added to the event
  * detail for exactly this; an older event without them excludes nothing.
  */
-async function cancelledFlightsFor(conversationId: string): Promise<CancelledFlight[]> {
+export async function cancelledFlightsFor(conversationId: string): Promise<CancelledFlight[]> {
   const events = await repo.listOpenTripEvents(conversationId);
   const out: CancelledFlight[] = [];
   for (const event of events) {
@@ -210,7 +210,7 @@ export const searchFlightsTool = defineTool({
       offerValidMinutes: expiresAt
         ? Math.max(0, Math.round(DateTime.fromISO(expiresAt).diffNow('minutes').minutes))
         : null,
-      hint: 'Prices include taxes and are live. Hotel nights follow from the flight chosen, so a cheaper flight landing a day early adds a night.',
+      hint: 'Prices include taxes and are live. Hotel nights follow from the flight chosen, so a cheaper flight landing a day early adds a night — if the patient is asking about the total cost, compare_trip_totals prices that.',
       ...(failures.length > 0 ? { searchFailures: failures } : {}),
     };
   },

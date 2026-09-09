@@ -8,6 +8,7 @@ describe('the tool set the model is given', () => {
       'set_party_size',
       'set_procedure_date',
       'search_flights',
+      'compare_trip_totals',
       'create_flight_order',
       'search_hotels',
       'choose_hotel',

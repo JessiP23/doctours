@@ -10,11 +10,12 @@ detected and raised before anything else, rebooking a flight and realigning the
 hotel to it, the traveller count — established rather than assumed, one to four
 people, enforced through both booking tools — the procedure moving, from the clinic
 or from the patient (section G), the early landing: the night before priced, early
-check-in filed as a request (section H), and other hotels on request (section I).
+check-in filed as a request (section H), other hotels on request (section I), and the
+cheapest whole trip (section J).
 
-**Not built yet:** cheapest-whole-trip ranking — planned in `PLAN-LEVEL-1.md`.
-Section E is how you check the agent is honest about not having it, which is the
-requirement until it exists.
+**Not built:** nothing from the nine questions. Section E keeps the honesty probes
+that still apply — a bed-type request the rates do not model, and anything a tool
+did not return.
 
 Two windows: the chat (`npm run dev`, or the deployed URL) as the patient, and the
 **operator console** at `/ops` as the airline, clinic and hotel. The console needs
@@ -214,15 +215,15 @@ select created_at, tool_name, duration_ms, error from tool_calls order by id des
 
 ## E · What must fail honestly
 
-None of these are built. The requirement until they are is that the agent says so
-instead of inventing an answer. Each one is a message; the pass is a plain no.
+Most of these are now built and point at their own section; the ones that remain
+are things no tool models. The requirement is the same: the agent says so instead
+of inventing an answer.
 
 14. _(Built — see section G.)_
 15. _(Built — see section H.)_
 16. **"can we get a twin room?"** — cheapest available room, no bed selection.
 17. _(Built — see section I.)_
-18. **"which is the cheapest trip overall, flight plus hotel?"** — it can only rank
-    flights today. It must not present a total it did not compute.
+18. _(Built — see section J.)_
 
 **Fail in every case:** a promise, a yes, or a made-up detail. Anything Sabre did not
 return and no tool produced is a fabrication, and that is the one class of bug this
@@ -425,3 +426,37 @@ moment you chose, or books the Ritz without telling you the cost.
 
 **Pass:** the one you chose, and nothing about the Holiday Inn as if it were still the
 plan.
+
+## J · Money is tight
+
+Built. The question is the total, and the cheapest flight is not it when it lands a
+day early. Fresh trip, party size answered, nothing booked.
+
+47. **"money is tight — what's the cheapest way to do the whole trip, flights and
+    hotel?"**
+
+**Pass:** it calls `compare_trip_totals`, not `search_flights`, and answers with a
+total: the flight price, the room price for the nights that flight implies, and the
+sum — then the trade in one sentence, with the tool's numbers ("the cheapest flight
+alone is $700, but it lands a day early and the extra night makes it $48 more
+overall"). If the cheapest flight is also the cheapest trip, it says that instead.
+**Fail:** it adds or subtracts prices itself (compare its sentence with the tool's
+`tradeoff` in the dev log — they must agree); or it quotes a total for an option the
+tool marked as having no room.
+
+48. **"ok take the cheapest total"** → confirm → details → book.
+
+**Pass:** the flight books from the compared option's offerId, and the room from its
+rateId without a second room search — both were persisted by the comparison. The
+room's nights match the flight.
+
+49. On a trip that already **holds a flight**: **"could I have done this cheaper?"**
+
+**Pass:** it compares, says what the cheapest total would be, and that switching means
+rebooking the flight (and the room following). It does not rebook without being
+asked.
+
+50. **"cheapest overall but non-stop only"**
+
+**Pass:** the comparison respects the stop limit (`maxStops: 0`) and, if nothing
+non-stop exists, says so rather than quietly comparing connections.

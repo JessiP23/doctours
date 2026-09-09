@@ -22,7 +22,7 @@ const MAX_SHOWN = 4;
 /** Landing this many hours or more before check-in time is worth a word — and a price. */
 const EARLY_ARRIVAL_HOURS = 2;
 
-function noRoomsIsAnAnswer(e: unknown): HotelRate[] {
+export function noRoomsIsAnAnswer(e: unknown): HotelRate[] {
   if (isProviderError(e) && e.code === 'NO_AVAILABILITY') return [];
   throw e;
 }
@@ -33,7 +33,7 @@ function noRoomsIsAnAnswer(e: unknown): HotelRate[] {
  * rate code. Sabre does not always file an occupancy, and an unknown is not a
  * refusal — it is reported so the agent can say the hotel has not stated it.
  */
-function pickRooms(rates: HotelRate[], adults: number, max = MAX_SHOWN) {
+export function pickRooms(rates: HotelRate[], adults: number, max = MAX_SHOWN) {
   const fits = rates.filter((r) => r.maxOccupancy === null || r.maxOccupancy >= adults);
   const seen = new Set<string>();
   const rooms: HotelRate[] = [];
@@ -47,7 +47,7 @@ function pickRooms(rates: HotelRate[], adults: number, max = MAX_SHOWN) {
   return { rooms, fits: fits.length };
 }
 
-function insertRateOffers(
+export function insertRateOffers(
   conversationId: string,
   rates: HotelRate[],
   flags: { extraNight: boolean },
