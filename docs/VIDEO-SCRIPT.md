@@ -140,13 +140,29 @@ flowing through the same event path. Same loop, more tools.
 
 ## Part 4 — judgment calls
 
-**SAY:** Where the brief was silent I decided and wrote it down — thirty-eight entries.
-The ones that matter: rules in code, not in the prompt. No passport numbers, because
-nothing here files them. Cancel and rebook instead of modify, selling first so the
-patient is never without a flight. The pinned hotel is a default, not a rule — I only
-search alternatives when asked. An operator console instead of a fake feed, so the
-simulation is visible. Codeshares excluded, because the sandbox can't confirm them.
-And all arithmetic in code — the model repeats totals, it never computes them.
+**SAY:** The brief left some things open, so I had to decide them myself. Each decision
+is written in `DECISIONS.md` with the reason. The main ones:
+
+The brief gives fixed dates and rules but doesn't say who enforces them. I put them in
+code, so the model can't bend them.
+
+The brief doesn't say what passenger data to collect. I collect name, date of birth and
+gender only — no passport numbers, because nothing in this system needs them.
+
+The brief says "rebook" but not how. Sabre has a modify call; I chose cancel-and-rebook
+instead, booking the new flight before releasing the old one, so the patient never
+ends up with nothing.
+
+The brief pins one hotel and also asks for alternatives. I treat the pinned hotel as the
+default and only search others when the patient asks.
+
+The brief asks for airline cancellations, but the sandbox can't produce one. I built an
+operator console that simulates them, openly, instead of faking a feed.
+
+The sandbox accepted a codeshare flight at price check and then refused to book it. I
+excluded codeshares.
+
+And every price total is computed in code, never by the model.
 
 ---
 
