@@ -4,6 +4,7 @@ import * as repo from '@/lib/db/repo';
 import type { BookingRow } from '@/lib/db/types';
 import { travelProvider } from '@/lib/providers/sabre';
 import { isProviderError } from '@/lib/providers/sabre/errors';
+import { compareStay } from '@/lib/trip/nights';
 import { rulesFor } from './context';
 import { defineTool } from './define';
 import { flightBookingRow, sellFlightOffer, travellersOf } from './flight-booking';
@@ -136,7 +137,7 @@ export const rebookFlightTool = defineTool({
     }
 
     const hotel = await repo.getLiveBooking(ctx.conversationId, 'hotel');
-    const realignment = hotelRealignment(hotel, stay);
+    const fit = hotelFit(hotel, stay);
 
     log.info(
       {
@@ -165,15 +166,20 @@ export const rebookFlightTool = defineTool({
         : {
             warning: `The replacement is booked, but the old order ${old.booking_reference} could not be released${cancelDetail ? ` (${cancelDetail})` : ''}. Tell the patient their new flights are confirmed and that the old booking is still being released — do not describe it as cancelled.`,
           }),
-      ...(realignment
+      ...(fit?.coverage === 'gap'
         ? {
-            hotelNeedsRealignment: realignment,
+            hotelNeedsRealignment: fit,
             nextStep:
-              'The hotel nights no longer match these flights. Search rooms for the new dates, tell the patient what it costs, then use rebook_hotel once they agree.',
+              'The hotel nights no longer cover these flights. Search rooms for the new dates, tell the patient what it costs, then use rebook_hotel once they agree.',
           }
-        : hotel
-          ? { nextStep: 'The hotel nights still match these flights. Nothing else to change.' }
-          : { nextStep: 'Book the hotel for those nights.' }),
+        : fit?.coverage === 'covers'
+          ? {
+              hotelExtraNights: fit,
+              nextStep: `The room still covers these flights, with ${fit.nightsBefore} night(s) before landing and ${fit.nightsAfter} after departure. Nothing is broken; tell the patient, and offer to move the room to the exact nights if they would rather not pay for the spare one(s).`,
+            }
+          : hotel
+            ? { nextStep: 'The hotel nights still match these flights. Nothing else to change.' }
+            : { nextStep: 'Book the hotel for those nights.' }),
       ...(scheduleDiffers
         ? {
             scheduleChangedOnConfirmation:
@@ -185,22 +191,37 @@ export const rebookFlightTool = defineTool({
 });
 
 /**
- * Whether the room the patient holds still covers the flights they now hold.
+ * How the room the patient holds relates to the flights they now hold.
  *
  * The nights were derived from the old itinerary, so a replacement that lands or
- * leaves on a different day leaves a real gap — a patient landing a day before
- * their room starts is the failure this exists to catch.
+ * leaves on a different day can leave a real gap — a patient landing a day before
+ * their room starts is the failure this exists to catch. A room that starts earlier
+ * or ends later than the new flights need is not a gap: it covers them, and the
+ * spare nights are reported so the patient can decide whether to keep paying for
+ * them. Null when the room and the flights line up, or there is no room.
  */
-export function hotelRealignment(
+export function hotelFit(
   hotel: BookingRow | null,
   stay: { checkIn: string; checkOut: string; nights: number },
 ) {
   if (!hotel) return null;
   const details = (hotel.details ?? {}) as { checkIn?: string; checkOut?: string; nights?: number };
-  if (details.checkIn === stay.checkIn && details.checkOut === stay.checkOut) return null;
+  if (!details.checkIn || !details.checkOut) {
+    return {
+      coverage: 'gap' as const,
+      nightsBefore: 0,
+      nightsAfter: 0,
+      reference: hotel.booking_reference,
+      was: { checkIn: null, checkOut: null },
+      now: { checkIn: stay.checkIn, checkOut: stay.checkOut, nights: stay.nights },
+    };
+  }
+  const coverage = compareStay({ checkIn: details.checkIn, checkOut: details.checkOut }, stay);
+  if (coverage.coverage === 'matches') return null;
   return {
+    ...coverage,
     reference: hotel.booking_reference,
-    was: { checkIn: details.checkIn ?? null, checkOut: details.checkOut ?? null },
+    was: { checkIn: details.checkIn, checkOut: details.checkOut },
     now: { checkIn: stay.checkIn, checkOut: stay.checkOut, nights: stay.nights },
   };
 }

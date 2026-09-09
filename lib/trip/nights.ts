@@ -42,3 +42,37 @@ export function nightsBetween(checkIn: string, checkOut: string): number {
   if (!from.isValid || !to.isValid) throw new Error(`Invalid stay dates ${checkIn} → ${checkOut}`);
   return Math.round(to.diff(from, 'days').days);
 }
+
+/**
+ * How a room's nights relate to the nights the flights imply.
+ *
+ * `matches` is the default case. `covers` means the room starts earlier or ends
+ * later than the flights need — a night booked on purpose so the room is ready
+ * when an early flight lands, or a spare one left behind by a flight change. Only
+ * `gap` is a broken trip: the patient lands before the room starts, or leaves
+ * after it ends.
+ */
+export interface StayCoverage {
+  coverage: 'matches' | 'covers' | 'gap';
+  /** Nights the room holds before the flight lands / after it leaves (0 when none). */
+  nightsBefore: number;
+  nightsAfter: number;
+}
+
+export function compareStay(
+  room: { checkIn: string; checkOut: string },
+  flights: { checkIn: string; checkOut: string },
+): StayCoverage {
+  const nightsBefore = nightsBetween(room.checkIn, flights.checkIn);
+  const nightsAfter = nightsBetween(flights.checkOut, room.checkOut);
+  if (nightsBefore === 0 && nightsAfter === 0)
+    return { coverage: 'matches', nightsBefore, nightsAfter };
+  if (nightsBefore < 0 || nightsAfter < 0) {
+    return {
+      coverage: 'gap',
+      nightsBefore: Math.max(0, nightsBefore),
+      nightsAfter: Math.max(0, nightsAfter),
+    };
+  }
+  return { coverage: 'covers', nightsBefore, nightsAfter };
+}

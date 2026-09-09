@@ -3,7 +3,15 @@ import { log } from '@/lib/log';
 import * as repo from '@/lib/db/repo';
 import { rulesFor } from './context';
 import { defineTool } from './define';
-import { guestSchema, hotelBookingRow, sellHotelRate } from './hotel-booking';
+import {
+  bookedFlightSlices,
+  describeCoverage,
+  describeRequests,
+  earlyCheckInField,
+  guestSchema,
+  hotelBookingRow,
+  sellHotelRate,
+} from './hotel-booking';
 import { loadBookableOffer } from './search_flights';
 import { MAX_TRAVELLERS } from './set_party_size';
 
@@ -25,6 +33,7 @@ export const createHotelBookingTool = defineTool({
       .min(1)
       .max(MAX_TRAVELLERS)
       .describe('One entry per traveller staying in the room, the patient first'),
+    earlyCheckIn: earlyCheckInField,
   }),
   handler: async (input, ctx) => {
     const rules = await rulesFor(ctx.conversationId);
@@ -51,15 +60,21 @@ export const createHotelBookingTool = defineTool({
     }
 
     const { row } = await loadBookableOffer(ctx.conversationId, input.rateId, 'hotel_rate');
-    const sale = await sellHotelRate(row, input.guests);
+    const slices = await bookedFlightSlices(ctx.conversationId);
+    const sale = await sellHotelRate(
+      row,
+      input.guests,
+      { earlyCheckIn: input.earlyCheckIn },
+      { rules, slices },
+    );
     if (!sale.sold) return { booked: false, ...sale.failure };
 
-    const { row: newRow, property } = await hotelBookingRow(
-      ctx.conversationId,
-      row,
-      sale,
-      input.guests,
-    );
+    const {
+      row: newRow,
+      property,
+      coverage,
+      flightStay,
+    } = await hotelBookingRow(ctx.conversationId, row, sale, input.guests);
     const saved = await repo.insertBooking(ctx.conversationId, newRow);
 
     log.info(
@@ -75,6 +90,8 @@ export const createHotelBookingTool = defineTool({
       checkIn: sale.booking.checkIn,
       checkOut: sale.booking.checkOut,
       totalUSD: sale.booking.total.amount,
+      ...describeCoverage(coverage, flightStay),
+      ...describeRequests(sale.requests),
       ...(property ? { property } : {}),
     };
   },

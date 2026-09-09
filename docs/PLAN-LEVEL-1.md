@@ -34,7 +34,7 @@ world, simulated, because the sandbox cannot cancel a flight for us."
 | --- | ---------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | 1   | Outbound cancelled → arrives a different day → hotel dates wrong. Fix both.              | Operator | **Done, verified live.** Console cancels it, the agent speaks first, rebooks, leaves the cancelled flight out, and moves the room.                                            | Nothing.                                                                                                                    |
 | 2   | Return cancelled → stuck longer → needs more nights.                                     | Operator | **Done.** Same path; the realignment moves the checkout.                                                                                                                      | One live run with _Airline cancels the return_.                                                                             |
-| 3   | Lands before check-in. Get in early? Arrives a full day early — pay for the extra night. | Patient  | **Half.** Early landing is flagged when rooms are shown. No early check-in request, no extra night.                                                                           | Extra night via `rebook_hotel` with an earlier check-in; early check-in as a request on the reservation.                    |
+| 3   | Lands before check-in. Get in early? Arrives a full day early — pay for the extra night. | Patient  | **Built.** The room search prices the night before when the flight lands early; early check-in is filed on the reservation as a request the hotel sees.                       | One live run: extra night booked from the night before; request visible on the Sabre order.                                 |
 | 4   | Procedure moved → whole trip needs new dates. Rebook flights and hotel together.         | Operator | **Built.** Rules derive from the procedure date; console and `set_procedure_date` both go through `moveProcedure`; the agent walks search → `rebook_flight` → `rebook_hotel`. | One live run: console moves it to Oct 20, agent raises it, new references chained to the old.                               |
 | 5   | Patient cancels entirely. Undo both.                                                     | Patient  | **Built.** Hotel first, verified with Sabre, cost stated first, `confirmed` required.                                                                                         | Nothing.                                                                                                                    |
 | 6   | Brings someone. Husband and wife want one bed, sisters want two. Book the right room.    | Patient  | **Built.** Count established by the greeting, prices for everyone, bed setups are separate options, everyone on the ticket and the room.                                      | Nothing.                                                                                                                    |
@@ -42,7 +42,7 @@ world, simulated, because the sandbox cannot cancel a flight for us."
 | 8   | Money is tight. Flight and hotel prices trade off. Bring the total down.                 | Patient  | **Not built.** Flights rank by price alone.                                                                                                                                   | `compare_trip_totals`: hotel total for each distinct stay a flight implies, ranked by flight + hotel.                       |
 | 9   | Hates connections. Fewest stops even if it costs more.                                   | Patient  | **Built.** `rankBy: fewest_stops`, `maxStops: 0`.                                                                                                                             | Nothing.                                                                                                                    |
 
-Seven done, one half, two not — plus the operator console and the agent speaking
+Eight done, two not — plus the operator console and the agent speaking
 first, which the brief only asks for at Level 3. Everything not built reuses the
 rebooking tools that already exist; none of it needs a new Sabre call type.
 
@@ -92,16 +92,23 @@ land?" in the chat produces the cancellation first, and `rebook_flight` follows.
 answering, and the trip ends with new flight and room references chained to the old
 ones via `superseded`.
 
-### C · Early check-in and the extra night — question 3
+### C · Early check-in and the extra night — question 3 — **built**
 
 - `search_hotel_rates` already accepts explicit dates. The prompt gains the path:
   when the patient lands before check-in and wants the room, offer the night before
   as an extra night, price it, and move the room with `rebook_hotel` once they agree.
   The extra night is an ordinary rate, charged the ordinary way — say so.
 - Early check-in on the same day is a request, not a booking: `specialInstruction`
-  already exists on the hotel Create Booking request. Add `earlyCheckIn: true` to the
-  booking and rebooking tools, filed as that instruction, and have the agent say
-  plainly it is a request the hotel may not honour.
+  already exists on the hotel Create Booking request. `earlyCheckIn: true` on the
+  booking and rebooking tools files it, worded by code from the itinerary ("guest
+  lands 12 Oct at 05:30"), and the agent says plainly it is a request the hotel may
+  not honour.
+- As built: `search_hotel_rates` prices the night before concurrently whenever the
+  flight lands two or more hours before check-in time, and returns it as
+  `extraNight` with its own bookable rateIds. A room booked from the night before
+  is recorded as _covering_ the flights (`compareStay`), not as the wrong dates —
+  so a later flight rebooking reports a spare night instead of demanding a
+  realignment.
 
 **Done when:** "I land at 6am, can I get in early?" leads to the two options — a
 request for that day, or an extra night with its price — and the chosen one is real.

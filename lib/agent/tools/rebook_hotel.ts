@@ -3,11 +3,17 @@ import { log } from '@/lib/log';
 import * as repo from '@/lib/db/repo';
 import { travelProvider } from '@/lib/providers/sabre';
 import { isProviderError } from '@/lib/providers/sabre/errors';
-import type { FlightSlice } from '@/lib/providers/types';
-import { deriveStay } from '@/lib/trip/nights';
 import { rulesFor } from './context';
 import { defineTool } from './define';
-import { guestSchema, hotelBookingRow, sellHotelRate } from './hotel-booking';
+import {
+  bookedFlightSlices,
+  describeCoverage,
+  describeRequests,
+  earlyCheckInField,
+  guestSchema,
+  hotelBookingRow,
+  sellHotelRate,
+} from './hotel-booking';
 import { loadBookableOffer } from './search_flights';
 import { MAX_TRAVELLERS } from './set_party_size';
 
@@ -29,7 +35,7 @@ import { MAX_TRAVELLERS } from './set_party_size';
 export const rebookHotelTool = defineTool({
   name: 'rebook_hotel',
   description:
-    'Replace the room this trip already holds with a different one the patient has confirmed — different nights after a flight change, or a different room type. Not create_hotel_booking, which refuses when a room exists. Search rooms for the dates you want first, tell the patient the cost and the cancellation terms, and only call this once they agree. It books the new room before releasing the old.',
+    'Replace the room this trip already holds with a different one the patient has confirmed — different nights after a flight change, an extra night at the start so the room is ready when they land, or a different room type. Not create_hotel_booking, which refuses when a room exists. Search rooms for the dates you want first, tell the patient the cost and the cancellation terms, and only call this once they agree. It books the new room before releasing the old.',
   schema: z.object({
     rateId: z.string().describe('rateId of the replacement room, from search_hotel_rates'),
     guests: z
@@ -37,6 +43,7 @@ export const rebookHotelTool = defineTool({
       .min(1)
       .max(MAX_TRAVELLERS)
       .describe('One entry per traveller staying in the room, the patient first'),
+    earlyCheckIn: earlyCheckInField,
     confirmed: z
       .literal(true)
       .describe(
@@ -73,7 +80,13 @@ export const rebookHotelTool = defineTool({
     const { row } = await loadBookableOffer(ctx.conversationId, input.rateId, 'hotel_rate');
 
     // Sell before anything is retired: a failure leaves the old room untouched.
-    const sale = await sellHotelRate(row, input.guests);
+    const slices = await bookedFlightSlices(ctx.conversationId);
+    const sale = await sellHotelRate(
+      row,
+      input.guests,
+      { earlyCheckIn: input.earlyCheckIn },
+      { rules, slices },
+    );
     if (!sale.sold) {
       return {
         rebooked: false,
@@ -83,12 +96,12 @@ export const rebookHotelTool = defineTool({
       };
     }
 
-    const { row: newRow, property } = await hotelBookingRow(
-      ctx.conversationId,
-      row,
-      sale,
-      input.guests,
-    );
+    const {
+      row: newRow,
+      property,
+      coverage,
+      flightStay,
+    } = await hotelBookingRow(ctx.conversationId, row, sale, input.guests);
     // The room is sold. Nothing past this point may throw and lose the reference.
     let booking;
     try {
@@ -128,14 +141,9 @@ export const rebookHotelTool = defineTool({
     }
 
     // Does the new stay actually cover the flights? Moving the room to the wrong
-    // nights is the same failure as leaving it on the old ones.
-    const flight = await repo.getLiveBooking(ctx.conversationId, 'flight');
-    const slices = ((flight?.raw ?? {}) as { bookedSlices?: FlightSlice[] }).bookedSlices;
-    const stay = slices && slices.length >= 2 ? deriveStay(slices[0], slices[1]) : null;
-    const matchesFlight = stay
-      ? stay.checkIn === sale.booking.checkIn && stay.checkOut === sale.booking.checkOut
-      : null;
-
+    // nights is the same failure as leaving it on the old ones. A night booked
+    // before the flight lands is covered, not wrong — it is what an early arrival
+    // asked for.
     const previous = (old.details ?? {}) as {
       totalUSD?: number;
       checkIn?: string;
@@ -170,17 +178,14 @@ export const rebookHotelTool = defineTool({
       refundable: sale.rate.refundable,
       cancelBy: sale.rate.cancelBy,
       oldReservationReleased: oldReleased,
+      ...describeCoverage(coverage, flightStay),
+      ...describeRequests(sale.requests),
       ...(property ? { property } : {}),
       ...(oldReleased
         ? {}
         : {
             warning: `The new room is booked, but the old reservation ${old.booking_reference} could not be released${cancelDetail ? ` (${cancelDetail})` : ''}. Tell the patient the new room is confirmed and that the old one is still being released — do not describe it as cancelled.`,
           }),
-      ...(matchesFlight === false
-        ? {
-            warning2: `These nights still do not match the booked flights (${stay!.checkIn} to ${stay!.checkOut}). Say so rather than treating the trip as settled.`,
-          }
-        : {}),
     };
   },
 });

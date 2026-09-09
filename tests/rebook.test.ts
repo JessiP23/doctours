@@ -151,7 +151,7 @@ function offerRow(id: string) {
   };
 }
 
-const { rebookFlightTool, hotelRealignment } = await import('@/lib/agent/tools/rebook_flight');
+const { rebookFlightTool, hotelFit } = await import('@/lib/agent/tools/rebook_flight');
 
 const ctx = { conversationId: 'c1' };
 const args = { offerId: 'o2', confirmed: true as const, reason: 'Qatar cancelled the outbound' };
@@ -312,34 +312,53 @@ describe('rebook_flight', () => {
   });
 });
 
-describe('hotelRealignment', () => {
+describe('hotelFit', () => {
   const stay = { checkIn: '2026-10-12', checkOut: '2026-10-18', nights: 6 };
 
   it('is silent when the nights already match', () => {
     expect(
-      hotelRealignment(
-        { details: { checkIn: '2026-10-12', checkOut: '2026-10-18' } } as never,
-        stay,
-      ),
+      hotelFit({ details: { checkIn: '2026-10-12', checkOut: '2026-10-18' } } as never, stay),
     ).toBeNull();
   });
 
   it('is silent when there is no room to realign', () => {
-    expect(hotelRealignment(null, stay)).toBeNull();
+    expect(hotelFit(null, stay)).toBeNull();
   });
 
-  it('reports both the old nights and the new ones', () => {
-    const result = hotelRealignment(
+  it('reports a gap with both the old nights and the new ones', () => {
+    const result = hotelFit(
+      {
+        booking_reference: 'RHOT11',
+        details: { checkIn: '2026-10-13', checkOut: '2026-10-18' },
+      } as never,
+      stay,
+    );
+    expect(result).toEqual({
+      coverage: 'gap',
+      nightsBefore: 0,
+      nightsAfter: 0,
+      reference: 'RHOT11',
+      was: { checkIn: '2026-10-13', checkOut: '2026-10-18' },
+      now: stay,
+    });
+  });
+
+  it('calls a room that starts the night before the flight lands covered, not wrong', () => {
+    // An early arrival booked from the 11th on purpose, or a spare night left by a
+    // flight change: either way the patient has a room when they land.
+    const result = hotelFit(
       {
         booking_reference: 'RHOT11',
         details: { checkIn: '2026-10-11', checkOut: '2026-10-18' },
       } as never,
       stay,
     );
-    expect(result).toEqual({
-      reference: 'RHOT11',
-      was: { checkIn: '2026-10-11', checkOut: '2026-10-18' },
-      now: stay,
+    expect(result).toMatchObject({ coverage: 'covers', nightsBefore: 1, nightsAfter: 0 });
+  });
+
+  it('treats a room with no dates on file as a gap rather than a match', () => {
+    expect(hotelFit({ booking_reference: 'X', details: {} } as never, stay)).toMatchObject({
+      coverage: 'gap',
     });
   });
 });

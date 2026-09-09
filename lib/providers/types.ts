@@ -163,6 +163,15 @@ export interface Guest {
   phone: string;
 }
 
+/** Anything filed on the reservation beyond the room and the guests. */
+export interface HotelBookingOptions {
+  /**
+   * Free text the hotel sees on the reservation — an early check-in request, say.
+   * A request, never a guarantee: the property decides on the day.
+   */
+  specialInstruction?: string;
+}
+
 export interface HotelBooking {
   id: string;
   bookingReference: string;
@@ -196,7 +205,11 @@ export interface TravelProvider {
   priceFlightOffer(offer: FlightOffer): Promise<FlightOffer>;
   createFlightOrder(offer: FlightOffer, passengers: Passenger[]): Promise<FlightOrder>;
   searchHotelRates(q: HotelSearch): Promise<HotelRate[]>;
-  createHotelBooking(rate: HotelRate, guests: Guest[]): Promise<HotelBooking>;
+  createHotelBooking(
+    rate: HotelRate,
+    guests: Guest[],
+    options?: HotelBookingOptions,
+  ): Promise<HotelBooking>;
   /** Cancels an order and verifies the outcome before reporting success. */
   cancelBooking(reference: string): Promise<CancellationResult>;
 }

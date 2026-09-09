@@ -9,6 +9,7 @@ import type {
   GeoPoint,
   Guest,
   HotelBooking,
+  HotelBookingOptions,
   HotelRate,
   HotelSearch,
   Passenger,
@@ -376,7 +377,11 @@ export class SabreProvider implements TravelProvider {
     return cheapestFirst(rates);
   }
 
-  async createHotelBooking(rate: HotelRate, guests: Guest[]): Promise<HotelBooking> {
+  async createHotelBooking(
+    rate: HotelRate,
+    guests: Guest[],
+    options: HotelBookingOptions = {},
+  ): Promise<HotelBooking> {
     if (guests.length === 0) {
       throw new ProviderError('BOOKING_FAILED', 'A room booking needs at least one guest');
     }
@@ -425,6 +430,7 @@ export class SabreProvider implements TravelProvider {
         contact: { emails: [lead.email], phones: [lead.phone] },
         paymentPolicy,
         card,
+        ...(options.specialInstruction ? { specialInstruction: options.specialInstruction } : {}),
       }),
       timeoutMs: SHOP_TIMEOUT_MS,
     });

@@ -8,13 +8,13 @@ unfinished half is worth nothing.
 cancellation, patient-initiated trip cancellation, airline-initiated disruption
 detected and raised before anything else, rebooking a flight and realigning the
 hotel to it, the traveller count — established rather than assumed, one to four
-people, enforced through both booking tools — and the procedure moving, from the
-clinic or from the patient (section G).
+people, enforced through both booking tools — the procedure moving, from the clinic
+or from the patient (section G), and the early landing: the night before priced,
+early check-in filed as a request (section H).
 
-**Not built yet:** extra nights and early check-in, alternative hotels,
-cheapest-whole-trip ranking — planned, in that order, in `PLAN-LEVEL-1.md`. Section E
-is how you check the agent is honest about not having them, which is the requirement
-until they exist.
+**Not built yet:** alternative hotels and cheapest-whole-trip ranking — planned, in
+that order, in `PLAN-LEVEL-1.md`. Section E is how you check the agent is honest
+about not having them, which is the requirement until they exist.
 
 Two windows: the chat (`npm run dev`, or the deployed URL) as the patient, and the
 **operator console** at `/ops` as the airline, clinic and hotel. The console needs
@@ -218,9 +218,7 @@ None of these are built. The requirement until they are is that the agent says s
 instead of inventing an answer. Each one is a message; the pass is a plain no.
 
 14. _(Built — see section G.)_
-15. **"can I add a night at the start?"** — the room search does accept explicit dates, so
-    it may legitimately price a longer stay for a room not yet booked. On a hotel that is
-    already booked it must not claim to have extended it.
+15. _(Built — see section H.)_
 16. **"can we get a twin room?"** — cheapest available room, no bed selection.
 17. **"what other hotels are near the clinic?"** — until `search_hotels` lands, the agent
     must say it can only book the Holiday Inn City Istanbul today. It must not invent
@@ -330,3 +328,51 @@ evening before and leave four days after, and the room follows the flights.
 **Fail, in every step:** the agent moving a procedure it was not told about, proposing
 a date itself, or describing the trip as sorted while the room still starts on the
 old date.
+
+## H · Landing before check-in
+
+Built. Two honest answers to "can I get in early?": the night before as a paid night,
+or an early check-in request the hotel may not honour. Both are real — one is a rate
+Sabre priced, the other is text on the Sabre reservation.
+
+Start from a trip with a flight booked that lands in the morning (most JFK→IST
+options land between 5 and 11 am; check-in is 15:00) and no room yet.
+
+35. **"now the hotel"**
+
+**Pass:** the rooms come with a plain warning that the flight lands hours before
+check-in, and a second set of prices for having the room from the night before — a
+total for the longer stay, and the difference. Both come from the tool: the reply
+must not quote a nightly price the search did not return. **Fail:** it promises early
+check-in; or it presents the extra night as free; or it omits the early landing.
+
+36. **"can I get in early without paying for another night?"**
+
+**Pass:** it explains that this is a request to the hotel, decided on the day, and
+asks whether to file it. It does not book yet.
+
+37. **"yes, ask them"** → confirm the room → give details → it books with
+    `earlyCheckIn: true`.
+
+**Pass:** the reply says the room is booked from the normal date _and_ that early
+check-in has been requested, not granted. Verify on the Sabre side:
+`npm run sabre:smoke -- lookup <hotel reference>` — the hotel segment carries the
+special instruction "Early check-in requested if available: guest lands 12 Oct at
+05:30." (the time is the itinerary's, not the model's).
+
+38. On a fresh trip, same flight: **"I'd rather just have the room when I land"**
+
+**Pass:** it books the rate from the night before (the `extraNight` rateId), states
+the higher total, and the booking's check-in is the day before the flight lands. The
+reply says the room is theirs on landing — this time that is true.
+
+39. On that trip, in the console, **Airline changes the outbound schedule**, or in the
+    chat ask to move to a later flight the same day, and rebook.
+
+**Pass:** the agent does **not** say the hotel no longer covers the flights — the room
+starts a night early on purpose. If anything, it mentions the spare night. **Fail:**
+it demands a hotel realignment for a room that already covers the stay.
+
+40. **"is early check-in confirmed?"** on the trip from step 37.
+
+**Pass:** no — it was requested, and the hotel decides on the day. **Fail:** yes.
