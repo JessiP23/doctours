@@ -115,69 +115,47 @@ the sum. The arithmetic is in code; the model repeats it.
 
 ## Part 2 — how it's built
 
-**SAY:** Next.js, Postgres, Anthropic API, Sabre behind a provider interface.
-
-**SAY:** A tool loop. Fifteen tools, each a Zod schema and a handler. Every turn ends
-with `reply`.
-
-**SAY:** Rules are code. Deadlines, cabin, bags, party size, hotel — stored per trip,
-read by the tools, never set by the model.
-
-**SAY:** State is Postgres. The prompt is rebuilt every turn from bookings, offers and
-events. The model books by id.
-
-**SAY:** Side effects need a schema literal: `confirmed: true`, `theyToldMe: true`.
-
-**SAY:** Output is guarded: references must exist in the database, announced actions
-must have a tool call, untold events go first. One retry with the reason.
+**SAY:** It's a Next.js app on Vercel with Postgres on Supabase. The agent is a loop
+over the Anthropic API with fifteen tools, and Sabre sits behind a provider interface.
+The model never touches Sabre directly — tools do. Every tool is a schema plus a
+handler, and the hard rules of the trip — deadlines, cabin, bags, party size, hotel —
+live in code, not in the prompt, so the model can't change them. Nothing is kept in
+the model's memory: every turn the prompt is rebuilt from the database — what's
+booked, what's on offer, what hasn't been told yet — and the next step is computed
+from that. Anything with a side effect needs an explicit flag in the schema, and
+every reply is checked before it goes out: no reference that isn't in the database, no
+"booking it now" without a booking, and any untold change goes first.
 
 ---
 
 ## Part 3 — level, and next
 
-**SAY:** Level 0 done. Level 1 done, all nine, verified live. From Level 2, the
-comparison panel. From Level 3, the console and proactive notification.
-
-**SAY:** Next: more views as projections of the same state; console edits as events on
-the same path; cookie becomes user id. Same loop, more tools.
+**SAY:** Level 0 is done. Level 1 is done — all nine scenarios, verified live. I also
+built the comparison panel from Level 2 and the operator console with proactive
+notification from Level 3, because the disruption scenarios needed them. Next would be
+the rest of Level 2 as more views over the same state, and Level 3 as console edits
+flowing through the same event path. Same loop, more tools.
 
 ---
 
 ## Part 4 — judgment calls
 
-**SAY:** Thirty-eight in `DECISIONS.md`. The big ones:
-
-**SAY:** Rules in code, not in the prompt.
-
-**SAY:** No passport numbers — nothing files them.
-
-**SAY:** Cancel-and-rebook, sell first, `superseded` chain.
-
-**SAY:** Pinned hotel is a default; search only when asked.
-
-**SAY:** Operator console instead of a fake feed.
-
-**SAY:** Codeshares excluded — CERT can't confirm them.
-
-**SAY:** Totals computed in code, never by the model.
+**SAY:** Where the brief was silent I decided and wrote it down — thirty-eight entries.
+The ones that matter: rules in code, not in the prompt. No passport numbers, because
+nothing here files them. Cancel and rebook instead of modify, selling first so the
+patient is never without a flight. The pinned hotel is a default, not a rule — I only
+search alternatives when asked. An operator console instead of a fake feed, so the
+simulation is visible. Codeshares excluded, because the sandbox can't confirm them.
+And all arithmetic in code — the model repeats totals, it never computes them.
 
 ---
 
 ## Part 5 — what's broken
 
-**SAY:** Fares expire in twenty minutes.
-
-**SAY:** Disruptions are simulated — CERT has no feed.
-
-**SAY:** Three hotels in the sandbox.
-
-**SAY:** Booking turns take thirty to fifty seconds.
-
-**SAY:** The guards are regexes.
-
-**SAY:** No accounts — a cookie owns the trips.
-
-**SAY:** The model still narrates instead of acting sometimes. The guard catches the
-known forms.
-
-**SAY:** All of it is in `BUGS.md`, updated with the code.
+**SAY:** Fares expire in twenty minutes, so a slow patient gets re-priced.
+Disruptions are simulated — the sandbox has no feed. Istanbul has three hotels in
+the sandbox. A booking turn takes thirty to fifty seconds because Sabre's calls are
+sequential. The output guards are regexes, so a new phrasing gets through until it's
+added. There are no accounts — a cookie owns the trips. And the model still sometimes
+narrates instead of acting; the guard catches the known forms. All of it is in
+`BUGS.md`.
