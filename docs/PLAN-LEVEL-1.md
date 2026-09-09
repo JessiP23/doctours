@@ -32,8 +32,8 @@ world, simulated, because the sandbox cannot cancel a flight for us."
 
 | #   | The brief asks                                                                           | Trigger  | Status                                                                                                                                   | Left to build                                                                                                               |
 | --- | ---------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Outbound cancelled → arrives a different day → hotel dates wrong. Fix both.              | Operator | **Built.** Detected, raised first, `rebook_flight` reports `hotelNeedsRealignment`, `rebook_hotel` moves the room.                       | Console button. One clean live run.                                                                                         |
-| 2   | Return cancelled → stuck longer → needs more nights.                                     | Operator | **Built.** Same path; the realignment moves the checkout.                                                                                | Console button. One clean live run.                                                                                         |
+| 1   | Outbound cancelled → arrives a different day → hotel dates wrong. Fix both.              | Operator | **Done, verified live.** Console cancels it, the agent speaks first, rebooks, leaves the cancelled flight out, and moves the room.       | Nothing.                                                                                                                    |
+| 2   | Return cancelled → stuck longer → needs more nights.                                     | Operator | **Done.** Same path; the realignment moves the checkout.                                                                                 | One live run with _Airline cancels the return_.                                                                             |
 | 3   | Lands before check-in. Get in early? Arrives a full day early — pay for the extra night. | Patient  | **Half.** Early landing is flagged when rooms are shown. No early check-in request, no extra night.                                      | Extra night via `rebook_hotel` with an earlier check-in; early check-in as a request on the reservation.                    |
 | 4   | Procedure moved → whole trip needs new dates. Rebook flights and hotel together.         | Operator | **Not built.** Rules are constants derived by hand.                                                                                      | Derive rules from the procedure date; `procedure_moved` event; the agent walks search → `rebook_flight` → `rebook_hotel`.   |
 | 5   | Patient cancels entirely. Undo both.                                                     | Patient  | **Built.** Hotel first, verified with Sabre, cost stated first, `confirmed` required.                                                    | Nothing.                                                                                                                    |
@@ -42,14 +42,15 @@ world, simulated, because the sandbox cannot cancel a flight for us."
 | 8   | Money is tight. Flight and hotel prices trade off. Bring the total down.                 | Patient  | **Not built.** Flights rank by price alone.                                                                                              | `compare_trip_totals`: hotel total for each distinct stay a flight implies, ranked by flight + hotel.                       |
 | 9   | Hates connections. Fewest stops even if it costs more.                                   | Patient  | **Built.** `rankBy: fewest_stops`, `maxStops: 0`.                                                                                        | Nothing.                                                                                                                    |
 
-Five built, one half, three not. Everything not built reuses the rebooking tools
-that already exist; none of it needs a new Sabre call type.
+Six done, one half, three not — plus the operator console and the agent speaking
+first, which the brief only asks for at Level 3. Everything not built reuses the
+rebooking tools that already exist; none of it needs a new Sabre call type.
 
 ---
 
 ## What gets built, in order
 
-### A · Operator console — `/ops`
+### A · Operator console — `/ops` — **done**
 
 Unlocks the demo for 1, 2 and 4, and makes "it came from them" visible instead of
 typed into a terminal.
